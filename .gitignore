@@ -1,0 +1,4 @@
+node_modules/
+public/
+wizard-input.json
+*.log

@@ -1,0 +1,55 @@
+{
+  "documentType": "terms",
+  "business": {
+    "name": "Lucas Store",
+    "type": "ecommerce",
+    "websiteUrl": "https://lucas-store.example",
+    "country": "Argentina",
+    "address": "Calle 123, Ciudad, Provincia, Argentina"
+  },
+  "contact": {
+    "email": "ebc@gmail.com",
+    "phone": "",
+    "pageUrl": "https://lucas-store.example/contacto"
+  },
+  "operations": {
+    "primaryJurisdiction": "ar",
+    "sellRegions": ["ar"]
+  },
+  "terms": {
+    "offeringType": "physical_goods",
+    "hasAccounts": true,
+    "requiresRegistration": false,
+    "allowsUserContent": true,
+    "pricesIncludeTaxes": true,
+    "currency": "ARS",
+    "paymentProvider": "Mercado Pago",
+    "refundsOffered": true,
+    "refundWindow": "10 días",
+    "refundConditions": "El producto debe devolverse sin uso, en buen estado y con sus etiquetas o embalaje original cuando corresponda.",
+    "returnShippingResponsibility": "case_by_case",
+    "warrantyOffered": true,
+    "warrantyDetails": "La garantía cubre fallas de fabricación conforme al plazo legal aplicable y no cubre daños por uso indebido.",
+    "prohibitedActivities": [
+      "No usar el sitio para actividades ilegales.",
+      "No interferir con la seguridad, estabilidad o funcionamiento técnico del sitio.",
+      "No copiar, revender o explotar el contenido o productos fuera de lo permitido."
+    ],
+    "ipOwner": "Lucas Store",
+    "ugcLicenseGranted": true,
+    "limitIndirectDamages": true,
+    "shippingDelayDisclaimer": true,
+    "customDisclaimer": "",
+    "maySuspendAccounts": true,
+    "terminationGrounds": "Podemos suspender cuentas o cancelar pedidos por fraude, abuso, incumplimiento contractual o riesgo operativo razonable.",
+    "changeNotification": "site_notice",
+    "disputesForum": "Tribunales competentes de la Ciudad de Buenos Aires",
+    "adrMethod": "mediation"
+  },
+  "settings": {
+    "language": "es"
+  },
+  "customizations": {
+    "manualDisclosures": []
+  }
+}

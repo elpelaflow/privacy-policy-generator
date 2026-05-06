@@ -1,0 +1,535 @@
+{
+  "version": "2.0.0",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "1. Policy Summary",
+      "required": true,
+      "content": [
+        "{business_name} provides {service_type}. This Privacy Policy explains what personal information we collect, how we use it, when we share it, and which rights are available to users.",
+        "This document is generated from a structured questionnaire. It should be reviewed and completed with business-specific legal advice before publication."
+      ]
+    },
+    {
+      "id": "definitions",
+      "title": "2. Definitions",
+      "required": true,
+      "content": [
+        "- **Company** means {business_name}.",
+        "- **Service** means the {service_type} operated by {business_name}.",
+        "- **Website** means {website_url_or_placeholder}.",
+        "- **Personal Data** means information that identifies or can reasonably identify a person.",
+        "- **Country** means {country}."
+      ]
+    },
+    {
+      "id": "business_model",
+      "title": "3. Business-Specific Processing",
+      "required": true,
+      "subsections": [
+        {
+          "id": "ecommerce_model",
+          "title": "3.1 E-Commerce Operations",
+          "includeWhen": {
+            "field": "business.type",
+            "equals": "ecommerce"
+          },
+          "content": [
+            "We process customer account, order, shipping, billing, and transaction-related information to sell products, fulfill orders, manage returns, and comply with tax and accounting obligations."
+          ]
+        },
+        {
+          "id": "blog_model",
+          "title": "3.2 Blog and Content Publishing",
+          "includeWhen": {
+            "field": "business.type",
+            "equals": "blog"
+          },
+          "content": [
+            "We process subscriber, reader, comment, and analytics information to publish content, distribute updates, moderate discussions, and improve editorial operations."
+          ]
+        },
+        {
+          "id": "saas_model",
+          "title": "3.3 SaaS and Account Services",
+          "includeWhen": {
+            "field": "business.type",
+            "equals": "saas"
+          },
+          "content": [
+            "We process account, authentication, service usage, and support information to deliver hosted software services, secure accounts, troubleshoot issues, and administer subscriptions."
+          ]
+        },
+        {
+          "id": "mobile_model",
+          "title": "3.4 Mobile Application Operations",
+          "includeWhen": {
+            "field": "business.type",
+            "equals": "mobile"
+          },
+          "content": [
+            "We process mobile device, app usage, and diagnostic data to provide core application functionality, maintain reliability, and improve user experience."
+          ]
+        },
+        {
+          "id": "nonprofit_model",
+          "title": "3.5 Nonprofit and Donation Operations",
+          "includeWhen": {
+            "field": "business.type",
+            "equals": "nonprofit"
+          },
+          "content": [
+            "We process donor, volunteer, supporter, and campaign information to administer programs, coordinate outreach, and maintain records required for governance and reporting."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "information_collected",
+      "title": "4. Information We Collect",
+      "required": true,
+      "subsections": [
+        {
+          "id": "personal_data",
+          "title": "4.1 Personal Information",
+          "includeWhen": {
+            "field": "dataPractices.collectedData",
+            "includes": "personal"
+          },
+          "content": [
+            "We collect information such as names, email addresses, account identifiers, postal addresses, and similar contact information when you provide it to us."
+          ]
+        },
+        {
+          "id": "financial_data",
+          "title": "4.2 Financial Information",
+          "includeWhen": {
+            "field": "dataPractices.collectedData",
+            "includes": "financial"
+          },
+          "content": [
+            "We collect or receive payment-related information necessary to process transactions. The exact payment data handled depends on the payment providers and payment flow used by the business."
+          ]
+        },
+        {
+          "id": "tax_data",
+          "title": "4.3 Fiscal and Invoicing Information",
+          "includeWhen": {
+            "field": "dataPractices.collectedData",
+            "includes": "tax"
+          },
+          "content": [
+            "We may collect tax, billing, invoicing, or regulatory information such as taxpayer identifiers, billing names, legal entity information, or invoice-related transaction records where required for accounting, tax, or legal compliance."
+          ]
+        },
+        {
+          "id": "identity_data",
+          "title": "4.4 Identity and Verification Information",
+          "includeWhen": {
+            "field": "dataPractices.collectedData",
+            "includes": "identity"
+          },
+          "content": [
+            "We may collect identification or verification-related data where necessary to prevent fraud, verify commercial transactions, process regulated services, or comply with legal obligations."
+          ]
+        },
+        {
+          "id": "usage_data",
+          "title": "4.5 Usage and Diagnostic Data",
+          "includeWhen": {
+            "field": "dataPractices.collectedData",
+            "includes": "usage"
+          },
+          "content": [
+            "We collect technical and behavioral information such as IP address, browser type, pages viewed, session timestamps, referring pages, and device diagnostics."
+          ]
+        },
+        {
+          "id": "cookie_data",
+          "title": "4.6 Cookies and Similar Technologies",
+          "includeWhen": {
+            "field": "dataPractices.collectedData",
+            "includes": "cookies"
+          },
+          "content": [
+            "We use cookies and similar technologies to remember preferences, understand usage patterns, maintain sessions, and support security or analytics features."
+          ]
+        },
+        {
+          "id": "location_data",
+          "title": "4.7 Location Information",
+          "includeWhen": {
+            "field": "dataPractices.collectedData",
+            "includes": "location"
+          },
+          "content": [
+            "If enabled for the service, we may process coarse or precise location information to provide location-aware functionality, security monitoring, or region-specific experiences."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data_use",
+      "title": "5. How We Use Information",
+      "required": true,
+      "content": [
+        "We use personal information to provide and maintain the service, authenticate users, process transactions, respond to support requests, communicate about updates, monitor performance, protect the service, and comply with legal obligations."
+      ],
+      "subsections": [
+        {
+          "id": "contract_basis_summary",
+          "title": "5.1 Contractual Fulfillment",
+          "includeWhen": {
+            "field": "dataPractices.legalBases",
+            "includes": "contract"
+          },
+          "content": [
+            "We process information where necessary to perform a contract with users or customers, including order processing, service delivery, account administration, returns, support, and related communications."
+          ]
+        },
+        {
+          "id": "consent_basis_summary",
+          "title": "5.2 Consent-Based Processing",
+          "includeWhen": {
+            "field": "dataPractices.legalBases",
+            "includes": "consent"
+          },
+          "content": [
+            "We may process certain information based on consent, such as marketing communications, optional cookies, location permissions, or other features that users actively enable."
+          ]
+        },
+        {
+          "id": "legal_obligation_basis_summary",
+          "title": "5.3 Legal Obligations",
+          "includeWhen": {
+            "field": "dataPractices.legalBases",
+            "includes": "legal_obligation"
+          },
+          "content": [
+            "We may process information where necessary to comply with tax, accounting, invoicing, consumer protection, anti-fraud, or other legal and regulatory obligations."
+          ]
+        },
+        {
+          "id": "legitimate_interest_basis_summary",
+          "title": "5.4 Legitimate Interests",
+          "includeWhen": {
+            "field": "dataPractices.legalBases",
+            "includes": "legitimate_interest"
+          },
+          "content": [
+            "We may process certain information based on legitimate interests such as service security, fraud prevention, product improvement, limited business analytics, or operational continuity, provided such interests do not override applicable privacy rights."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "legal_bases",
+      "title": "6. Regional Legal Bases and Privacy Rights",
+      "required": true,
+      "subsections": [
+        {
+          "id": "gdpr_bases",
+          "title": "6.1 GDPR and UK GDPR",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.primaryJurisdiction", "equals": "eu" },
+              { "field": "operations.primaryJurisdiction", "equals": "uk" },
+              { "field": "operations.sellRegions", "includes": "eu" },
+              { "field": "operations.sellRegions", "includes": "uk" }
+            ]
+          },
+          "content": [
+            "Where GDPR or UK GDPR applies, we rely on one or more of the following legal bases: performance of a contract, consent, compliance with legal obligations, protection of vital interests, public tasks where relevant, and legitimate interests that are not overridden by data protection rights.",
+            "Affected individuals may have rights to access, correct, erase, restrict, object to processing, and request portability of their personal information, subject to applicable legal limits."
+          ]
+        },
+        {
+          "id": "ccpa_rights",
+          "title": "6.2 California Privacy Rights",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.primaryJurisdiction", "equals": "us" },
+              { "field": "compliance.requestedFrameworks", "includes": "ccpa" },
+              { "field": "compliance.requestedFrameworks", "includes": "caloppa" }
+            ]
+          },
+          "content": [
+            "Where California privacy law applies, residents may request disclosure of categories and specific pieces of personal information collected, request deletion subject to exceptions, request correction where applicable, and opt out of certain sharing or sale activities where required by law."
+          ]
+        },
+        {
+          "id": "pipeda_rights",
+          "title": "6.3 Canadian Privacy Rights",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.primaryJurisdiction", "equals": "ca" },
+              { "field": "operations.sellRegions", "includes": "ca" },
+              { "field": "compliance.requestedFrameworks", "includes": "pipeda" }
+            ]
+          },
+          "content": [
+            "Where Canadian privacy law applies, individuals may request access to personal information under our control, request corrections, withdraw consent where legally permitted, and submit complaints to the appropriate supervisory authority."
+          ]
+        },
+        {
+          "id": "au_rights",
+          "title": "6.4 Australian Privacy Rights",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.primaryJurisdiction", "equals": "au" },
+              { "field": "operations.sellRegions", "includes": "au" }
+            ]
+          },
+          "content": [
+            "Where Australian privacy law applies, individuals may request access to their personal information, request correction, and submit complaints about handling practices."
+          ]
+        },
+        {
+          "id": "argentina_rights",
+          "title": "6.5 Argentina Privacy Rights",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.primaryJurisdiction", "equals": "ar" },
+              { "field": "operations.sellRegions", "includes": "ar" }
+            ]
+          },
+          "content": [
+            "Where Argentina privacy law applies, individuals may exercise access, rectification, update, and deletion rights under Law 25.326. Consent may be withdrawn where processing depends on consent, subject to legal limits and legitimate retention requirements.",
+            "Data subjects may also submit complaints to the Agencia de Acceso a la Información Pública (AAIP) where they consider their rights have not been properly addressed."
+          ]
+        },
+        {
+          "id": "global_rights",
+          "title": "6.6 Global or Custom Jurisdiction Review",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.primaryJurisdiction", "equals": "global" },
+              { "field": "operations.sellRegions", "includes": "global" }
+            ]
+          },
+          "content": [
+            "This policy was generated for a business operating under a global or custom jurisdiction profile. Generic privacy rights language has been included, but local legal requirements should be reviewed manually for each country or region where the service is offered.",
+            "Individuals may have rights to access, correct, delete, restrict, or object to processing of personal information depending on local law."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sharing",
+      "title": "7. Sharing and Service Providers",
+      "required": true,
+      "content": [
+        "We share personal information only where necessary to operate the service, fulfill transactions, support business operations, comply with law, protect rights, or with user direction or consent."
+      ],
+      "subsections": [
+        {
+          "id": "analytics",
+          "title": "7.1 Analytics Providers",
+          "includeWhen": {
+            "field": "dataPractices.thirdParties",
+            "includes": "analytics"
+          },
+          "content": [
+            "We use analytics providers to measure usage, improve product performance, understand feature adoption, and support operational reporting."
+          ]
+        },
+        {
+          "id": "advertising",
+          "title": "7.2 Advertising Partners",
+          "includeWhen": {
+            "field": "dataPractices.thirdParties",
+            "includes": "advertising"
+          },
+          "content": [
+            "We may share identifiers, cookie data, or audience signals with advertising partners to measure campaigns, deliver ads, or suppress audiences where legally permitted."
+          ]
+        },
+        {
+          "id": "payment",
+          "title": "7.3 Payment Processors",
+          "includeWhen": {
+            "field": "dataPractices.thirdParties",
+            "includes": "payment"
+          },
+          "content": [
+            "Payments are handled through one or more third-party processors. Those providers are responsible for storing and protecting payment credentials under their own privacy and security controls."
+          ]
+        },
+        {
+          "id": "shipping",
+          "title": "7.4 Shipping and Fulfillment Partners",
+          "includeWhen": {
+            "field": "dataPractices.thirdParties",
+            "includes": "shipping"
+          },
+          "content": [
+            "We may share names, delivery addresses, order identifiers, contact details, and shipping-related instructions with carriers, couriers, fulfillment centers, or logistics providers to complete delivery, manage returns, and support order-related operations."
+          ]
+        },
+        {
+          "id": "paypal_only",
+          "title": "7.5 PayPal-Only Payments",
+          "includeWhen": {
+            "field": "dataPractices.thirdParties",
+            "includes": "paypal_only"
+          },
+          "content": [
+            "Where payments are handled exclusively through PayPal, we rely on PayPal to process payment credentials and do not store full payment card details on our own systems."
+          ]
+        },
+        {
+          "id": "cloud",
+          "title": "7.6 Cloud Hosting and Infrastructure",
+          "includeWhen": {
+            "field": "dataPractices.thirdParties",
+            "includes": "cloud"
+          },
+          "content": [
+            "We use cloud infrastructure providers to host applications, databases, file storage, backups, and related security or operational services."
+          ]
+        },
+        {
+          "id": "social",
+          "title": "7.7 Social Media and Embedded Content",
+          "includeWhen": {
+            "field": "dataPractices.thirdParties",
+            "includes": "social"
+          },
+          "content": [
+            "We may embed social content or use social platform integrations that can collect device identifiers, interaction data, and referral information when users interact with those features."
+          ]
+        },
+        {
+          "id": "email",
+          "title": "7.8 Email and Marketing Platforms",
+          "includeWhen": {
+            "field": "dataPractices.thirdParties",
+            "includes": "email"
+          },
+          "content": [
+            "We may use email delivery or marketing platforms to send transactional communications, service announcements, newsletters, or campaign messages, subject to applicable consent and unsubscribe requirements."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "retention",
+      "title": "8. Retention and Security",
+      "required": true,
+      "content": [
+        "We retain personal information for as long as reasonably necessary to provide the service, fulfill the purposes described in this policy, resolve disputes, enforce agreements, and meet legal, tax, accounting, or regulatory obligations.",
+        "We use administrative, technical, and organizational safeguards designed to protect personal information against unauthorized access, loss, misuse, alteration, or disclosure."
+      ],
+      "subsections": [
+        {
+          "id": "fiscal_retention",
+          "title": "8.1 Fiscal and Accounting Retention",
+          "includeWhen": {
+            "field": "dataPractices.collectedData",
+            "includes": "tax"
+          },
+          "content": [
+            "Where invoicing, tax, accounting, or fiscal compliance applies, we may retain billing and transaction-related records for the period required by applicable commercial, accounting, or tax law."
+          ]
+        },
+        {
+          "id": "profiling",
+          "title": "8.2 Profiling and Automated Decision Review",
+          "includeWhen": {
+            "field": "dataPractices.collectedData",
+            "includes": "profiling"
+          },
+          "content": [
+            "If we use profiling, behavioral segmentation, automated scoring, or similar decision-making tools, we review those practices to ensure they are consistent with applicable law and user rights, especially where such tools could materially affect user experience, access, or commercial treatment."
+          ]
+        },
+        {
+          "id": "physical_goods_retention",
+          "title": "8.3 Order and Fulfillment Records",
+          "includeWhen": {
+            "field": "business.type",
+            "equals": "ecommerce"
+          },
+          "content": [
+            "For physical goods, we may retain order history, billing records, and shipping information for longer periods where required to fulfill contracts, handle returns, support warranties, or comply with commercial and tax recordkeeping requirements."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "children",
+      "title": "9. Children's Privacy",
+      "required": true,
+      "subsections": [
+        {
+          "id": "children_enabled",
+          "title": "9.1 Services Directed to Children",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.childrenAudience", "isTrue": true },
+              { "field": "compliance.requestedFrameworks", "includes": "coppa" }
+            ]
+          },
+          "content": [
+            "If the service is directed to children or knowingly collects information from children, additional notice, parental consent, and data handling safeguards may apply. Review the generated policy carefully to confirm that age-gating, consent, and parental rights language matches actual business practices."
+          ]
+        },
+        {
+          "id": "children_disabled",
+          "title": "9.2 General Audience Services",
+          "includeWhen": {
+            "field": "operations.childrenAudience",
+            "isFalse": true
+          },
+          "content": [
+            "The service is intended for a general audience and is not designed to knowingly collect personal information directly from children without appropriate legal basis or parental authorization where required."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "transfers",
+      "title": "10. International Transfers",
+      "required": true,
+      "content": [
+        "Because the service may rely on global vendors or remote infrastructure, personal information may be processed in countries other than the user's jurisdiction. Where required, we use appropriate contractual, organizational, or technical safeguards for cross-border transfers."
+      ]
+    },
+    {
+      "id": "requests",
+      "title": "11. Exercising Privacy Rights",
+      "required": true,
+      "content": [
+        "Users may submit privacy or data subject requests using the contact methods listed below. We may verify identity before fulfilling access, correction, deletion, portability, or objection requests where legally required."
+      ]
+    },
+    {
+      "id": "changes",
+      "title": "12. Changes to This Policy",
+      "required": true,
+      "content": [
+        "We may update this Privacy Policy from time to time to reflect legal, operational, or product changes. The latest version should be published with an updated effective date."
+      ]
+    },
+    {
+      "id": "custom_notes",
+      "title": "13. Additional Business Notes Requiring Review",
+      "includeWhen": {
+        "field": "customizations.manualDisclosures",
+        "exists": true
+      },
+      "content": [
+        "The following custom notes were provided during policy generation. They should be reviewed and integrated manually where needed:",
+        "{manual_disclosures_lines}"
+      ]
+    },
+    {
+      "id": "contact",
+      "title": "14. Contact Information",
+      "required": true,
+      "content": [
+        "{contact_lines}"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "business": {
+    "name": "Acme Cloud",
+    "type": "saas",
+    "websiteUrl": "https://acme.example",
+    "country": "Germany",
+    "address": "42 Example Street, Berlin"
+  },
+  "contact": {
+    "email": "privacy@acme.example",
+    "phone": "+49 30 000000",
+    "pageUrl": "https://acme.example/privacy-contact"
+  },
+  "operations": {
+    "primaryJurisdiction": "eu",
+    "sellRegions": ["eu", "uk"],
+    "childrenAudience": false
+  },
+  "dataPractices": {
+    "collectedData": ["personal", "usage", "cookies"],
+    "thirdParties": ["analytics", "cloud", "email"],
+    "legalBases": ["contract", "legitimate_interest"]
+  },
+  "compliance": {
+    "requestedFrameworks": []
+  }
+}

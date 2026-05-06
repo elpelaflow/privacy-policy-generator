@@ -1,0 +1,17 @@
+{
+  "name": "privacy-policy-generator",
+  "version": "2.0.0",
+  "description": "CLI generator for privacy policies and terms, with interactive wizards, validation, publishing, and tests.",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": {
+    "privacy-policy": "./cli.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "validate:example": "node ./cli.js validate --input ./examples/saas-eu.json",
+    "generate:example": "node ./cli.js generate --input ./examples/saas-eu.json --format markdown",
+    "validate:terms": "node ./cli.js validate --document terms --input ./examples/terms-ar-ecommerce.json",
+    "generate:terms": "node ./cli.js generate --document terms --input ./examples/terms-ar-ecommerce.json --format markdown"
+  }
+}

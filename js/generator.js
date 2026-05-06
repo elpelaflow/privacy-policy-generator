@@ -1,621 +1,619 @@
 /**
  * Privacy Policy Generator
- * Core functionality for generating comprehensive privacy policies based on user inputs
+ * Structured-rule generator with validation, explainability, and CLI/browser support.
  */
 
 class PrivacyPolicyGenerator {
   constructor() {
-    this.templates = {};
-    this.jurisdictions = {};
-    this.comprehensiveTemplate = {};
-    this.debug = true; // Enable debugging
-    
-    // Initialize with loading necessary data
-    this.loadTemplates();
-    this.loadJurisdictions();
-    this.loadComprehensiveTemplate();
+    this.templateData = {};
+    this.ready = this.loadTemplateData();
   }
-  
-  // Helper method for logging
-  log(message, data) {
-    if (this.debug) {
-      console.log(`[PolicyGenerator] ${message}`, data || '');
+
+  async loadTemplateData() {
+    if (this.templateData.en && this.templateData.es) {
+      return this.templateData;
     }
-  }
-  
-  async loadTemplates() {
-    try {
-      this.log('Loading templates...');
-      const response = await fetch('./data/templates.json');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      this.templates = await response.json();
-      this.log('Templates loaded successfully', this.templates);
-    } catch (error) {
-      console.error('Failed to load templates:', error);
-      this.log('Using fallback templates');
-      // Fallback to embedded minimal templates if fetch fails
-      this.templates = {
-        version: "1.0",
-        ecommerce: { 
-          name: "E-Commerce",
-          specifics: []
-        },
-        blog: { 
-          name: "Blog/Content Site",
-          specifics: []
-        },
-        saas: { 
-          name: "SaaS/Web App",
-          specifics: []
-        },
-        mobile: { 
-          name: "Mobile App",
-          specifics: []
-        },
-        nonprofit: { 
-          name: "Non-Profit",
-          specifics: []
-        },
-        general: {
-          name: "General Website",
-          specifics: []
-        }
-      };
-    }
-  }
-  
-  async loadJurisdictions() {
-    try {
-      this.log('Loading jurisdictions...');
-      const response = await fetch('./data/jurisdictions.json');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      this.jurisdictions = await response.json();
-      this.log('Jurisdictions loaded successfully', this.jurisdictions);
-    } catch (error) {
-      console.error('Failed to load jurisdictions:', error);
-      this.log('Using fallback jurisdictions');
-      // Fallback to embedded minimal jurisdiction rules
-      this.jurisdictions = {
-        us: { name: "United States", dataRights: "Various rights under state laws" },
-        eu: { name: "European Union (GDPR)", dataRights: "Rights under GDPR" },
-        uk: { name: "United Kingdom", dataRights: "Rights under UK GDPR" },
-        ca: { name: "Canada", dataRights: "Rights under PIPEDA" },
-        au: { name: "Australia", dataRights: "Rights under Privacy Act" },
-        global: { name: "Global", dataRights: "Basic data rights" }
-      };
-    }
-  }
-  
-  async loadComprehensiveTemplate() {
-    try {
-      this.log('Loading comprehensive template...');
-      const response = await fetch('./data/comprehensive-template.json');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      this.comprehensiveTemplate = await response.json();
-      this.log('Comprehensive template loaded successfully');
-    } catch (error) {
-      console.error('Failed to load comprehensive template:', error);
-      this.log('Using fallback comprehensive template');
-      // Fallback to basic structure if fetch fails
-      this.comprehensiveTemplate = {
-        version: "1.0",
-        sections: [
-          {
-            id: "introduction",
-            title: "1. Introduction",
-            required: true,
-            content: "This is a basic privacy policy for {business_name}."
-          },
-          {
-            id: "information_collected",
-            title: "2. Information We Collect",
-            required: true,
-            content: "We collect basic information necessary to provide our services."
-          },
-          {
-            id: "contact_us",
-            title: "3. Contact Us",
-            required: true,
-            content: "If you have questions, contact {business_name}."
-          }
-        ]
-      };
-    }
-  }
-  
-  generate(formData) {
-    try {
-      this.log('Generating policy with data:', formData);
-      
-      // Check if necessary data is loaded
-      if (!this.comprehensiveTemplate.sections || this.comprehensiveTemplate.sections.length === 0) {
-        throw new Error('Comprehensive template not properly loaded');
-      }
-      
-      // Extract data from form
-      const {
-        businessName,
-        businessType,
-        jurisdiction,
-        dataCollected = [],
-        thirdParties = [],
-        contactEmail = '',
-        contactPhone = '',
-        businessAddress = '',
-        contactPage = '',
-        websiteUrl = '',
-        country = 'United States', // Default value
-        sellRegions = [] // Additional regions where business operates
-      } = formData;
-      
-      // Validate required fields
-      if (!businessName) throw new Error('Business name is required');
-      if (!businessType) throw new Error('Business type is required');
-      if (!jurisdiction) throw new Error('Jurisdiction is required');
-      
-      this.log('Preparing data for template');
-      
-      // Generate the comprehensive policy
-      const policy = this.generateComprehensivePolicy({
-        business_name: businessName,
-        service_type: this.getServiceType(businessType),
-        jurisdiction,
-        sellRegions,
-        data_collected: dataCollected,
-        third_parties: thirdParties,
-        contact_email: contactEmail,
-        contact_phone: contactPhone,
-        business_address: businessAddress,
-        contact_page: contactPage,
-        website_url: websiteUrl,
-        country,
-        financial_processors: this.getFinancialProcessors(thirdParties),
-        effective_date: new Date().toLocaleDateString()
-      });
-      
-      this.log('Policy generated successfully');
-      
-      return {
-        html: this.formatAsHTML(policy, businessName),
-        markdown: this.formatAsMarkdown(policy, businessName),
-        text: this.formatAsText(policy, businessName)
-      };
-    } catch (error) {
-      console.error('Error generating policy:', error);
-      throw new Error(`Failed to generate policy: ${error.message}`);
-    }
-  }
-  
-  getServiceType(businessType) {
-    const types = {
-      'ecommerce': 'online store and services',
-      'blog': 'website and blog',
-      'saas': 'software as a service',
-      'mobile': 'mobile application',
-      'nonprofit': 'website and services'
+
+    const [english, spanish] = await Promise.all([
+      this.readJson('policy-sections.json'),
+      this.readJson('policy-sections.es.json')
+    ]);
+
+    this.templateData = {
+      en: english,
+      es: spanish
     };
-    
-    return types[businessType] || 'website and services';
+    return this.templateData;
   }
-  
-  getFinancialProcessors(thirdParties) {
-    if (thirdParties && thirdParties.includes('payment')) {
-      return ' (such as PayPal, Stripe, etc.)';
+
+  async readJson(filename) {
+    const fs = require('node:fs/promises');
+    const path = require('node:path');
+    const filePath = path.join(__dirname, '..', 'data', filename);
+    const raw = await fs.readFile(filePath, 'utf8');
+    return JSON.parse(raw);
+  }
+
+  async validate(input) {
+    const normalized = this.normalizeInput(input);
+    return {
+      ok: normalized.errors.length === 0,
+      errors: normalized.errors,
+      warnings: normalized.warnings,
+      normalizedInput: normalized.data
+    };
+  }
+
+  async explain(input) {
+    const result = await this.buildPolicy(input);
+    return {
+      validation: {
+        ok: result.errors.length === 0,
+        errors: result.errors,
+        warnings: result.warnings
+      },
+      decisionLog: result.decisionLog,
+      includedSections: result.policy.sections.map((section) => section.title)
+    };
+  }
+
+  async generate(input) {
+    const result = await this.buildPolicy(input);
+
+    if (result.errors.length > 0) {
+      throw new Error(result.errors.join(' | '));
     }
-    return '';
+
+    return {
+      html: this.formatAsHTML(result.policy),
+      markdown: this.formatAsMarkdown(result.policy),
+      text: this.formatAsText(result.policy),
+      warnings: result.warnings,
+      decisionLog: result.decisionLog
+    };
   }
-  
-  generateComprehensivePolicy(data) {
-    try {
-      this.log('Generating comprehensive policy with data');
-      
-      const { sections } = this.comprehensiveTemplate;
-      if (!sections || !Array.isArray(sections)) {
-        throw new Error('Template sections not properly defined');
-      }
-      
-      const policySections = [];
-      
-      // Handle primary jurisdiction first (based on where business is located)
-      const primaryJurisdiction = data.jurisdiction;
-      
-      // Also consider regions where business sells to or operates in
-      const sellRegions = data.sellRegions || [];
-      
-      for (const section of sections) {
-        try {
-          // Skip sections that don't apply based on conditions
-          if (section.condition) {
-            // Support for sell regions - if condition checks jurisdiction, also check sell regions
-            if (section.condition.includes('jurisdiction ===')) {
-              const regionMatch = section.condition.match(/jurisdiction === ['"]([^'"]+)['"]/);
-              if (regionMatch && regionMatch[1]) {
-                const region = regionMatch[1];
-                // Include section if it's either the primary jurisdiction OR in sell regions
-                const conditionMet = (primaryJurisdiction === region) || sellRegions.includes(region);
-                
-                if (conditionMet) {
-                  this.log(`Including section ${section.id} - matches primary jurisdiction or sell regions`);
-                } else {
-                  this.log(`Skipping section ${section.id} - condition not met for any jurisdiction`);
-                  continue;
-                }
-              } else {
-                // Fall back to normal condition evaluation if we can't parse it
-                const conditionMet = this.evaluateCondition(section.condition, data);
-                if (!conditionMet) {
-                  this.log(`Skipping section ${section.id} - condition not met`);
-                  continue;
-                }
-              }
-            } else {
-              // Regular condition evaluation for non-jurisdiction conditions
-              const conditionMet = this.evaluateCondition(section.condition, data);
-              if (!conditionMet) {
-                this.log(`Skipping section ${section.id} - condition not met`);
-                continue;
-              }
-            }
-          }
-          
-          this.log(`Processing section: ${section.id}`);
-          
-          // Process the section's content with the data
-          let content = section.content;
-          if (content) {
-            content = this.replaceVariables(content, data);
-          } else {
-            content = ""; // Handle missing content
-          }
-          
-          // Process any subsections
-          if (section.subsections && section.subsections.length > 0) {
-            for (const subsection of section.subsections) {
-              try {
-                // Skip subsections that don't apply based on conditions
-                if (subsection.condition) {
-                  const subConditionMet = this.evaluateCondition(subsection.condition, data);
-                  if (!subConditionMet) {
-                    this.log(`Skipping subsection ${subsection.id} - condition not met`);
-                    continue;
-                  }
-                }
-                
-                this.log(`Processing subsection: ${subsection.id}`);
-                
-                // Process the subsection's content with the data
-                if (subsection.content) {
-                  const subContent = this.replaceVariables(subsection.content, data);
-                  
-                  // Add subsection to content
-                  content += `\n\n${subsection.title}\n\n${subContent}`;
-                }
-              } catch (subError) {
-                console.error(`Error processing subsection ${subsection.id}:`, subError);
-                // Continue with other subsections even if one fails
-              }
-            }
-          }
-          
-          policySections.push({
-            title: section.title,
-            content: content
-          });
-        } catch (sectionError) {
-          console.error(`Error processing section ${section.id}:`, sectionError);
-          // Continue with other sections even if one fails
+
+  async buildPolicy(input) {
+    await this.ready;
+
+    const normalized = this.normalizeInput(input);
+    const language = normalized.data.settings.language || 'en';
+    const template = this.templateData[language] || this.templateData.en;
+    this.currentLanguage = language;
+    const policy = {
+      businessName: normalized.data.business.name,
+      effectiveDate: new Date().toISOString().slice(0, 10),
+      warnings: normalized.warnings,
+      sections: [],
+      language
+    };
+    const decisionLog = [];
+
+    if (normalized.errors.length === 0) {
+      for (const sectionDefinition of template.sections) {
+        const sectionResult = this.resolveSection(sectionDefinition, normalized.data, decisionLog);
+        if (sectionResult) {
+          policy.sections.push(sectionResult);
         }
       }
-      
-      return {
-        businessName: data.business_name,
-        sections: policySections,
-        effectiveDate: data.effective_date
-      };
-    } catch (error) {
-      console.error('Error in generateComprehensivePolicy:', error);
-      throw error;
     }
+
+    return {
+      errors: normalized.errors,
+      warnings: normalized.warnings,
+      decisionLog,
+      policy
+    };
   }
-  
-  evaluateCondition(condition, data) {
-    try {
-      this.log(`Evaluating condition: ${condition}`);
-      
-      // Special handling for common conditions
-      if (condition.includes('.includes(')) {
-        // Handle array includes conditions safely
-        const match = condition.match(/([a-zA-Z_]+)\.includes\('([^']+)'\)/);
-        if (match) {
-          const [, arrayName, value] = match;
-          const array = data[arrayName];
-          if (Array.isArray(array)) {
-            return array.includes(value);
-          }
-          return false;
-        }
+
+  normalizeInput(input) {
+    const raw = this.isCanonicalInput(input) ? input : this.fromLegacyInput(input);
+    const data = {
+      business: {
+        name: this.stringValue(raw.business?.name),
+        type: this.stringValue(raw.business?.type),
+        websiteUrl: this.stringValue(raw.business?.websiteUrl),
+        country: this.stringValue(raw.business?.country, 'United States'),
+        address: this.stringValue(raw.business?.address)
+      },
+      contact: {
+        email: this.stringValue(raw.contact?.email),
+        phone: this.stringValue(raw.contact?.phone),
+        pageUrl: this.stringValue(raw.contact?.pageUrl)
+      },
+      operations: {
+        primaryJurisdiction: this.stringValue(raw.operations?.primaryJurisdiction),
+        sellRegions: this.arrayValue(raw.operations?.sellRegions),
+        childrenAudience: Boolean(raw.operations?.childrenAudience)
+      },
+      dataPractices: {
+        collectedData: this.arrayValue(raw.dataPractices?.collectedData),
+        thirdParties: this.arrayValue(raw.dataPractices?.thirdParties),
+        legalBases: this.arrayValue(raw.dataPractices?.legalBases)
+      },
+      compliance: {
+        requestedFrameworks: this.arrayValue(raw.compliance?.requestedFrameworks)
+      },
+      settings: {
+        language: this.stringValue(raw.settings?.language, 'en')
+      },
+      customizations: {
+        manualDisclosures: this.arrayValue(raw.customizations?.manualDisclosures)
       }
-      
-      // For simple equality checks
-      if (condition.includes('===')) {
-        const [left, right] = condition.split('===').map(part => part.trim());
-        if (left in data) {
-          return data[left] === right.replace(/['"]/g, '');
+    };
+
+    const errors = [];
+    const warnings = [];
+    const messages = data.settings.language === 'es'
+      ? {
+          missingBusinessName: 'El nombre del negocio es obligatorio.',
+          missingBusinessType: 'El tipo de negocio es obligatorio.',
+          missingJurisdiction: 'La jurisdicción principal es obligatoria.',
+          missingContact: 'No se proporcionó un medio de contacto de privacidad. La sección de contacto quedará incompleta.',
+          missingWebsite: 'No se proporcionó una URL del sitio. La política usará una referencia genérica al sitio web.',
+          coppaWarning: 'Se seleccionó COPPA pero el servicio no figura como dirigido a menores. Revise cuidadosamente la sección de privacidad infantil.',
+          paymentConflict: 'Seleccione procesadores múltiples de pago o sólo PayPal, pero no ambas opciones.',
+          globalWarning: 'Se seleccionó una jurisdicción global o personalizada. Revise manualmente el lenguaje de derechos regionales antes de publicar.',
+          ecommercePaymentRequired: 'Para e-commerce debe indicarse al menos un procesador de pago o una modalidad de pago externa.',
+          ecommerceShippingRequired: 'Para e-commerce debe indicarse al menos una categoría de logística o envíos.',
+          ecommerceFiscalRequired: 'Para e-commerce debe indicarse si se tratan datos fiscales, de facturación o identificación comercial.',
+          advertisingCookiesWarning: 'Seleccionó publicidad sin cookies. Revise si utiliza píxeles, remarketing o cookies publicitarias.',
+          shortAddressWarning: 'La dirección cargada parece incompleta. Agregue calle, número, ciudad y país o jurisdicción relevante.',
+          argentinaSpanishWarning: 'Para un negocio en Argentina conviene publicar la política también en español.',
+          argentinaRightsWarning: 'Si opera en Argentina, revise que la política incluya derechos locales, AAIP y tratamiento de datos conforme a la Ley 25.326.',
+          missingLegalBasisWarning: 'No se indicaron bases legales de tratamiento. Revise contrato, consentimiento, obligación legal o interés legítimo según corresponda.'
         }
-      }
-      
-      // If we can't safely evaluate, assume the condition is met
-      this.log('Could not safely evaluate condition, defaulting to true');
-      return true;
-    } catch (error) {
-      console.error('Error evaluating condition:', condition, error);
-      return true; // Default to including sections on error
+      : {
+          missingBusinessName: 'Business name is required.',
+          missingBusinessType: 'Business type is required.',
+          missingJurisdiction: 'Primary jurisdiction is required.',
+          missingContact: 'No privacy contact method was provided. Contact section will be incomplete.',
+          missingWebsite: 'No website URL was provided. The generated policy uses a placeholder website label.',
+          coppaWarning: 'COPPA was selected but the service is not marked as directed to children. Review the children privacy section carefully.',
+          paymentConflict: 'Select either multiple payment processors or PayPal-only payments, not both.',
+          globalWarning: 'Global or custom jurisdiction selected. Review regional rights language manually before publishing.',
+          ecommercePaymentRequired: 'E-commerce requires at least one payment processor or external payment flow.',
+          ecommerceShippingRequired: 'E-commerce requires at least one shipping or logistics category.',
+          ecommerceFiscalRequired: 'E-commerce requires a fiscal, invoicing, or commercial identity data category.',
+          advertisingCookiesWarning: 'Advertising was selected without cookies. Review whether you use pixels, remarketing, or advertising cookies.',
+          shortAddressWarning: 'The address provided looks incomplete. Add street, number, city, and country or relevant jurisdiction.',
+          argentinaSpanishWarning: 'For an Argentina-based business, publishing the policy in Spanish is strongly recommended.',
+          argentinaRightsWarning: 'If the business operates in Argentina, review local rights, AAIP references, and Law 25.326 requirements before publishing.',
+          missingLegalBasisWarning: 'No legal bases were selected. Review contract, consent, legal obligation, or legitimate interests as appropriate.'
+        };
+
+    if (!data.business.name) {
+      errors.push(messages.missingBusinessName);
     }
+
+    if (!data.business.type) {
+      errors.push(messages.missingBusinessType);
+    }
+
+    if (!data.operations.primaryJurisdiction) {
+      errors.push(messages.missingJurisdiction);
+    }
+
+    if (!data.contact.email && !data.contact.phone && !data.contact.pageUrl && !data.business.address) {
+      warnings.push(messages.missingContact);
+    }
+
+    if (!data.business.websiteUrl) {
+      warnings.push(messages.missingWebsite);
+    }
+
+    if (data.business.address && data.business.address.trim().length < 12) {
+      warnings.push(messages.shortAddressWarning);
+    }
+
+    if (data.operations.primaryJurisdiction === 'global') {
+      warnings.push(messages.globalWarning);
+    }
+
+    if (data.operations.primaryJurisdiction === 'ar' || data.business.country.toLowerCase().includes('argentina')) {
+      warnings.push(messages.argentinaRightsWarning);
+      if (data.settings.language !== 'es') {
+        warnings.push(messages.argentinaSpanishWarning);
+      }
+    }
+
+    if (data.compliance.requestedFrameworks.includes('coppa') && !data.operations.childrenAudience) {
+      warnings.push(messages.coppaWarning);
+    }
+
+    if (data.dataPractices.thirdParties.includes('payment') && data.dataPractices.thirdParties.includes('paypal_only')) {
+      errors.push(messages.paymentConflict);
+    }
+
+    if (data.dataPractices.thirdParties.includes('advertising') && !data.dataPractices.collectedData.includes('cookies')) {
+      warnings.push(messages.advertisingCookiesWarning);
+    }
+
+    if (data.dataPractices.legalBases.length === 0) {
+      warnings.push(messages.missingLegalBasisWarning);
+    }
+
+    if (data.business.type === 'ecommerce') {
+      const paymentConfigured = data.dataPractices.thirdParties.includes('payment') || data.dataPractices.thirdParties.includes('paypal_only');
+      const shippingConfigured = data.dataPractices.thirdParties.includes('shipping');
+      const fiscalConfigured = data.dataPractices.collectedData.includes('tax') || data.dataPractices.collectedData.includes('identity');
+
+      if (!paymentConfigured) {
+        warnings.push(messages.ecommercePaymentRequired);
+      }
+
+      if (!shippingConfigured) {
+        warnings.push(messages.ecommerceShippingRequired);
+      }
+
+      if (!fiscalConfigured) {
+        warnings.push(messages.ecommerceFiscalRequired);
+      }
+    }
+
+    return { data, errors, warnings };
   }
-  
-  replaceVariables(text, data) {
-    try {
-      // Replace all {variable_name} instances with the corresponding value
-      return text.replace(/\{([^}]+)\}/g, (match, key) => {
-        if (data[key] !== undefined) {
-          return data[key];
-        }
-        this.log(`Warning: Variable ${key} not found in data`);
-        return match; // Keep the original if not found
+
+  isCanonicalInput(input) {
+    return Boolean(input?.business || input?.operations || input?.dataPractices);
+  }
+
+  fromLegacyInput(input) {
+    return {
+      business: {
+        name: input.businessName,
+        type: input.businessType,
+        websiteUrl: input.websiteUrl,
+        country: input.country,
+        address: input.businessAddress
+      },
+      contact: {
+        email: input.contactEmail,
+        phone: input.contactPhone,
+        pageUrl: input.contactPage
+      },
+      operations: {
+        primaryJurisdiction: input.jurisdiction,
+        sellRegions: input.sellRegions,
+        childrenAudience: Boolean(input.childrenAudience)
+      },
+      dataPractices: {
+        collectedData: input.dataCollected,
+        thirdParties: input.thirdParties,
+        legalBases: input.legalBases
+      },
+      compliance: {
+        requestedFrameworks: input.compliance
+      },
+      settings: {
+        language: input.outputLanguage || input.language || 'en'
+      },
+      customizations: {
+        manualDisclosures: input.manualDisclosures || input.customDisclosures
+      }
+    };
+  }
+
+  resolveSection(sectionDefinition, data, decisionLog) {
+    const includeSection = this.shouldInclude(sectionDefinition.includeWhen, data, sectionDefinition.required === true);
+    const sectionLog = {
+      sectionId: sectionDefinition.id,
+      title: sectionDefinition.title,
+      included: includeSection,
+      reason: includeSection ? 'rule matched or section required' : 'rule did not match'
+    };
+    decisionLog.push(sectionLog);
+
+    if (!includeSection) {
+      return null;
+    }
+
+    const paragraphs = [];
+    const subsections = [];
+
+    for (const line of sectionDefinition.content || []) {
+      const renderedLine = this.renderLine(line, data);
+      if (renderedLine) {
+        paragraphs.push(renderedLine);
+      }
+    }
+
+    for (const subsection of sectionDefinition.subsections || []) {
+      const includeSubsection = this.shouldInclude(subsection.includeWhen, data, false);
+      decisionLog.push({
+        sectionId: subsection.id,
+        title: subsection.title,
+        included: includeSubsection,
+        reason: includeSubsection ? 'rule matched' : 'rule did not match'
       });
-    } catch (error) {
-      console.error('Error replacing variables:', error);
-      return text; // Return original on error
+
+      if (!includeSubsection) {
+        continue;
+      }
+
+      const subsectionParagraphs = (subsection.content || [])
+        .map((line) => this.renderLine(line, data))
+        .filter(Boolean);
+
+      if (subsectionParagraphs.length > 0) {
+        subsections.push({
+          title: subsection.title,
+          paragraphs: subsectionParagraphs
+        });
+      }
     }
+
+    if (paragraphs.length === 0 && subsections.length === 0) {
+      return null;
+    }
+
+    return {
+      title: this.cleanTitle(sectionDefinition.title),
+      paragraphs,
+      subsections: subsections.map((subsection) => ({
+        ...subsection,
+        title: this.cleanTitle(subsection.title)
+      }))
+    };
   }
-  
-  formatAsHTML(policy, businessName) {
-    try {
-      let html = `<!DOCTYPE html>
-<html lang="en">
+
+  shouldInclude(rule, data, defaultValue) {
+    if (!rule) {
+      return defaultValue;
+    }
+
+    if (rule.allOf) {
+      return rule.allOf.every((item) => this.shouldInclude(item, data, false));
+    }
+
+    if (rule.anyOf) {
+      return rule.anyOf.some((item) => this.shouldInclude(item, data, false));
+    }
+
+    if (rule.noneOf) {
+      return rule.noneOf.every((item) => !this.shouldInclude(item, data, false));
+    }
+
+    const fieldValue = this.getByPath(data, rule.field);
+
+    if (Object.prototype.hasOwnProperty.call(rule, 'equals')) {
+      return fieldValue === rule.equals;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(rule, 'notEquals')) {
+      return fieldValue !== rule.notEquals;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(rule, 'includes')) {
+      return Array.isArray(fieldValue) && fieldValue.includes(rule.includes);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(rule, 'notIncludes')) {
+      return Array.isArray(fieldValue) && !fieldValue.includes(rule.notIncludes);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(rule, 'exists')) {
+      const hasValue = Array.isArray(fieldValue)
+        ? fieldValue.length > 0
+        : fieldValue !== undefined && fieldValue !== '';
+      return rule.exists ? hasValue : !hasValue;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(rule, 'isTrue')) {
+      return Boolean(fieldValue) === Boolean(rule.isTrue);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(rule, 'isFalse')) {
+      return Boolean(fieldValue) === !Boolean(rule.isFalse);
+    }
+
+    return defaultValue;
+  }
+
+  renderLine(line, data) {
+    const context = this.createTemplateContext(data);
+    return line.replace(/\{([^}]+)\}/g, (_, token) => context[token] ?? '');
+  }
+
+  createTemplateContext(data) {
+    return {
+      business_name: data.business.name,
+      service_type: this.getServiceTypeLabel(data.business.type),
+      website_url_or_placeholder: data.business.websiteUrl || `${data.business.name || 'the business'} website`,
+      country: data.business.country,
+      contact_lines: this.buildContactLines(data.contact, data.business.address, data.settings.language),
+      manual_disclosures_lines: this.buildManualDisclosureLines(data.customizations.manualDisclosures)
+    };
+  }
+
+  buildContactLines(contact, address, language) {
+    const lines = [];
+    const labels = language === 'es'
+      ? {
+          email: 'Por email',
+          page: 'A través de esta página',
+          phone: 'Por teléfono',
+          mail: 'Por correo postal',
+          fallback: 'No se configuró todavía un canal directo de contacto. Agregue al menos un medio de contacto de privacidad antes de publicar esta política.'
+        }
+      : {
+          email: 'By email',
+          page: 'Through this page',
+          phone: 'By phone',
+          mail: 'By mail',
+          fallback: 'No direct contact method has been configured yet. Add at least one privacy contact channel before publishing this policy.'
+        };
+
+    if (contact.email) {
+      lines.push(`- ${labels.email}: ${contact.email}`);
+    }
+    if (contact.pageUrl) {
+      lines.push(`- ${labels.page}: ${contact.pageUrl}`);
+    }
+    if (contact.phone) {
+      lines.push(`- ${labels.phone}: ${contact.phone}`);
+    }
+    if (address) {
+      lines.push(`- ${labels.mail}: ${address}`);
+    }
+
+    if (lines.length === 0) {
+      lines.push(`- ${labels.fallback}`);
+    }
+
+    return lines.join('\n');
+  }
+
+  buildManualDisclosureLines(disclosures) {
+    if (!Array.isArray(disclosures) || disclosures.length === 0) {
+      return '';
+    }
+
+    return disclosures
+      .filter(Boolean)
+      .map((entry) => `- ${entry}`)
+      .join('\n');
+  }
+
+  getServiceTypeLabel(type) {
+    const englishLabels = {
+      ecommerce: 'website, online store, and related services',
+      blog: 'content site, newsletter, and related services',
+      saas: 'software service and related account features',
+      mobile: 'mobile application and related services',
+      nonprofit: 'nonprofit website, campaigns, and related services'
+    };
+
+    const spanishLabels = {
+      ecommerce: 'sitio web, tienda online y servicios relacionados',
+      blog: 'sitio de contenido, newsletter y servicios relacionados',
+      saas: 'servicio de software y funciones relacionadas de cuenta',
+      mobile: 'aplicación móvil y servicios relacionados',
+      nonprofit: 'sitio de ONG, campañas y servicios relacionados'
+    };
+
+    return this.currentLanguage === 'es'
+      ? (spanishLabels[type] || 'servicio en línea')
+      : (englishLabels[type] || 'online service');
+  }
+
+  getByPath(object, path) {
+    return path.split('.').reduce((value, segment) => {
+      if (value === undefined || value === null) {
+        return undefined;
+      }
+      return value[segment];
+    }, object);
+  }
+
+  stringValue(value, fallback = '') {
+    return typeof value === 'string' ? value.trim() : fallback;
+  }
+
+  arrayValue(value) {
+    return Array.isArray(value) ? value.filter(Boolean) : [];
+  }
+
+  cleanTitle(title) {
+    return title.replace(/^\d+(\.\d+)*\.?\s+/, '');
+  }
+
+  formatAsMarkdown(policy) {
+    const labels = policy.language === 'es'
+      ? { title: 'Política de Privacidad', effectiveDate: 'Fecha de vigencia' }
+      : { title: 'Privacy Policy', effectiveDate: 'Effective Date' };
+    let markdown = `# ${labels.title} - ${policy.businessName}\n\n`;
+    markdown += `*${labels.effectiveDate}: ${policy.effectiveDate}*\n\n`;
+
+    policy.sections.forEach((section, sectionIndex) => {
+      markdown += `## ${sectionIndex + 1}. ${section.title}\n\n`;
+
+      for (const paragraph of section.paragraphs) {
+        markdown += `${paragraph}\n\n`;
+      }
+
+      section.subsections.forEach((subsection, subsectionIndex) => {
+        markdown += `### ${sectionIndex + 1}.${subsectionIndex + 1} ${subsection.title}\n\n`;
+        for (const paragraph of subsection.paragraphs) {
+          markdown += `${paragraph}\n\n`;
+        }
+      });
+    });
+
+    return markdown.trim();
+  }
+
+  formatAsText(policy) {
+    return this.formatAsMarkdown(policy)
+      .replace(/^# /gm, '')
+      .replace(/^## /gm, '')
+      .replace(/^### /gm, '')
+      .replace(/\*\*/g, '')
+      .replace(/\*/g, '');
+  }
+
+  formatAsHTML(policy) {
+    const labels = policy.language === 'es'
+      ? { title: 'Política de Privacidad', effectiveDate: 'Fecha de vigencia' }
+      : { title: 'Privacy Policy', effectiveDate: 'Effective Date' };
+    let html = `<!DOCTYPE html>
+<html lang="${policy.language === 'es' ? 'es' : 'en'}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - ${businessName}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 {
-            font-size: 24px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-        h2 {
-            font-size: 20px;
-            margin-top: 30px;
-        }
-        h3 {
-            font-size: 18px;
-            margin-top: 25px;
-        }
-        p {
-            margin: 15px 0;
-        }
-        ul {
-            margin: 15px 0;
-            padding-left: 30px;
-            list-style-position: outside; /* Keep bullets outside the text flow */
-            width: auto; /* Ensure lists don't expand beyond container */
-        }
-        li {
-            margin-bottom: 8px;
-            text-indent: 0; /* Prevent text indentation */
-            padding-left: 5px; /* Small padding after bullet */
-            width: calc(100% - 10px); /* Ensure list items respect container width */
-            box-sizing: border-box;
-        }
-        /* Special styling for definition lists */
-        .definitions-list {
-            margin-left: 0;
-            padding-left: 20px;
-            width: calc(100% - 20px);
-        }
-        .definitions-list li {
-            margin-bottom: 12px;
-            padding-right: 10px;
-        }
-        .effective-date {
-            margin-top: 40px;
-            font-style: italic;
-            color: #666;
-        }
-        /* Force all content to wrap */
-        * {
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            word-break: break-word;
-            hyphens: auto;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(labels.title)} - ${escapeHtml(policy.businessName)}</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #222; max-width: 900px; margin: 0 auto; padding: 24px; }
+    h1, h2, h3 { line-height: 1.2; }
+    ul { padding-left: 24px; }
+  </style>
 </head>
 <body>
-    <h1>Privacy Policy - ${businessName}</h1>
-    <p class="effective-date">Effective Date: ${policy.effectiveDate}</p>
-`;
-      
-      if (!policy.sections || policy.sections.length === 0) {
-        html += `    <p>Error: No policy sections were generated.</p>`;
-      } else {
-        policy.sections.forEach(section => {
-          if (!section.title || !section.content) {
-            return; // Skip invalid sections
-          }
-          
-          html += `    <h2>${section.title}</h2>\n`;
-          
-          // Special handling for the Definitions section to fix bullet point indentation
-          if (section.title.includes("Definitions")) {
-            // Extract the initial paragraph text (before the bullet points)
-            const introText = section.content.split('\n\n')[0];
-            
-            // Get the bullet points
-            const bulletPointsMatch = section.content.match(/\n\n([\s\S]*)/);
-            let bulletPoints = bulletPointsMatch ? bulletPointsMatch[1] : '';
-            
-            // Format the bullet points properly
-            if (bulletPoints) {
-              bulletPoints = bulletPoints
-                .replace(/- \*\*([^:*]+)\*\*:/g, '- <strong>$1</strong>:') // Format definition terms
-                .replace(/- \*\*([^:*]+)\*\*/g, '- <strong>$1</strong>') // Format other bold items
-                .split('\n-').map(point => point.trim())
-                .filter(point => point.length > 0)
-                .map(point => `<li>${point.startsWith('-') ? point.substring(1).trim() : point}</li>`)
-                .join('\n');
-                
-              html += `    <p>${introText}</p>\n`;
-              html += `    <ul class="definitions-list">\n${bulletPoints}\n    </ul>\n`;
-            } else {
-              html += `    <p>${section.content}</p>\n`;
-            }
-          } else {
-            // Regular content formatting for other sections
-            let sectionContent = section.content;
-            
-            // Handle markdown-style formatting
-            sectionContent = sectionContent.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>'); // Bold text
-            
-            // Handle headings
-            sectionContent = sectionContent.replace(/(### |## )([^\n]+)/g, '</p><h3>$2</h3><p>');
-            
-            // Handle paragraphs
-            sectionContent = sectionContent.replace(/\n\n/g, '</p><p>');
-            
-            // Handle bullet points properly
-            if (sectionContent.includes('\n- ')) {
-              // Split by paragraphs first
-              const paragraphs = sectionContent.split('</p><p>');
-              
-              let formattedContent = '';
-              
-              paragraphs.forEach(para => {
-                if (para.includes('\n- ')) {
-                  // This paragraph contains bullet points
-                  const [beforeList, ...listContent] = para.split('\n- ');
-                  
-                  // Add the text before the list
-                  if (beforeList.trim()) {
-                    formattedContent += `<p>${beforeList.trim()}</p>`;
-                  }
-                  
-                  // Format the list items
-                  const listItems = listContent.map(item => `<li>${item.trim()}</li>`).join('');
-                  formattedContent += `<ul>${listItems}</ul>`;
-                } else {
-                  // Regular paragraph
-                  if (para.trim()) {
-                    formattedContent += `<p>${para.trim()}</p>`;
-                  }
-                }
-              });
-              
-              sectionContent = formattedContent;
-            } else {
-              // No bullet points, just wrap in paragraph tags if needed
-              if (!sectionContent.startsWith('<p>')) {
-                sectionContent = `<p>${sectionContent}</p>`;
-              }
-            }
-            
-            // Clean up any leftover placeholders or double tags
-            sectionContent = sectionContent
-              .replace(/<p><\/p>/g, '')
-              .replace(/<p><p>/g, '<p>')
-              .replace(/<\/p><\/p>/g, '</p>')
-              .replace(/<\/h3><p><\/p>/g, '</h3>');
-            
-            html += `    ${sectionContent}\n`;
-          }
-        });
-      }
-      
-      html += `</body>
-</html>`;
-      
-      return html;
-    } catch (error) {
-      console.error('Error formatting HTML:', error);
-      return `<html><body><h1>Error Generating Policy</h1><p>There was an error formatting the policy: ${error.message}</p></body></html>`;
-    }
+  <h1>${escapeHtml(labels.title)} - ${escapeHtml(policy.businessName)}</h1>
+  <p><em>${escapeHtml(labels.effectiveDate)}: ${escapeHtml(policy.effectiveDate)}</em></p>
+  ${this.renderPolicyHtml(policy)}
+</body></html>`;
+    return html;
   }
-  
-  formatAsMarkdown(policy, businessName) {
-    try {
-      let markdown = `# Privacy Policy - ${businessName}\n\n`;
-      markdown += `*Effective Date: ${policy.effectiveDate}*\n\n`;
-      
-      if (!policy.sections || policy.sections.length === 0) {
-        markdown += `Error: No policy sections were generated.\n\n`;
-      } else {
-        policy.sections.forEach(section => {
-          if (!section.title || !section.content) {
-            return; // Skip invalid sections
-          }
-          
-          markdown += `## ${section.title}\n\n`;
-          markdown += `${section.content}\n\n`;
-        });
+
+  renderPolicyHtml(policy) {
+    let html = '';
+
+    policy.sections.forEach((section, sectionIndex) => {
+      html += `<section><h2>${escapeHtml(`${sectionIndex + 1}. ${section.title}`)}</h2>`;
+      for (const paragraph of section.paragraphs) {
+        html += paragraphToHtml(paragraph);
       }
-      
-      return markdown;
-    } catch (error) {
-      console.error('Error formatting Markdown:', error);
-      return `# Error Generating Policy\n\nThere was an error formatting the policy: ${error.message}`;
-    }
-  }
-  
-  formatAsText(policy, businessName) {
-    try {
-      let text = `PRIVACY POLICY - ${businessName}\n\n`;
-      text += `Effective Date: ${policy.effectiveDate}\n\n`;
-      
-      if (!policy.sections || policy.sections.length === 0) {
-        text += `Error: No policy sections were generated.\n\n`;
-      } else {
-        policy.sections.forEach(section => {
-          if (!section.title || !section.content) {
-            return; // Skip invalid sections
-          }
-          
-          text += `${section.title.toUpperCase()}\n\n`;
-          
-          // Remove markdown formatting for plain text
-          let content = section.content
-            .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold formatting
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)') // Convert links to text with URL in parentheses
-            .replace(/(### |## )([^\n]+)/g, '$2:'); // Convert headings to text with colon
-          
-          text += `${content}\n\n`;
-        });
-      }
-      
-      return text;
-    } catch (error) {
-      console.error('Error formatting Text:', error);
-      return `ERROR GENERATING POLICY\n\nThere was an error formatting the policy: ${error.message}`;
-    }
+      section.subsections.forEach((subsection, subsectionIndex) => {
+        html += `<h3>${escapeHtml(`${sectionIndex + 1}.${subsectionIndex + 1} ${subsection.title}`)}</h3>`;
+        for (const paragraph of subsection.paragraphs) {
+          html += paragraphToHtml(paragraph);
+        }
+      });
+      html += '</section>';
+    });
+
+    return html;
   }
 }
 
-// Export for browser and Node.js environments
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = PrivacyPolicyGenerator;
-} else {
-  window.PrivacyPolicyGenerator = PrivacyPolicyGenerator;
+function escapeHtml(value) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
+
+function paragraphToHtml(paragraph) {
+  if (paragraph.startsWith('- ')) {
+    const items = paragraph
+      .split('\n')
+      .filter((line) => line.startsWith('- '))
+      .map((line) => `<li>${escapeHtml(line.slice(2)).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')}</li>`)
+      .join('');
+    return `<ul>${items}</ul>`;
+  }
+
+  return `<p>${escapeHtml(paragraph).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')}</p>`;
+}
+module.exports = PrivacyPolicyGenerator;
