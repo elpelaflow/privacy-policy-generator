@@ -601,6 +601,10 @@ function inferJurisdiction(country) {
   return 'global';
 }
 
+function isArgentinaCountry(country) {
+  return inferJurisdiction(country) === 'ar';
+}
+
 function defaultContactEmail(websiteUrl) {
   try {
     if (!websiteUrl) {
@@ -1028,6 +1032,9 @@ async function collectOperationsSection(rl, state) {
       state.operations.sellRegions = regionsChoice.values.length > 0
         ? regionsChoice.values
         : [state.operations.primaryJurisdiction].filter((value) => value && value !== 'global');
+      if (state.operations.sellRegions.length === 0 && isArgentinaCountry(state.business.country)) {
+        state.operations.sellRegions = ['ar'];
+      }
       state.manualDisclosures.push(...regionsChoice.manualNotes.map((note) => `Región operativa manual: ${note}`));
     },
     async () => {
@@ -1893,10 +1900,13 @@ async function collectTermsLegalSection(rl, state) {
       state.terms.changeNotification = choice.value;
     },
     async () => {
+      const argentinaForumDefault = isArgentinaCountry(state.business.country)
+        ? 'Tribunales competentes de la Ciudad Autónoma de Buenos Aires'
+        : '';
       const value = await promptText(rl, 'Jurisdicción o foro para reclamos', {
         required: true,
         allowEmpty: false,
-        defaultValue: state.terms.disputesForum || (state.business.country ? `Tribunales competentes de ${state.business.country}` : '')
+        defaultValue: state.terms.disputesForum || argentinaForumDefault || (state.business.country ? `Tribunales competentes de ${state.business.country}` : '')
       });
       if (value === BACK) return BACK;
       state.terms.disputesForum = value;
@@ -2917,9 +2927,9 @@ async function runWizard(generator) {
   const rl = readline.createInterface({ input: stdin, output: stdout });
   const state = {
     documentType: 'privacy',
-    business: { name: '', type: '', websiteUrl: '', country: 'United States', address: '' },
+    business: { name: '', type: '', websiteUrl: '', country: 'Argentina', address: '' },
     contact: { email: '', phone: '', pageUrl: '' },
-    operations: { primaryJurisdiction: '', sellRegions: [], childrenAudience: false },
+    operations: { primaryJurisdiction: 'ar', sellRegions: ['ar'], childrenAudience: false },
     dataPractices: { collectedData: [], thirdParties: [], legalBases: [] },
     compliance: { requestedFrameworks: [] },
     output: { language: 'es', format: 'markdown', publishHashedUrl: false, baseUrl: '', publishDir: '', writeToFile: false, outputPath: '', saveInput: true, inputPath: '' },

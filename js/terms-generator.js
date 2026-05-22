@@ -139,6 +139,8 @@ class TermsGenerator {
           missingPaymentProvider: 'Conviene indicar cómo se procesan los pagos o qué pasarela utiliza.',
           missingForum: 'Debe indicar jurisdicción o foro aplicable para disputas.',
           argentinaSpanishWarning: 'Para un negocio en Argentina conviene publicar los términos también en español.',
+          argentinaConsumerWarning: 'Para e-commerce en Argentina conviene contemplar reglas de defensa del consumidor, información clara, derecho de arrepentimiento y garantías legales cuando correspondan.',
+          argentinaForumWarning: 'Para un negocio argentino conviene definir con mayor precisión la jurisdicción o foro aplicable, evitando fórmulas demasiado vagas.',
           weakRefundWarning: 'Si vende productos o servicios al consumidor, conviene definir cambios, devoluciones o reembolsos.',
           weakWarrantyWarning: 'Si ofrece garantía o productos físicos, conviene aclarar su alcance.',
           weakAccountsWarning: 'Si hay cuentas de usuario, conviene definir cuándo pueden suspenderse o cancelarse.',
@@ -155,6 +157,8 @@ class TermsGenerator {
           missingPaymentProvider: 'You should specify how payments are processed or which gateway is used.',
           missingForum: 'You must specify the governing forum or dispute venue.',
           argentinaSpanishWarning: 'For an Argentina-based business, publishing the terms in Spanish is strongly recommended.',
+          argentinaConsumerWarning: 'For Argentina e-commerce, consider covering consumer-law expectations, clear information duties, withdrawal rights, and statutory warranties where relevant.',
+          argentinaForumWarning: 'For an Argentina-based business, define the governing forum more precisely and avoid overly vague dispute wording.',
           weakRefundWarning: 'If you sell to consumers, you should define refunds, returns, or exchanges.',
           weakWarrantyWarning: 'If you offer warranties or physical goods, you should clarify warranty scope.',
           weakAccountsWarning: 'If user accounts exist, you should define when they may be suspended or terminated.',
@@ -178,8 +182,12 @@ class TermsGenerator {
     if (!data.terms.refundsOffered && data.business.type === 'ecommerce') warnings.push(messages.weakRefundWarning);
     if (!data.terms.warrantyOffered && data.terms.offeringType === 'physical_goods') warnings.push(messages.weakWarrantyWarning);
     if (data.terms.hasAccounts && !data.terms.terminationGrounds) warnings.push(messages.weakAccountsWarning);
-    if ((data.operations.primaryJurisdiction === 'ar' || data.business.country.toLowerCase().includes('argentina')) && data.settings.language !== 'es') {
-      warnings.push(messages.argentinaSpanishWarning);
+    if (this.isArgentina(data)) {
+      if (data.settings.language !== 'es') warnings.push(messages.argentinaSpanishWarning);
+      if (data.business.type === 'ecommerce') warnings.push(messages.argentinaConsumerWarning);
+      if (/competent courts|tribunales competentes de argentina|argentina courts/i.test(data.terms.disputesForum || '')) {
+        warnings.push(messages.argentinaForumWarning);
+      }
     }
 
     return { data, errors, warnings };
@@ -219,6 +227,12 @@ class TermsGenerator {
       this.interpolate(this.pricingText(data), data),
       this.interpolate(this.paymentText(data), data)
     ], this.orderSubsections(data)));
+
+    if (this.isArgentina(data) && data.business.type === 'ecommerce') {
+      sections.push(this.section('argentina-consumer', t('Argentina Consumer Notice', 'Aviso de Consumo en Argentina'), [
+        this.interpolate(this.argentinaConsumerText(data), data)
+      ]));
+    }
 
     sections.push(this.section('conduct', t('Prohibited Conduct', 'Conductas Prohibidas'), [
       this.interpolate(t(
@@ -351,7 +365,10 @@ class TermsGenerator {
     const shippingText = data.terms.returnShippingResponsibility
       ? this.text(`Return shipping responsibility: ${data.terms.returnShippingResponsibility}.`, `Responsabilidad por el envío de devolución: ${data.terms.returnShippingResponsibility}.`)
       : this.text('Return shipping responsibility should be clarified.', 'Debería aclararse quién asume el envío de devolución.');
-    return `${windowText} ${conditionText} ${shippingText}`;
+    const argentinaText = this.isArgentina(data) && data.business.type === 'ecommerce'
+      ? this.text(' Where mandatory consumer protections apply, any statutory withdrawal, defect, or mismatch remedy available under consumer law will prevail over any narrower operational rule in these terms.', ' Cuando apliquen protecciones obligatorias de defensa del consumidor, cualquier derecho legal de arrepentimiento, falla o falta de conformidad previsto por la normativa de consumo prevalecerá sobre cualquier regla operativa más restrictiva de estos términos.')
+      : '';
+    return `${windowText} ${conditionText} ${shippingText}${argentinaText}`;
   }
 
   warrantyText(data) {
@@ -446,6 +463,17 @@ class TermsGenerator {
       `These terms are governed and interpreted in connection with the laws and courts of ${data.terms.disputesForum}. ${adr}`.trim(),
       `Estos términos se rigen e interpretan en relación con las leyes y tribunales de ${data.terms.disputesForum}. ${adr}`.trim()
     );
+  }
+
+  argentinaConsumerText(data) {
+    const refundWindow = data.terms.refundWindow
+      ? this.text(`For distance sales in Argentina, customers should review whether a withdrawal or cancellation right may exist within ${data.terms.refundWindow}, without prejudice to any mandatory right that prevails over these terms.`, `Para ventas a distancia en Argentina, los clientes deberían revisar si existe un derecho de arrepentimiento o revocación dentro de ${data.terms.refundWindow}, sin perjuicio de cualquier derecho obligatorio que prevalezca sobre estos términos.`)
+      : this.text(`For distance sales in Argentina, customers may have statutory withdrawal or cancellation rights, without prejudice to any mandatory consumer protection that prevails over these terms.`, `Para ventas a distancia en Argentina, los clientes pueden tener derechos legales de arrepentimiento o revocación, sin perjuicio de cualquier protección obligatoria de defensa del consumidor que prevalezca sobre estos términos.`);
+    const pricing = this.text('Prices, taxes, availability, and core commercial conditions should be presented clearly before the user completes the transaction.', 'Los precios, impuestos, disponibilidad y condiciones comerciales esenciales deberían presentarse con claridad antes de que el usuario complete la transacción.');
+    const warranty = data.terms.offeringType === 'physical_goods'
+      ? this.text(' Product warranties, hidden defects, and remedies for goods that are damaged, defective, or materially different from what was offered should be interpreted consistently with applicable consumer law.', ' La garantía de productos, los vicios o defectos y los remedios por bienes dañados, defectuosos o sustancialmente distintos de lo ofrecido deben interpretarse de manera compatible con la normativa de defensa del consumidor aplicable.')
+      : '';
+    return `${refundWindow} ${pricing}${warranty}`.trim();
   }
 
   restrictionsLines(data) {
@@ -553,6 +581,10 @@ class TermsGenerator {
 
   arrayValue(value) {
     return Array.isArray(value) ? value.filter(Boolean) : [];
+  }
+
+  isArgentina(data) {
+    return data.operations.primaryJurisdiction === 'ar' || String(data.business.country || '').toLowerCase().includes('argentina');
   }
 
   paragraphToHtml(paragraph, escape) {

@@ -295,6 +295,8 @@
           },
           "content": [
             "Where Argentina privacy law applies, individuals may exercise access, rectification, update, and deletion rights under Law 25.326. Consent may be withdrawn where processing depends on consent, subject to legal limits and legitimate retention requirements.",
+            "Requests relating to access, rectification, update, or deletion may be submitted through the contact channels listed in this policy. Where appropriate, we may request reasonable information to verify identity and protect third-party data.",
+            "Where processing involves consumer relationships, accounts, billing, or operational history, we may retain limited records for as long as needed to satisfy legal, contractual, tax, accounting, security, or fraud-prevention obligations.",
             "Data subjects may also submit complaints to the Agencia de Acceso a la Información Pública (AAIP) where they consider their rights have not been properly addressed."
           ]
         },
@@ -453,6 +455,20 @@
           "content": [
             "For physical goods, we may retain order history, billing records, and shipping information for longer periods where required to fulfill contracts, handle returns, support warranties, or comply with commercial and tax recordkeeping requirements."
           ]
+        },
+        {
+          "id": "argentina_security",
+          "title": "8.4 Argentina Security, Retention, and Sensitive Data",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.primaryJurisdiction", "equals": "ar" },
+              { "field": "operations.sellRegions", "includes": "ar" }
+            ]
+          },
+          "content": [
+            "Where Argentina privacy law applies, we aim to limit internal access to personal information, document reasonable security measures, and retain information only for the period necessary for the stated purposes or applicable legal requirements.",
+            "If sensitive data were ever processed, we would seek to do so under a heightened legal basis, with proportionate safeguards and use restrictions tied to the relevant specific purpose."
+          ]
         }
       ]
     },
@@ -493,6 +509,21 @@
       "required": true,
       "content": [
         "Because the service may rely on global vendors or remote infrastructure, personal information may be processed in countries other than the user's jurisdiction. Where required, we use appropriate contractual, organizational, or technical safeguards for cross-border transfers."
+      ],
+      "subsections": [
+        {
+          "id": "argentina_transfers",
+          "title": "10.1 Transfers from Argentina",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.primaryJurisdiction", "equals": "ar" },
+              { "field": "operations.sellRegions", "includes": "ar" }
+            ]
+          },
+          "content": [
+            "If personal data is transferred from Argentina to vendors, infrastructure, or third parties located in other countries, we seek to rely on reasonable legal grounds and safeguards appropriate to the service, the vendor involved, and applicable law."
+          ]
+        }
       ]
     },
     {
@@ -501,6 +532,21 @@
       "required": true,
       "content": [
         "Users may submit privacy or data subject requests using the contact methods listed below. We may verify identity before fulfilling access, correction, deletion, portability, or objection requests where legally required."
+      ],
+      "subsections": [
+        {
+          "id": "argentina_requests",
+          "title": "11.1 Requests under Law 25.326",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.primaryJurisdiction", "equals": "ar" },
+              { "field": "operations.sellRegions", "includes": "ar" }
+            ]
+          },
+          "content": [
+            "Where Argentina law applies, requests should ideally identify the data subject, the relationship with the service, and the right the person seeks to exercise. The business aims to respond within reasonable periods and, where applicable, in line with the timing contemplated by local law."
+          ]
+        }
       ]
     },
     {

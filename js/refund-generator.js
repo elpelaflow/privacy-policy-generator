@@ -115,7 +115,10 @@ class ReturnRefundPolicyGenerator {
           missingReturnChannel: 'Conviene indicar un canal claro para iniciar devoluciones o reclamos.',
           missingRefundTiming: 'Conviene indicar cuánto tarda el reembolso una vez aprobado.',
           digitalNeedsClarity: 'Si vendés productos digitales, conviene aclarar si son finales, no reembolsables o si tienen excepciones.',
-          noReturnsNeedsReason: 'Si no aceptás devoluciones, conviene aclarar excepciones mínimas por daño, error o exigencia legal.'
+          noReturnsNeedsReason: 'Si no aceptás devoluciones, conviene aclarar excepciones mínimas por daño, error o exigencia legal.',
+          argentinaSpanishWarning: 'Para una política de devoluciones orientada a Argentina conviene publicarla en español.',
+          argentinaWithdrawalWarning: 'Para ventas a distancia en Argentina conviene contemplar el derecho de arrepentimiento y aclarar que los derechos legales del consumidor prevalecen cuando corresponda.',
+          argentinaDefectWarning: 'Para e-commerce en Argentina conviene describir con claridad qué ocurre si el producto llega defectuoso, dañado o es distinto del ofrecido.'
         }
       : {
           missingBusinessName: 'Business name is required.',
@@ -125,7 +128,10 @@ class ReturnRefundPolicyGenerator {
           missingReturnChannel: 'You should provide a clear channel for initiating return or refund requests.',
           missingRefundTiming: 'You should state how long refunds usually take after approval.',
           digitalNeedsClarity: 'If you sell digital products, you should clarify whether sales are final, non-refundable, or subject to exceptions.',
-          noReturnsNeedsReason: 'If you do not accept returns, you should explain at least the basic exceptions for damage, error, or legal obligations.'
+          noReturnsNeedsReason: 'If you do not accept returns, you should explain at least the basic exceptions for damage, error, or legal obligations.',
+          argentinaSpanishWarning: 'For an Argentina-facing return policy, publishing in Spanish is strongly recommended.',
+          argentinaWithdrawalWarning: 'For distance sales in Argentina, consider describing the statutory withdrawal or cooling-off right and clarifying that mandatory consumer rights prevail where applicable.',
+          argentinaDefectWarning: 'For Argentina e-commerce, clearly describe what happens if the product arrives defective, damaged, or materially different from what was offered.'
         };
 
     const errors = [];
@@ -139,6 +145,11 @@ class ReturnRefundPolicyGenerator {
     if (!data.refund.refundProcessingTime) warnings.push(messages.missingRefundTiming);
     if (data.refund.offeringType === 'digital_products' && !data.refund.digitalGoodsFinal && data.refund.nonReturnableItems.length === 0) warnings.push(messages.digitalNeedsClarity);
     if (!data.refund.acceptsReturns && !data.refund.damagedItemsProcess) warnings.push(messages.noReturnsNeedsReason);
+    if (this.isArgentina(data)) {
+      if (data.settings.language !== 'es') warnings.push(messages.argentinaSpanishWarning);
+      if (!data.refund.refundWindow) warnings.push(messages.argentinaWithdrawalWarning);
+      if (!data.refund.damagedItemsProcess) warnings.push(messages.argentinaDefectWarning);
+    }
 
     return { data, errors, warnings };
   }
@@ -154,6 +165,11 @@ class ReturnRefundPolicyGenerator {
       this.section('eligibility', this.text('Eligibility for Returns and Refunds', 'Elegibilidad para Devoluciones y Reembolsos'), [
         this.eligibilityText(data)
       ]),
+      ...(this.isArgentina(data) ? [
+        this.section('consumer-rights-ar', this.text('Argentina Consumer and Distance-Sales Notice', 'Aviso de Consumo y Venta a Distancia en Argentina'), [
+          this.argentinaConsumerText(data)
+        ])
+      ] : []),
       this.section('process', this.text('How to Start a Return or Refund Request', 'Cómo Iniciar una Solicitud de Devolución o Reembolso'), [
         this.processText(data)
       ]),
@@ -216,6 +232,22 @@ class ReturnRefundPolicyGenerator {
       parts.push(data.refund.returnConditions);
     }
     return parts.join(' ');
+  }
+
+  argentinaConsumerText(data) {
+    const withdrawal = data.refund.refundWindow
+      ? this.text(
+        `Where Argentina consumer law applies, customers purchasing at a distance should review whether a statutory withdrawal right may exist within ${data.refund.refundWindow}, without prejudice to any mandatory legal right that may prevail over this policy.`,
+        `Cuando resulte aplicable la normativa argentina de consumo, los clientes que compren a distancia deberían revisar si existe un derecho de arrepentimiento dentro de ${data.refund.refundWindow}, sin perjuicio de cualquier derecho legal obligatorio que prevalezca sobre esta política.`
+      )
+      : this.text(
+        'Where Argentina consumer law applies, customers purchasing at a distance may have a statutory withdrawal right, without prejudice to any mandatory legal right that prevails over this policy.',
+        'Cuando resulte aplicable la normativa argentina de consumo, los clientes que compren a distancia pueden tener un derecho legal de arrepentimiento, sin perjuicio de cualquier derecho obligatorio que prevalezca sobre esta política.'
+      );
+    const defects = data.refund.damagedItemsProcess
+      ? ` ${this.text('Issues involving defective, damaged, or materially different products should be handled under the specific review and remediation process described below.', 'Los supuestos de producto defectuoso, dañado o sustancialmente distinto de lo ofrecido deberían canalizarse conforme al proceso específico de revisión y solución indicado más abajo.')}`
+      : '';
+    return `${withdrawal}${defects}`;
   }
 
   processText(data) {
@@ -369,6 +401,10 @@ class ReturnRefundPolicyGenerator {
 
   booleanValue(value, fallback = false) {
     return typeof value === 'boolean' ? value : fallback;
+  }
+
+  isArgentina(data) {
+    return String(data.business.country || '').toLowerCase().includes('argentina');
   }
 }
 

@@ -110,6 +110,7 @@ test('Argentina scenario includes local rights and warns when output is not in S
   input.operations.sellRegions = ['ar'];
   input.settings = { language: 'en' };
   input.dataPractices.legalBases = ['contract', 'legal_obligation'];
+  input.dataPractices.thirdParties = ['cloud'];
 
   const validation = await generator.validate(input);
   const result = await generator.generate(input);
@@ -121,6 +122,9 @@ test('Argentina scenario includes local rights and warns when output is not in S
   assert.doesNotMatch(result.markdown, /Additional Business Notes Requiring Review|Notas Adicionales del Negocio que Requieren Revisión/);
   assert.ok(validation.warnings.some((warning) => /Spanish/i.test(warning)));
   assert.ok(validation.warnings.some((warning) => /Law 25\.326|AAIP/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /transfers|transferencias/i.test(warning)));
+  assert.match(result.markdown, /Requests under Law 25\.326|Solicitudes bajo Ley 25\.326/);
+  assert.match(result.markdown, /Transfers from Argentina|Transferencias desde Argentina/);
 });
 
 test('invalid placeholder values are stripped from rendered public policy output', async () => {
@@ -280,6 +284,7 @@ test('terms generator creates spanish ecommerce terms with payment and dispute s
   assert.match(result.markdown, /Mercado Pago/);
   assert.match(result.markdown, /Tribunales competentes de la Ciudad de Buenos Aires/);
   assert.match(result.markdown, /Reembolsos, Cambios y Devoluciones/);
+  assert.match(result.markdown, /Aviso de Consumo en Argentina|defensa del consumidor|derecho de arrepentimiento/i);
 });
 
 test('terms validation blocks missing website and forum', async () => {
@@ -454,6 +459,7 @@ test('cookies generator creates a cookie policy with categories and controls sec
   assert.match(result.markdown, /Categorías de Cookies/);
   assert.match(result.markdown, /Consentimiento y Controles de Cookies/);
   assert.match(result.markdown, /publicidad/i);
+  assert.match(result.markdown, /Aviso de Cookies para Argentina|estrictamente necesarias/i);
 });
 
 test('cookies validation blocks missing website and warns on missing management details', async () => {
@@ -463,12 +469,14 @@ test('cookies validation blocks missing website and warns on missing management 
   input.cookies.managementUrl = '';
   input.contact.email = '';
   input.contact.pageUrl = '';
+  input.settings.language = 'en';
 
   const validation = await generator.validate(input);
 
   assert.equal(validation.ok, false);
   assert.ok(validation.errors.some((error) => /URL del sitio|Website or app URL/i.test(error)));
   assert.ok(validation.warnings.some((warning) => /gestionar cookies|manage cookies/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /Spanish|español/i.test(warning)));
 });
 
 test('cookies publish command returns final public URL without full document body', async () => {
@@ -536,14 +544,17 @@ test('refund generator creates a spanish return and refund policy with timing an
   assert.match(result.markdown, /Política de Devoluciones y Reembolsos/);
   assert.match(result.markdown, /10 días hábiles/);
   assert.match(result.markdown, /Productos personalizados o hechos a medida/);
+  assert.match(result.markdown, /derecho de arrepentimiento|venta a distancia|Consumo y Venta a Distancia/i);
 });
 
 test('refund validation blocks missing website and warns on missing process details', async () => {
   const generator = new ReturnRefundPolicyGenerator();
   const input = baseRefundInput();
   input.business.websiteUrl = '';
+  input.refund.refundWindow = '';
   input.refund.refundProcessingTime = '';
   input.refund.returnConditions = '';
+  input.refund.damagedItemsProcess = '';
 
   const validation = await generator.validate(input);
 
@@ -551,6 +562,8 @@ test('refund validation blocks missing website and warns on missing process deta
   assert.ok(validation.errors.some((error) => /URL del sitio|Website or app URL/i.test(error)));
   assert.ok(validation.warnings.some((warning) => /reembolso|refund/i.test(warning)));
   assert.ok(validation.warnings.some((warning) => /estado|condition/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /arrepentimiento|withdrawal/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /defectuoso|damaged|distinto/i.test(warning)));
 });
 
 test('refund publish command returns final public URL without full document body', async () => {

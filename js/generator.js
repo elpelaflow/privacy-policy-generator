@@ -161,6 +161,10 @@ class PrivacyPolicyGenerator {
           shortAddressWarning: 'La dirección cargada parece incompleta. Agregue calle, número, ciudad y país o jurisdicción relevante.',
           argentinaSpanishWarning: 'Para un negocio en Argentina conviene publicar la política también en español.',
           argentinaRightsWarning: 'Si opera en Argentina, revise que la política incluya derechos locales, AAIP y tratamiento de datos conforme a la Ley 25.326.',
+          argentinaRightsChannelWarning: 'Para privacidad en Argentina conviene informar un canal claro para ejercer derechos, idealmente por email o mediante una página de contacto.',
+          argentinaTransferWarning: 'Si opera en Argentina y utiliza proveedores globales, revise que la política describa transferencias internacionales y salvaguardas aplicables.',
+          argentinaThirdPartiesWarning: 'Si opera en Argentina, conviene describir con mayor claridad categorías de encargados, proveedores y terceros que intervienen en el tratamiento.',
+          argentinaConsumerLanguageWarning: 'Para un negocio argentino orientado a consumidores, conviene evitar una política demasiado global o genérica y usar lenguaje local más claro.',
           missingLegalBasisWarning: 'No se indicaron bases legales de tratamiento. Revise contrato, consentimiento, obligación legal o interés legítimo según corresponda.'
         }
       : {
@@ -179,6 +183,10 @@ class PrivacyPolicyGenerator {
           shortAddressWarning: 'The address provided looks incomplete. Add street, number, city, and country or relevant jurisdiction.',
           argentinaSpanishWarning: 'For an Argentina-based business, publishing the policy in Spanish is strongly recommended.',
           argentinaRightsWarning: 'If the business operates in Argentina, review local rights, AAIP references, and Law 25.326 requirements before publishing.',
+          argentinaRightsChannelWarning: 'For Argentina privacy compliance, provide a clear channel for rights requests, ideally by email or a contact page.',
+          argentinaTransferWarning: 'If the business operates in Argentina and uses global providers, review whether international transfers and safeguards are clearly described.',
+          argentinaThirdPartiesWarning: 'If the business operates in Argentina, describe processors, vendors, or third-party categories more clearly.',
+          argentinaConsumerLanguageWarning: 'For an Argentina-facing consumer business, avoid a policy that feels overly global or generic and prefer clearer local wording.',
           missingLegalBasisWarning: 'No legal bases were selected. Review contract, consent, legal obligation, or legitimate interests as appropriate.'
         };
 
@@ -214,6 +222,18 @@ class PrivacyPolicyGenerator {
       warnings.push(messages.argentinaRightsWarning);
       if (data.settings.language !== 'es') {
         warnings.push(messages.argentinaSpanishWarning);
+      }
+      if (!data.contact.email && !data.contact.pageUrl) {
+        warnings.push(messages.argentinaRightsChannelWarning);
+      }
+      if (data.dataPractices.thirdParties.some((value) => ['cloud', 'analytics', 'advertising', 'social', 'payment', 'email'].includes(value))) {
+        warnings.push(messages.argentinaTransferWarning);
+      }
+      if (data.dataPractices.thirdParties.length === 0) {
+        warnings.push(messages.argentinaThirdPartiesWarning);
+      }
+      if (data.business.type === 'ecommerce' && data.operations.primaryJurisdiction === 'global') {
+        warnings.push(messages.argentinaConsumerLanguageWarning);
       }
     }
 

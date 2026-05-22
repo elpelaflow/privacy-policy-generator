@@ -111,7 +111,10 @@ class CookiesPolicyGenerator {
           missingThirdParties: 'Conviene indicar si existen terceros que colocan o leen cookies, como analítica o publicidad.',
           missingManagementUrl: 'Conviene indicar una URL, página o canal donde el usuario pueda gestionar cookies o contactarte sobre ellas.',
           advertisingNeedsConsent: 'Si usás cookies publicitarias o remarketing, conviene aclarar el mecanismo de consentimiento o banner de cookies.',
-          analyticsNeedsControls: 'Si usás analítica o cookies no esenciales, conviene explicar cómo deshabilitarlas desde el navegador o desde tu banner.'
+          analyticsNeedsControls: 'Si usás analítica o cookies no esenciales, conviene explicar cómo deshabilitarlas desde el navegador o desde tu banner.',
+          argentinaSpanishWarning: 'Para un sitio o app en Argentina conviene publicar la política de cookies también en español.',
+          advertisingNeedsSeparation: 'Si usás publicidad o remarketing, conviene separar con claridad cookies necesarias, analíticas y publicitarias.',
+          advertisingNeedsThirdPartyClarity: 'Si usás analítica o publicidad, conviene identificar mejor los terceros y vincular esta política con la política de privacidad general.'
         }
       : {
           missingBusinessName: 'Business name is required.',
@@ -120,7 +123,10 @@ class CookiesPolicyGenerator {
           missingThirdParties: 'You should specify whether third parties place or read cookies, such as analytics or advertising providers.',
           missingManagementUrl: 'You should provide a URL, page, or contact channel where users can manage cookies or contact you about them.',
           advertisingNeedsConsent: 'If you use advertising or remarketing cookies, you should explain the consent or cookie-banner mechanism.',
-          analyticsNeedsControls: 'If you use analytics or other non-essential cookies, you should explain how users can disable them in the browser or through your banner.'
+          analyticsNeedsControls: 'If you use analytics or other non-essential cookies, you should explain how users can disable them in the browser or through your banner.',
+          argentinaSpanishWarning: 'For an Argentina-facing site or app, publishing the cookie policy in Spanish is strongly recommended.',
+          advertisingNeedsSeparation: 'If you use advertising or remarketing, clearly separate necessary, analytics, and advertising cookies.',
+          advertisingNeedsThirdPartyClarity: 'If you use analytics or advertising, identify third parties more clearly and link this policy back to your broader privacy policy.'
         };
 
     const errors = [];
@@ -133,6 +139,9 @@ class CookiesPolicyGenerator {
     if (!data.cookies.managementUrl && !data.contact.email) warnings.push(messages.missingManagementUrl);
     if (data.cookies.categories.includes('advertising') && data.cookies.consentMode === 'essential_only') warnings.push(messages.advertisingNeedsConsent);
     if (data.cookies.categories.some((item) => ['analytics', 'advertising', 'preferences'].includes(item)) && !data.cookies.browserControls) warnings.push(messages.analyticsNeedsControls);
+    if (this.isArgentina(data) && data.settings.language !== 'es') warnings.push(messages.argentinaSpanishWarning);
+    if (data.cookies.categories.includes('advertising') && !data.cookies.categories.includes('analytics') && !data.cookies.categories.includes('necessary')) warnings.push(messages.advertisingNeedsSeparation);
+    if (data.cookies.categories.some((item) => ['analytics', 'advertising'].includes(item)) && data.cookies.thirdParties.length === 0) warnings.push(messages.advertisingNeedsThirdPartyClarity);
 
     return { data, errors, warnings };
   }
@@ -154,6 +163,11 @@ class CookiesPolicyGenerator {
       this.section('categories', this.text('Categories of Cookies We Use', 'Categorías de Cookies que Utilizamos'), [
         this.categoriesText(data)
       ]),
+      ...(this.isArgentina(data) ? [
+        this.section('argentina-notice', this.text('Argentina Cookie Notice', 'Aviso de Cookies para Argentina'), [
+          this.argentinaNoticeText(data)
+        ])
+      ] : []),
       this.section('third-parties', this.text('Third-Party Cookies and Similar Technologies', 'Cookies de Terceros y Tecnologías Similares'), [
         this.thirdPartiesText(data)
       ]),
@@ -210,6 +224,14 @@ class CookiesPolicyGenerator {
 
     const labels = data.cookies.thirdParties.map((item) => this.thirdPartyLabel(item));
     return `${this.text('The following categories of third parties may set or read cookies or similar technologies through the service:', 'Las siguientes categorías de terceros pueden instalar o leer cookies o tecnologías similares a través del servicio:')}\n${this.listLines(labels)}`;
+  }
+
+  argentinaNoticeText(data) {
+    const categories = this.text('Where cookies are not strictly necessary for the technical operation of the service, users should review available consent or preference controls before enabling analytics, advertising, or similar optional technologies.', 'Cuando las cookies no sean estrictamente necesarias para la operación técnica del servicio, los usuarios deberían revisar los controles de consentimiento o preferencias disponibles antes de habilitar tecnologías opcionales de analítica, publicidad o similares.');
+    const privacy = data.cookies.managementUrl
+      ? this.text(`Additional information about privacy practices, third parties, or user choices may also be available at ${data.cookies.managementUrl}.`, `Puede existir información adicional sobre prácticas de privacidad, terceros u opciones del usuario en ${data.cookies.managementUrl}.`)
+      : '';
+    return `${categories} ${privacy}`.trim();
   }
 
   controlsText(data) {
@@ -373,6 +395,10 @@ class CookiesPolicyGenerator {
 
   arrayValue(value) {
     return Array.isArray(value) ? value.filter(Boolean) : [];
+  }
+
+  isArgentina(data) {
+    return data.operations.primaryJurisdiction === 'ar' || String(data.business.country || '').toLowerCase().includes('argentina');
   }
 }
 

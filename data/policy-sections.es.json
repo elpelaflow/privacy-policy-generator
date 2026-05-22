@@ -247,6 +247,8 @@
           },
           "content": [
             "Cuando resulta aplicable la normativa argentina, las personas pueden ejercer derechos de acceso, rectificación, actualización y supresión conforme a la Ley 25.326. El consentimiento puede retirarse cuando el tratamiento se base en dicho consentimiento, sujeto a límites legales y a obligaciones legítimas de conservación.",
+            "Las solicitudes vinculadas con derechos de acceso, rectificación, actualización o supresión pueden presentarse por los medios de contacto indicados en esta política. Cuando corresponda, podremos solicitar información razonable para verificar identidad y proteger datos de terceros.",
+            "Cuando el tratamiento involucre relaciones de consumo, cuentas, facturación o historial operativo, podremos conservar ciertos registros mínimos por el plazo necesario para cumplir obligaciones legales, contractuales, fiscales, contables, de seguridad o prevención de fraude.",
             "Los titulares de datos también pueden presentar reclamos ante la Agencia de Acceso a la Información Pública (AAIP) si consideran que sus derechos no fueron debidamente atendidos."
           ]
         },
@@ -372,6 +374,20 @@
           "content": [
             "Para bienes físicos, podemos conservar historial de pedidos, registros de facturación e información de envío durante períodos más extensos cuando sea necesario para cumplir contratos, gestionar devoluciones, atender garantías o cumplir requisitos de registración comercial y fiscal."
           ]
+        },
+        {
+          "id": "argentina_security",
+          "title": "8.4 Seguridad, Conservación y Datos Sensibles en Argentina",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.primaryJurisdiction", "equals": "ar" },
+              { "field": "operations.sellRegions", "includes": "ar" }
+            ]
+          },
+          "content": [
+            "Cuando aplica la normativa argentina, procuramos limitar el acceso interno a los datos personales, documentar medidas de seguridad razonables y conservar la información sólo durante el tiempo necesario para las finalidades informadas o exigidas por la normativa aplicable.",
+            "Si llegáramos a tratar datos sensibles, procuraremos hacerlo con una base legal reforzada, bajo medidas de resguardo proporcionales y con un uso restringido a la finalidad específica correspondiente."
+          ]
         }
       ]
     },
@@ -409,6 +425,21 @@
       "required": true,
       "content": [
         "Dado que el servicio puede apoyarse en proveedores globales o infraestructura remota, la información personal puede procesarse en países distintos de la jurisdicción del usuario. Cuando corresponda, utilizamos salvaguardas contractuales, organizativas o técnicas apropiadas para transferencias transfronterizas."
+      ],
+      "subsections": [
+        {
+          "id": "argentina_transfers",
+          "title": "10.1 Transferencias desde Argentina",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.primaryJurisdiction", "equals": "ar" },
+              { "field": "operations.sellRegions", "includes": "ar" }
+            ]
+          },
+          "content": [
+            "Si los datos personales se transfieren desde Argentina hacia proveedores, infraestructura o terceros ubicados en otros países, procuraremos que esas transferencias se apoyen en bases legales y salvaguardas razonables según la naturaleza del servicio, el proveedor involucrado y la normativa aplicable."
+          ]
+        }
       ]
     },
     {
@@ -417,6 +448,21 @@
       "required": true,
       "content": [
         "Los usuarios pueden presentar solicitudes de privacidad o de derechos sobre datos personales a través de los medios de contacto indicados abajo. Podemos verificar la identidad antes de atender pedidos de acceso, rectificación, supresión, portabilidad u oposición cuando la ley lo requiera."
+      ],
+      "subsections": [
+        {
+          "id": "argentina_requests",
+          "title": "11.1 Solicitudes bajo Ley 25.326",
+          "includeWhen": {
+            "anyOf": [
+              { "field": "operations.primaryJurisdiction", "equals": "ar" },
+              { "field": "operations.sellRegions", "includes": "ar" }
+            ]
+          },
+          "content": [
+            "Cuando aplica la normativa argentina, recomendamos que las solicitudes identifiquen al titular, la relación con el servicio y el derecho que desea ejercer. El negocio procurará responder en plazos razonables y, cuando corresponda, conforme a los tiempos previstos por la normativa aplicable."
+          ]
+        }
       ]
     },
     {
