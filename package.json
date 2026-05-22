@@ -1,7 +1,7 @@
 {
   "name": "privacy-policy-generator",
   "version": "2.0.0",
-  "description": "CLI generator for privacy policies and terms, with interactive wizards, validation, publishing, and tests.",
+  "description": "CLI generator for privacy policies, terms, cookie policies, return/refund policies, disclaimers, and deletion instructions, with interactive wizards, validation, publishing, and tests.",
   "license": "MIT",
   "type": "commonjs",
   "bin": {
@@ -12,6 +12,14 @@
     "validate:example": "node ./cli.js validate --input ./examples/saas-eu.json",
     "generate:example": "node ./cli.js generate --input ./examples/saas-eu.json --format markdown",
     "validate:terms": "node ./cli.js validate --document terms --input ./examples/terms-ar-ecommerce.json",
-    "generate:terms": "node ./cli.js generate --document terms --input ./examples/terms-ar-ecommerce.json --format markdown"
+    "generate:terms": "node ./cli.js generate --document terms --input ./examples/terms-ar-ecommerce.json --format markdown",
+    "validate:deletion": "node ./cli.js validate --document deletion --input ./examples/deletion-ar-meta.json",
+    "generate:deletion": "node ./cli.js generate --document deletion --input ./examples/deletion-ar-meta.json --format markdown",
+    "validate:cookies": "node ./cli.js validate --document cookies --input ./examples/cookies-ar-meta.json",
+    "generate:cookies": "node ./cli.js generate --document cookies --input ./examples/cookies-ar-meta.json --format markdown",
+    "validate:refund": "node ./cli.js validate --document refund --input ./examples/refund-ar-ecommerce.json",
+    "generate:refund": "node ./cli.js generate --document refund --input ./examples/refund-ar-ecommerce.json --format markdown",
+    "validate:disclaimer": "node ./cli.js validate --document disclaimer --input ./examples/disclaimer-meta-content.json",
+    "generate:disclaimer": "node ./cli.js generate --document disclaimer --input ./examples/disclaimer-meta-content.json --format markdown"
   }
 }

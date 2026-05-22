@@ -428,17 +428,8 @@
       ]
     },
     {
-      "id": "custom_notes",
-      "title": "13. Notas Adicionales del Negocio que Requieren Revisión",
-      "includeWhen": { "field": "customizations.manualDisclosures", "exists": true },
-      "content": [
-        "Durante la generación se proporcionaron las siguientes notas personalizadas. Deben revisarse e integrarse manualmente donde corresponda:",
-        "{manual_disclosures_lines}"
-      ]
-    },
-    {
       "id": "contact",
-      "title": "14. Información de Contacto",
+      "title": "13. Información de Contacto",
       "required": true,
       "content": [
         "{contact_lines}"

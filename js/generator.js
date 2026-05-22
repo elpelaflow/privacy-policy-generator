@@ -419,7 +419,9 @@ class PrivacyPolicyGenerator {
     return {
       business_name: data.business.name,
       service_type: this.getServiceTypeLabel(data.business.type),
-      website_url_or_placeholder: data.business.websiteUrl || `${data.business.name || 'the business'} website`,
+      website_url_or_placeholder: data.business.websiteUrl || (this.currentLanguage === 'es'
+        ? 'el sitio o servicio en línea asociado'
+        : `${data.business.name || 'the business'} website`),
       country: data.business.country,
       contact_lines: this.buildContactLines(data.contact, data.business.address, data.settings.language),
       manual_disclosures_lines: this.buildManualDisclosureLines(data.customizations.manualDisclosures)
@@ -507,7 +509,16 @@ class PrivacyPolicyGenerator {
   }
 
   stringValue(value, fallback = '') {
-    return typeof value === 'string' ? value.trim() : fallback;
+    if (typeof value !== 'string') {
+      return fallback;
+    }
+
+    const normalized = value.trim();
+    if (!normalized || ['>', 'no hay', 'n/a', 'na', 'none', 'null'].includes(normalized.toLowerCase())) {
+      return fallback;
+    }
+
+    return normalized;
   }
 
   arrayValue(value) {

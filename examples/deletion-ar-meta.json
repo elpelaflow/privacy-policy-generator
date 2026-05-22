@@ -1,0 +1,41 @@
+{
+  "documentType": "deletion",
+  "business": {
+    "name": "AutoAds CLI Operator",
+    "type": "saas",
+    "websiteUrl": "https://dev-flow.duckdns.org/",
+    "country": "Argentina",
+    "address": "Adolfo Alsina 3135, B1849, Buenos Aires, Argentina"
+  },
+  "contact": {
+    "email": "thechief@dev-flow.duckdns.org",
+    "phone": "+5491123317940",
+    "pageUrl": "https://dev-flow.duckdns.org/"
+  },
+  "deletion": {
+    "requestChannel": "both",
+    "requestEmail": "thechief@dev-flow.duckdns.org",
+    "requestUrl": "https://dev-flow.duckdns.org/",
+    "identityRequirements": [
+      "Email de la cuenta o del usuario solicitante",
+      "ID de cuenta publicitaria o recurso vinculado",
+      "Breve descripción del pedido de eliminación"
+    ],
+    "deletionScope": [
+      "Datos de perfil o cuenta asociados al usuario",
+      "Tokens o credenciales de acceso almacenadas por la aplicación",
+      "Registros operativos vinculados al uso de la aplicación"
+    ],
+    "retentionExceptions": [
+      "Registros necesarios para cumplir obligaciones legales o regulatorias",
+      "Registros mínimos para seguridad, prevención de fraude o auditoría"
+    ],
+    "responseTime": "10 días hábiles",
+    "completionTime": "30 días",
+    "hasMetaConnection": true,
+    "metaDisconnectInstructions": "Además de enviar la solicitud de eliminación, el usuario puede revocar el acceso de la app desde la configuración de aplicaciones conectadas en Meta o Facebook. La revocación de permisos no reemplaza la solicitud formal de eliminación."
+  },
+  "settings": {
+    "language": "es"
+  }
+}

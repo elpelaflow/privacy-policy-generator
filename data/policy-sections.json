@@ -512,20 +512,8 @@
       ]
     },
     {
-      "id": "custom_notes",
-      "title": "13. Additional Business Notes Requiring Review",
-      "includeWhen": {
-        "field": "customizations.manualDisclosures",
-        "exists": true
-      },
-      "content": [
-        "The following custom notes were provided during policy generation. They should be reviewed and integrated manually where needed:",
-        "{manual_disclosures_lines}"
-      ]
-    },
-    {
       "id": "contact",
-      "title": "14. Contact Information",
+      "title": "13. Contact Information",
       "required": true,
       "content": [
         "{contact_lines}"

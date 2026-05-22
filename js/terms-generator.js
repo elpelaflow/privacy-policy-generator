@@ -250,16 +250,6 @@ class TermsGenerator {
       this.interpolate(this.disputesText(data), data)
     ]));
 
-    if (data.customizations.manualDisclosures.length > 0) {
-      sections.push(this.section('custom', t('Additional Business Notes Requiring Review', 'Notas Adicionales del Negocio que Requieren Revisión'), [
-        t(
-          'The following manual notes were provided during generation and should be reviewed before publication:',
-          'Durante la generación se proporcionaron las siguientes notas manuales y deben revisarse antes de publicar:'
-        ),
-        this.manualLines(data.customizations.manualDisclosures)
-      ]));
-    }
-
     sections.push(this.section('contact', t('Contact Information', 'Información de Contacto'), [
       this.contactLines(data)
     ]));
@@ -310,8 +300,8 @@ class TermsGenerator {
   accountText(data) {
     if (!data.terms.hasAccounts) {
       return this.text(
-        'Users may browse or place orders without maintaining a persistent account, unless specific checkout steps require identification information.',
-        'Los usuarios pueden navegar o realizar pedidos sin mantener una cuenta persistente, salvo que ciertos pasos del proceso requieran identificación.'
+        'Users may access and use the service without maintaining a persistent account, unless a specific feature or support flow requires identification information.',
+        'Los usuarios pueden acceder y utilizar el servicio sin mantener una cuenta persistente, salvo que una función específica o un flujo de soporte requieran identificación.'
       );
     }
 
@@ -334,7 +324,7 @@ class TermsGenerator {
       : this.text('Displayed prices may exclude taxes, duties, or other charges unless expressly stated otherwise.', 'Los precios exhibidos pueden no incluir impuestos, tasas u otros cargos salvo indicación expresa en contrario.');
     const currencyText = data.terms.currency
       ? this.text(`Prices are shown primarily in ${data.terms.currency}.`, `Los precios se muestran principalmente en ${data.terms.currency}.`)
-      : this.text('The operating currency should be reviewed before publication.', 'La moneda operativa debe revisarse antes de publicar.');
+      : this.text('The service uses the currency indicated in the applicable commercial flow or payment channel.', 'El servicio utiliza la moneda indicada en el flujo comercial o canal de pago aplicable.');
     return `${taxesText} ${currencyText}`;
   }
 
@@ -368,8 +358,8 @@ class TermsGenerator {
     return data.terms.warrantyDetails
       ? data.terms.warrantyDetails
       : this.text(
-          'Warranty scope, exclusions, and claim procedures should be completed before publication.',
-          'El alcance de la garantía, sus exclusiones y el procedimiento de reclamo deberían completarse antes de publicar.'
+          'Any warranty scope, exclusions, and claim procedures will be governed by the specific commercial conditions communicated to the user where applicable.',
+          'Cualquier alcance de garantía, exclusiones y procedimiento de reclamo se regirá por las condiciones comerciales específicas comunicadas al usuario cuando corresponda.'
         );
   }
 
@@ -390,7 +380,7 @@ class TermsGenerator {
     }
     return this.text(
       'User-generated content may be moderated or removed, and any reuse beyond on-site display should be specifically reviewed before publication.',
-      'El contenido generado por usuarios puede ser moderado o eliminado, y cualquier reutilización fuera del sitio debería revisarse específicamente antes de publicar.'
+      'El contenido generado por usuarios puede ser moderado o eliminado, y cualquier reutilización fuera del sitio quedará sujeta a la autorización o base legal aplicable.'
     );
   }
 
@@ -402,8 +392,8 @@ class TermsGenerator {
       );
     }
     return this.text(
-      'Liability limitations should be reviewed carefully according to local consumer law and the actual service model.',
-      'Las limitaciones de responsabilidad deberían revisarse cuidadosamente según la normativa local de consumo y el modelo real del servicio.'
+      'Liability limitations apply only to the extent permitted by applicable law and should be interpreted consistently with consumer and contractual protections that cannot be waived.',
+      'Las limitaciones de responsabilidad aplican únicamente en la medida permitida por la ley aplicable y deben interpretarse de forma compatible con las protecciones de consumo y contractuales que no puedan ser renunciadas.'
     );
   }
 
@@ -428,8 +418,8 @@ class TermsGenerator {
           'El negocio podrá suspender o terminar el acceso, las cuentas o los pedidos cuando los usuarios incumplan estos términos, hagan un uso indebido del servicio, generen riesgos operativos o legales, o cuando la continuidad del servicio no sea razonablemente posible.'
         )
       : this.text(
-          'Any account or service suspension conditions should be reviewed and described clearly before publication.',
-          'Las condiciones de suspensión de cuentas o del servicio deberían revisarse y describirse claramente antes de publicar.'
+          'The service provider may adopt proportionate operational restrictions where necessary to protect the service, comply with law, or address misuse.',
+          'El prestador del servicio podrá adoptar restricciones operativas proporcionales cuando sea necesario para proteger el servicio, cumplir la ley o atender usos indebidos.'
         );
     return data.terms.terminationGrounds ? `${base} ${data.terms.terminationGrounds}` : base;
   }
@@ -523,9 +513,9 @@ class TermsGenerator {
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;');
     const body = document.sections.map((section) => {
-      const paragraphs = section.paragraphs.map((paragraph) => `<p>${escape(paragraph).replaceAll('\n', '<br>')}</p>`).join('\n');
+      const paragraphs = section.paragraphs.map((paragraph) => this.paragraphToHtml(paragraph, escape)).join('\n');
       const subsections = section.subsections.map((subsection) => {
-        const subsectionParagraphs = subsection.paragraphs.map((paragraph) => `<p>${escape(paragraph).replaceAll('\n', '<br>')}</p>`).join('\n');
+        const subsectionParagraphs = subsection.paragraphs.map((paragraph) => this.paragraphToHtml(paragraph, escape)).join('\n');
         return `<h3>${escape(subsection.title)}</h3>\n${subsectionParagraphs}`;
       }).join('\n');
       return `<section>\n<h2>${escape(section.title)}</h2>\n${paragraphs}\n${subsections}\n</section>`;
@@ -549,11 +539,33 @@ class TermsGenerator {
   }
 
   stringValue(value, fallback = '') {
-    return typeof value === 'string' ? value.trim() : fallback;
+    if (typeof value !== 'string') {
+      return fallback;
+    }
+
+    const normalized = value.trim();
+    if (!normalized || ['>', 'no hay', 'n/a', 'na', 'none', 'null'].includes(normalized.toLowerCase())) {
+      return fallback;
+    }
+
+    return normalized;
   }
 
   arrayValue(value) {
     return Array.isArray(value) ? value.filter(Boolean) : [];
+  }
+
+  paragraphToHtml(paragraph, escape) {
+    if (paragraph.startsWith('- ')) {
+      const items = paragraph
+        .split('\n')
+        .filter((line) => line.startsWith('- '))
+        .map((line) => `<li>${escape(line.slice(2))}</li>`)
+        .join('');
+      return `<ul>${items}</ul>`;
+    }
+
+    return `<p>${escape(paragraph).replaceAll('\n', '<br>')}</p>`;
   }
 }
 

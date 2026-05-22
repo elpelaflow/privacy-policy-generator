@@ -1,0 +1,35 @@
+{
+  "documentType": "refund",
+  "business": {
+    "name": "AutoPost CLI Operator",
+    "type": "ecommerce",
+    "websiteUrl": "https://dev-flow.duckdns.org/",
+    "country": "Argentina",
+    "address": "Adolfo Alsina 3135, B1849, Buenos Aires, Argentina"
+  },
+  "contact": {
+    "email": "thechief@dev-flow.duckdns.org",
+    "phone": "+5491123317940",
+    "pageUrl": "https://dev-flow.duckdns.org/contacto"
+  },
+  "refund": {
+    "offeringType": "physical_goods",
+    "acceptsReturns": true,
+    "refundWindow": "10 días",
+    "exchangeWindow": "10 días",
+    "returnConditions": "El producto debe devolverse sin uso, con accesorios y empaque razonablemente conservado.",
+    "refundMethod": "el mismo medio de pago original",
+    "refundProcessingTime": "10 días hábiles",
+    "returnShippingResponsibility": "case_by_case",
+    "returnRequestChannel": "thechief@dev-flow.duckdns.org",
+    "nonReturnableItems": [
+      "Productos personalizados o hechos a medida",
+      "Productos usados, dañados por mal uso o incompletos"
+    ],
+    "digitalGoodsFinal": false,
+    "damagedItemsProcess": "Si el producto llega dañado, incorrecto o con fallas, pedimos que nos contactes con fotos y datos del pedido para revisar el caso."
+  },
+  "settings": {
+    "language": "es"
+  }
+}

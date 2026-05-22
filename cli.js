@@ -6,11 +6,19 @@ const readline = require('node:readline/promises');
 const { stdin, stdout } = require('node:process');
 const PrivacyPolicyGenerator = require('./js/generator');
 const TermsGenerator = require('./js/terms-generator');
+const DataDeletionGenerator = require('./js/deletion-generator');
+const CookiesPolicyGenerator = require('./js/cookies-generator');
+const ReturnRefundPolicyGenerator = require('./js/refund-generator');
+const DisclaimerGenerator = require('./js/disclaimer-generator');
 const { publishPolicy } = require('./js/publishing');
 
 const DOCUMENT_OPTIONS = [
   { value: 'privacy', label: 'Política de privacidad', description: 'Genera una política de privacidad con foco en datos, terceros, cookies y derechos.' },
-  { value: 'terms', label: 'Términos y condiciones', description: 'Genera condiciones de servicio o términos comerciales del sitio /terms.' }
+  { value: 'terms', label: 'Términos y condiciones', description: 'Genera condiciones de servicio o términos comerciales del sitio /terms.' },
+  { value: 'deletion', label: 'Eliminación de datos', description: 'Genera una página pública con instrucciones para solicitar eliminación de datos.' },
+  { value: 'cookies', label: 'Política de cookies', description: 'Genera una política específica de cookies, consentimiento y tecnologías similares.' },
+  { value: 'refund', label: 'Devoluciones y reembolsos', description: 'Genera una política de devoluciones, cambios y reembolsos para compartir como URL pública.' },
+  { value: 'disclaimer', label: 'Disclaimer / descargo', description: 'Genera descargos de responsabilidad modulares para contenido, enlaces, reseñas, salud, fitness y uso del sitio.' }
 ];
 
 const BUSINESS_TYPE_OPTIONS = [
@@ -118,6 +126,76 @@ const TERMS_STANDARD_RESTRICTIONS = [
   { value: 'No interferir con la seguridad, estabilidad o funcionamiento técnico del sitio.', label: 'Interferencia técnica', description: 'Prohíbe ataques, scraping abusivo o manipulación técnica.' },
   { value: 'No copiar, revender o explotar el contenido o productos fuera de lo permitido.', label: 'Reventa o explotación', description: 'Restringe copia, reventa o explotación no autorizada.' },
   { value: 'No enviar spam, contenido abusivo o información falsa.', label: 'Spam o abuso', description: 'Prohíbe spam, hostigamiento o datos falsos.' }
+];
+
+const DELETION_CHANNEL_OPTIONS = [
+  { value: 'email', label: 'Sólo email', description: 'Los pedidos de eliminación se presentan por correo electrónico.' },
+  { value: 'form', label: 'Sólo formulario o página', description: 'Los pedidos se presentan desde una URL o página específica.' },
+  { value: 'both', label: 'Email y página', description: 'Ofrecés ambos canales para pedir eliminación.' }
+];
+
+const DELETION_IDENTITY_OPTIONS = [
+  { value: 'Email de la cuenta o del usuario solicitante', label: 'Email de la cuenta', description: 'Permite ubicar el registro asociado al usuario.' },
+  { value: 'Nombre del perfil o identificador de usuario', label: 'ID o perfil', description: 'Sirve para ubicar la cuenta o perfil afectado.' },
+  { value: 'ID de cuenta publicitaria o recurso vinculado', label: 'ID publicitario', description: 'Útil si la app trabaja con activos o cuentas de Meta Ads.' },
+  { value: 'Breve descripción del pedido de eliminación', label: 'Descripción del pedido', description: 'Ayuda a identificar qué acceso o dato se quiere eliminar.' }
+];
+
+const DELETION_SCOPE_OPTIONS = [
+  { value: 'Datos de perfil o cuenta asociados al usuario', label: 'Perfil o cuenta', description: 'Cuenta, perfil o identificación interna del usuario.' },
+  { value: 'Tokens o credenciales de acceso almacenadas por la aplicación', label: 'Tokens o credenciales', description: 'Permisos, tokens y accesos persistidos por la app.' },
+  { value: 'Registros operativos vinculados al uso de la aplicación', label: 'Registros operativos', description: 'Datos de uso o actividad vinculados al usuario.' },
+  { value: 'Configuraciones o preferencias guardadas', label: 'Preferencias', description: 'Preferencias, configuraciones o estados de uso guardados.' }
+];
+
+const DELETION_RETENTION_OPTIONS = [
+  { value: 'Registros necesarios para cumplir obligaciones legales o regulatorias', label: 'Obligaciones legales', description: 'Datos que deban conservarse por ley.' },
+  { value: 'Registros mínimos para seguridad, prevención de fraude o auditoría', label: 'Seguridad y fraude', description: 'Datos mínimos retenidos por seguridad o auditoría.' },
+  { value: 'Información necesaria para resolver disputas o hacer cumplir acuerdos', label: 'Disputas o contratos', description: 'Datos que deban conservarse para resolver conflictos.' }
+];
+
+const COOKIE_CATEGORY_OPTIONS = [
+  { value: 'necessary', label: 'Necesarias', description: 'Cookies indispensables para sesión, seguridad, carga básica o funciones centrales del servicio.' },
+  { value: 'preferences', label: 'Preferencias / funcionales', description: 'Recuerdan idioma, ajustes, preferencias o personalizaciones no esenciales.' },
+  { value: 'analytics', label: 'Analítica / medición', description: 'Miden uso, rendimiento, eventos o comportamiento de navegación.' },
+  { value: 'advertising', label: 'Publicidad / remarketing', description: 'Soportan segmentación publicitaria, atribución o remarketing.' }
+];
+
+const COOKIE_PROVIDER_OPTIONS = [
+  { value: 'analytics', label: 'Analítica', description: 'Google Analytics, Plausible, PostHog u otros proveedores de medición.' },
+  { value: 'advertising', label: 'Publicidad', description: 'Meta Ads, Google Ads u otras plataformas de publicidad o remarketing.' },
+  { value: 'social', label: 'Social / embeds', description: 'Login social, contenido embebido o widgets desde redes sociales.' },
+  { value: 'cloud', label: 'Infraestructura / delivery', description: 'CDN, scripts o infraestructura que pueda intervenir en la entrega de contenido y tags.' },
+  { value: 'email', label: 'Email / marketing', description: 'Automatizaciones o herramientas que integren tracking de campañas o formularios.' }
+];
+
+const COOKIE_CONSENT_OPTIONS = [
+  { value: 'banner', label: 'Banner o centro de preferencias', description: 'El usuario puede aceptar, rechazar o configurar cookies no esenciales.' },
+  { value: 'implied', label: 'Aviso con uso continuado', description: 'Mostrás un aviso y tratás el uso continuado como aceptación cuando la ley lo permita.' },
+  { value: 'essential_only', label: 'Sólo esenciales', description: 'Declarás que el servicio debería operar sólo con cookies necesarias salvo futura activación de otras categorías.' }
+];
+
+const REFUND_OFFERING_OPTIONS = [
+  { value: 'physical_goods', label: 'Productos físicos', description: 'Productos tangibles con despacho, entrega física o retiro.' },
+  { value: 'digital_products', label: 'Productos digitales', description: 'Descargas, licencias, cursos o bienes digitales.' },
+  { value: 'services', label: 'Servicios', description: 'Prestación profesional, implementación, soporte o trabajo bajo pedido.' },
+  { value: 'subscriptions', label: 'Suscripciones', description: 'Membresías, planes recurrentes o acceso periódico.' }
+];
+
+const REFUND_RETURN_SHIPPING_OPTIONS = [
+  { value: 'customer', label: 'Cliente', description: 'El cliente normalmente asume el costo de la devolución.' },
+  { value: 'merchant', label: 'Negocio', description: 'El negocio normalmente asume el costo cuando aprueba la devolución.' },
+  { value: 'case_by_case', label: 'Caso por caso', description: 'Depende del motivo, el estado del producto y la ley aplicable.' }
+];
+
+const DISCLAIMER_OPTIONS = [
+  { value: 'medical', label: 'Información médica', description: 'Para sitios o apps que publican salud, medicina, síntomas o bienestar clínico.' },
+  { value: 'fitness', label: 'Información de fitness', description: 'Para ejercicios, rutinas, entrenamiento, nutrición o wellness físico.' },
+  { value: 'errors_omissions', label: 'Errores y omisiones', description: 'Aclara que puede haber errores, datos desactualizados u omisiones.' },
+  { value: 'external_links', label: 'Enlaces externos', description: 'Aclara que no controlás ni garantizás sitios de terceros enlazados.' },
+  { value: 'views_expressed', label: 'Opiniones expresadas', description: 'Aclara que opiniones o comentarios no representan necesariamente posiciones oficiales.' },
+  { value: 'own_risk', label: 'Uso bajo propio riesgo', description: 'Avisa que el uso del sitio, herramientas o materiales corre por cuenta del usuario.' },
+  { value: 'product_reviews', label: 'Reseñas de productos', description: 'Aclara cómo se interpretan reseñas, ratings y posible sesgo comercial o afiliación.' }
 ];
 
 const BACK = Symbol('back');
@@ -438,26 +516,64 @@ async function publishGeneratedPolicy(input, result, options = {}) {
 }
 
 function defaultBaseUrlForDocument(documentType) {
-  return documentType === 'terms'
-    ? 'https://dev-flow.duckdns.org/terms'
-    : DEFAULT_PUBLIC_BASE_URL;
+  if (documentType === 'terms') {
+    return 'https://dev-flow.duckdns.org/terms';
+  }
+  if (documentType === 'deletion') {
+    return 'https://dev-flow.duckdns.org/data-deletion';
+  }
+  if (documentType === 'cookies') {
+    return 'https://dev-flow.duckdns.org/cookies';
+  }
+  if (documentType === 'refund') {
+    return 'https://dev-flow.duckdns.org/refunds';
+  }
+  if (documentType === 'disclaimer') {
+    return 'https://dev-flow.duckdns.org/disclaimer';
+  }
+  return DEFAULT_PUBLIC_BASE_URL;
 }
 
 function defaultPublishDirForDocument(documentType) {
-  return documentType === 'terms'
-    ? '/home/dev-flow/tinyclaw/infra/www/terms'
-    : DEFAULT_PUBLISH_DIR;
+  if (documentType === 'terms') {
+    return '/home/dev-flow/tinyclaw/infra/www/terms';
+  }
+  if (documentType === 'deletion') {
+    return '/home/dev-flow/tinyclaw/infra/www/data-deletion';
+  }
+  if (documentType === 'cookies') {
+    return '/home/dev-flow/tinyclaw/infra/www/cookies';
+  }
+  if (documentType === 'refund') {
+    return '/home/dev-flow/tinyclaw/infra/www/refunds';
+  }
+  if (documentType === 'disclaimer') {
+    return '/home/dev-flow/tinyclaw/infra/www/disclaimer';
+  }
+  return DEFAULT_PUBLISH_DIR;
 }
 
 function resolveDocumentType(options, input) {
-  if (options.document === 'terms' || options.document === 'privacy') {
+  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer'].includes(options.document)) {
     return options.document;
   }
-  if (input?.documentType === 'terms' || input?.documentType === 'privacy') {
+  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer'].includes(input?.documentType)) {
     return input.documentType;
   }
   if (input?.terms) {
     return 'terms';
+  }
+  if (input?.deletion) {
+    return 'deletion';
+  }
+  if (input?.cookies) {
+    return 'cookies';
+  }
+  if (input?.refund) {
+    return 'refund';
+  }
+  if (input?.disclaimer) {
+    return 'disclaimer';
   }
   return 'privacy';
 }
@@ -542,6 +658,15 @@ function removeValue(list, value) {
   return list.filter((item) => item !== value);
 }
 
+function documentOutputSuffix(documentType) {
+  if (documentType === 'terms') return 'terms';
+  if (documentType === 'deletion') return 'data-deletion';
+  if (documentType === 'cookies') return 'cookies-policy';
+  if (documentType === 'refund') return 'return-refund-policy';
+  if (documentType === 'disclaimer') return 'disclaimer';
+  return 'privacy-policy';
+}
+
 function mergeTermsStateFromPrivacyInput(state, input) {
   state.business.name = input.business?.name || state.business.name;
   state.business.type = input.business?.type || state.business.type;
@@ -581,6 +706,84 @@ function mergeTermsStateFromPrivacyInput(state, input) {
   }
 }
 
+function mergeDeletionStateFromPrivacyInput(state, input) {
+  state.business.name = input.business?.name || state.business.name;
+  state.business.type = input.business?.type || state.business.type;
+  state.business.websiteUrl = input.business?.websiteUrl || state.business.websiteUrl;
+  state.business.country = input.business?.country || state.business.country;
+  state.business.address = input.business?.address || state.business.address;
+
+  state.contact.email = input.contact?.email || state.contact.email;
+  state.contact.phone = input.contact?.phone || state.contact.phone;
+  state.contact.pageUrl = input.contact?.pageUrl || state.contact.pageUrl;
+
+  state.operations.primaryJurisdiction = input.operations?.primaryJurisdiction || state.operations.primaryJurisdiction;
+  state.operations.sellRegions = Array.isArray(input.operations?.sellRegions) && input.operations.sellRegions.length > 0
+    ? input.operations.sellRegions
+    : state.operations.sellRegions;
+
+  state.deletion.requestEmail = state.contact.email || state.deletion.requestEmail;
+  state.deletion.requestUrl = state.contact.pageUrl || state.deletion.requestUrl;
+  state.deletion.hasMetaConnection = state.deletion.hasMetaConnection
+    || input.customizations?.manualDisclosures?.some((note) => /meta/i.test(note))
+    || input.dataPractices?.thirdParties?.includes('advertising');
+
+  if ((input.business?.country || '').toLowerCase().includes('argentina') || input.operations?.primaryJurisdiction === 'ar') {
+    state.output.language = 'es';
+    state.operations.primaryJurisdiction = state.operations.primaryJurisdiction || 'ar';
+    state.operations.sellRegions = state.operations.sellRegions.length > 0 ? state.operations.sellRegions : ['ar'];
+  }
+}
+
+function mergeCookiesStateFromPrivacyInput(state, input) {
+  state.business.name = input.business?.name || state.business.name;
+  state.business.type = input.business?.type || state.business.type;
+  state.business.websiteUrl = input.business?.websiteUrl || state.business.websiteUrl;
+  state.business.country = input.business?.country || state.business.country;
+  state.business.address = input.business?.address || state.business.address;
+
+  state.contact.email = input.contact?.email || state.contact.email;
+  state.contact.phone = input.contact?.phone || state.contact.phone;
+  state.contact.pageUrl = input.contact?.pageUrl || state.contact.pageUrl;
+
+  state.operations.primaryJurisdiction = input.operations?.primaryJurisdiction || state.operations.primaryJurisdiction;
+  state.operations.sellRegions = Array.isArray(input.operations?.sellRegions) && input.operations.sellRegions.length > 0
+    ? input.operations.sellRegions
+    : state.operations.sellRegions;
+
+  if (input.dataPractices?.collectedData?.includes('cookies')) {
+    state.cookies.categories = addUnique(state.cookies.categories, 'necessary');
+  }
+  if (input.dataPractices?.thirdParties?.includes('analytics')) {
+    state.cookies.categories = addUnique(state.cookies.categories, 'analytics');
+    state.cookies.thirdParties = addUnique(state.cookies.thirdParties, 'analytics');
+  }
+  if (input.dataPractices?.thirdParties?.includes('advertising')) {
+    state.cookies.categories = addUnique(state.cookies.categories, 'advertising');
+    state.cookies.thirdParties = addUnique(state.cookies.thirdParties, 'advertising');
+    state.cookies.consentMode = 'banner';
+  }
+  if (input.dataPractices?.thirdParties?.includes('social')) {
+    state.cookies.thirdParties = addUnique(state.cookies.thirdParties, 'social');
+  }
+  if (input.dataPractices?.thirdParties?.includes('cloud')) {
+    state.cookies.thirdParties = addUnique(state.cookies.thirdParties, 'cloud');
+  }
+  if (input.dataPractices?.thirdParties?.includes('email')) {
+    state.cookies.thirdParties = addUnique(state.cookies.thirdParties, 'email');
+  }
+  if (input.customizations?.manualDisclosures?.some((note) => /cookie|cookies|pixel|remarketing/i.test(note))) {
+    state.cookies.categories = addUnique(state.cookies.categories, 'preferences');
+  }
+
+  state.cookies.managementUrl = state.contact.pageUrl || state.cookies.managementUrl;
+  if ((input.business?.country || '').toLowerCase().includes('argentina') || input.operations?.primaryJurisdiction === 'ar') {
+    state.output.language = 'es';
+    state.operations.primaryJurisdiction = state.operations.primaryJurisdiction || 'ar';
+    state.operations.sellRegions = state.operations.sellRegions.length > 0 ? state.operations.sellRegions : ['ar'];
+  }
+}
+
 function buildInputFromState(state) {
   return {
     documentType: 'privacy',
@@ -614,6 +817,105 @@ function buildInputFromState(state) {
     },
     customizations: {
       manualDisclosures: state.manualDisclosures
+    }
+  };
+}
+
+function buildDeletionInputFromState(state) {
+  return {
+    documentType: 'deletion',
+    business: {
+      name: state.business.name,
+      type: state.business.type,
+      websiteUrl: state.business.websiteUrl,
+      country: state.business.country,
+      address: state.business.address
+    },
+    contact: {
+      email: state.contact.email,
+      phone: state.contact.phone,
+      pageUrl: state.contact.pageUrl
+    },
+    deletion: {
+      ...state.deletion
+    },
+    settings: {
+      language: state.output.language
+    }
+  };
+}
+
+function buildCookiesInputFromState(state) {
+  return {
+    documentType: 'cookies',
+    business: {
+      name: state.business.name,
+      type: state.business.type,
+      websiteUrl: state.business.websiteUrl,
+      country: state.business.country,
+      address: state.business.address
+    },
+    contact: {
+      email: state.contact.email,
+      phone: state.contact.phone,
+      pageUrl: state.contact.pageUrl
+    },
+    operations: {
+      primaryJurisdiction: state.operations.primaryJurisdiction,
+      sellRegions: state.operations.sellRegions
+    },
+    cookies: {
+      ...state.cookies
+    },
+    settings: {
+      language: state.output.language
+    }
+  };
+}
+
+function buildRefundInputFromState(state) {
+  return {
+    documentType: 'refund',
+    business: {
+      name: state.business.name,
+      type: state.business.type,
+      websiteUrl: state.business.websiteUrl,
+      country: state.business.country,
+      address: state.business.address
+    },
+    contact: {
+      email: state.contact.email,
+      phone: state.contact.phone,
+      pageUrl: state.contact.pageUrl
+    },
+    refund: {
+      ...state.refund
+    },
+    settings: {
+      language: state.output.language
+    }
+  };
+}
+
+function buildDisclaimerInputFromState(state) {
+  return {
+    documentType: 'disclaimer',
+    business: {
+      name: state.business.name,
+      websiteUrl: state.business.websiteUrl,
+      country: state.business.country,
+      address: state.business.address
+    },
+    contact: {
+      email: state.contact.email,
+      phone: state.contact.phone,
+      pageUrl: state.contact.pageUrl
+    },
+    disclaimer: {
+      ...state.disclaimer
+    },
+    settings: {
+      language: state.output.language
     }
   };
 }
@@ -907,7 +1209,7 @@ async function collectOutputSection(rl, state) {
     },
     async () => {
       if (!state.output.writeToFile) return;
-      const suffix = state.documentType === 'terms' ? 'terms' : 'privacy-policy';
+      const suffix = documentOutputSuffix(state.documentType);
       const baseName = `${slugify(state.business.name)}-${suffix}`;
       const value = await promptText(rl, 'Ruta de salida', {
         required: true,
@@ -936,7 +1238,7 @@ async function collectOutputSection(rl, state) {
     },
     async () => {
       if (!state.output.saveInput) return;
-      const suffix = state.documentType === 'terms' ? 'terms' : 'privacy-policy';
+      const suffix = documentOutputSuffix(state.documentType);
       const baseName = `${slugify(state.business.name)}-${suffix}`;
       const value = await promptText(rl, 'Ruta para guardar el JSON', {
         required: true,
@@ -1070,6 +1372,290 @@ async function maybePreloadTermsFromPrivacy(rl, state) {
     try {
       const imported = await readJsonFile(inputPath);
       mergeTermsStateFromPrivacyInput(state, imported);
+      state.output.importPath = inputPath;
+      stdout.write(`${green(`Importé datos compartidos desde ${inputPath}`)}\n`);
+      return;
+    } catch (error) {
+      stdout.write(`${red(`No pude leer ese JSON: ${error.message}`)}\n`);
+    }
+  }
+}
+
+async function maybePreloadDeletionFromPrivacy(rl, state) {
+  const reuse = await promptYesNo(
+    rl,
+    'Reutilizar datos desde privacidad',
+    'Marcá sí si ya generaste una política de privacidad y querés precargar negocio, contacto y señales operativas.',
+    false,
+    false
+  );
+
+  if (!reuse) {
+    return;
+  }
+
+  const candidates = await listReusablePrivacyInputs();
+  if (candidates.length > 0) {
+    stdout.write(`\n${bold(cyan('JSON de privacidad detectados'))}\n`);
+    candidates.forEach((candidate, index) => {
+      stdout.write(`  ${yellow(String(index + 1))}. ${bold(candidate.label)}\n`);
+      stdout.write(`     ${dim(candidate.description)}\n`);
+    });
+    stdout.write(`  ${yellow(String(candidates.length + 1))}. ${bold('Otro')}\n`);
+    stdout.write(`     ${dim('Escribís manualmente la ruta de otro JSON de privacidad.')}\n`);
+
+    while (true) {
+      const answer = (await rl.question(`${green('Elegí un número')}: `)).trim();
+      const choice = Number.parseInt(answer, 10);
+
+      if (Number.isInteger(choice) && choice >= 1 && choice <= candidates.length) {
+        const selected = candidates[choice - 1];
+        const imported = await readJsonFile(selected.path);
+        mergeDeletionStateFromPrivacyInput(state, imported);
+        state.output.importPath = selected.path;
+        stdout.write(`${green(`Importé datos compartidos desde ${selected.label}`)}\n`);
+        return;
+      }
+
+      if (choice === candidates.length + 1) {
+        break;
+      }
+
+      stdout.write(`${red('Opción inválida. Probá de nuevo.')}\n`);
+    }
+  }
+
+  while (true) {
+    const inputPath = await promptText(rl, 'Ruta del JSON de privacidad a reutilizar', {
+      required: true,
+      allowEmpty: false,
+      defaultValue: state.output.importPath || 'wizard-input.json'
+    });
+    if (inputPath === BACK) {
+      continue;
+    }
+
+    try {
+      const imported = await readJsonFile(inputPath);
+      mergeDeletionStateFromPrivacyInput(state, imported);
+      state.output.importPath = inputPath;
+      stdout.write(`${green(`Importé datos compartidos desde ${inputPath}`)}\n`);
+      return;
+    } catch (error) {
+      stdout.write(`${red(`No pude leer ese JSON: ${error.message}`)}\n`);
+    }
+  }
+}
+
+async function maybePreloadCookiesFromPrivacy(rl, state) {
+  const reuse = await promptYesNo(
+    rl,
+    'Reutilizar datos desde privacidad',
+    'Marcá sí si ya generaste una política de privacidad y querés precargar negocio, contacto y señales de cookies/terceros.',
+    false,
+    false
+  );
+
+  if (!reuse) {
+    return;
+  }
+
+  const candidates = await listReusablePrivacyInputs();
+  if (candidates.length > 0) {
+    stdout.write(`\n${bold(cyan('JSON de privacidad detectados'))}\n`);
+    candidates.forEach((candidate, index) => {
+      stdout.write(`  ${yellow(String(index + 1))}. ${bold(candidate.label)}\n`);
+      stdout.write(`     ${dim(candidate.description)}\n`);
+    });
+    stdout.write(`  ${yellow(String(candidates.length + 1))}. ${bold('Otro')}\n`);
+    stdout.write(`     ${dim('Escribís manualmente la ruta de otro JSON de privacidad.')}\n`);
+
+    while (true) {
+      const answer = (await rl.question(`${green('Elegí un número')}: `)).trim();
+      const choice = Number.parseInt(answer, 10);
+
+      if (Number.isInteger(choice) && choice >= 1 && choice <= candidates.length) {
+        const selected = candidates[choice - 1];
+        const imported = await readJsonFile(selected.path);
+        mergeCookiesStateFromPrivacyInput(state, imported);
+        state.output.importPath = selected.path;
+        stdout.write(`${green(`Importé datos compartidos desde ${selected.label}`)}\n`);
+        return;
+      }
+
+      if (choice === candidates.length + 1) {
+        break;
+      }
+
+      stdout.write(`${red('Opción inválida. Probá de nuevo.')}\n`);
+    }
+  }
+
+  while (true) {
+    const inputPath = await promptText(rl, 'Ruta del JSON de privacidad a reutilizar', {
+      required: true,
+      allowEmpty: false,
+      defaultValue: state.output.importPath || 'wizard-input.json'
+    });
+    if (inputPath === BACK) {
+      continue;
+    }
+
+    try {
+      const imported = await readJsonFile(inputPath);
+      mergeCookiesStateFromPrivacyInput(state, imported);
+      state.output.importPath = inputPath;
+      stdout.write(`${green(`Importé datos compartidos desde ${inputPath}`)}\n`);
+      return;
+    } catch (error) {
+      stdout.write(`${red(`No pude leer ese JSON: ${error.message}`)}\n`);
+    }
+  }
+}
+
+async function maybePreloadRefundFromPrivacy(rl, state) {
+  const reuse = await promptYesNo(
+    rl,
+    'Reutilizar datos desde privacidad',
+    'Marcá sí si ya generaste una política de privacidad y querés precargar negocio, contacto y contexto general.',
+    false,
+    false
+  );
+
+  if (!reuse) {
+    return;
+  }
+
+  const candidates = await listReusablePrivacyInputs();
+  if (candidates.length > 0) {
+    stdout.write(`\n${bold(cyan('JSON de privacidad detectados'))}\n`);
+    candidates.forEach((candidate, index) => {
+      stdout.write(`  ${yellow(String(index + 1))}. ${bold(candidate.label)}\n`);
+      stdout.write(`     ${dim(candidate.description)}\n`);
+    });
+    stdout.write(`  ${yellow(String(candidates.length + 1))}. ${bold('Otro')}\n`);
+    stdout.write(`     ${dim('Escribís manualmente la ruta de otro JSON de privacidad.')}\n`);
+
+    while (true) {
+      const answer = (await rl.question(`${green('Elegí un número')}: `)).trim();
+      const choice = Number.parseInt(answer, 10);
+
+      if (Number.isInteger(choice) && choice >= 1 && choice <= candidates.length) {
+        const selected = candidates[choice - 1];
+        const imported = await readJsonFile(selected.path);
+        state.business.name = imported.business?.name || state.business.name;
+        state.business.type = imported.business?.type || state.business.type;
+        state.business.websiteUrl = imported.business?.websiteUrl || state.business.websiteUrl;
+        state.business.country = imported.business?.country || state.business.country;
+        state.business.address = imported.business?.address || state.business.address;
+        state.contact.email = imported.contact?.email || state.contact.email;
+        state.contact.phone = imported.contact?.phone || state.contact.phone;
+        state.contact.pageUrl = imported.contact?.pageUrl || state.contact.pageUrl;
+        if (imported.business?.type === 'ecommerce') {
+          state.refund.offeringType = 'physical_goods';
+        }
+        state.output.importPath = selected.path;
+        stdout.write(`${green(`Importé datos compartidos desde ${selected.label}`)}\n`);
+        return;
+      }
+
+      if (choice === candidates.length + 1) {
+        break;
+      }
+
+      stdout.write(`${red('Opción inválida. Probá de nuevo.')}\n`);
+    }
+  }
+
+  while (true) {
+    const inputPath = await promptText(rl, 'Ruta del JSON de privacidad a reutilizar', {
+      required: true,
+      allowEmpty: false,
+      defaultValue: state.output.importPath || 'wizard-input.json'
+    });
+    if (inputPath === BACK) {
+      continue;
+    }
+
+    try {
+      const imported = await readJsonFile(inputPath);
+      state.business.name = imported.business?.name || state.business.name;
+      state.business.type = imported.business?.type || state.business.type;
+      state.business.websiteUrl = imported.business?.websiteUrl || state.business.websiteUrl;
+      state.business.country = imported.business?.country || state.business.country;
+      state.business.address = imported.business?.address || state.business.address;
+      state.contact.email = imported.contact?.email || state.contact.email;
+      state.contact.phone = imported.contact?.phone || state.contact.phone;
+      state.contact.pageUrl = imported.contact?.pageUrl || state.contact.pageUrl;
+      if (imported.business?.type === 'ecommerce') {
+        state.refund.offeringType = 'physical_goods';
+      }
+      state.output.importPath = inputPath;
+      stdout.write(`${green(`Importé datos compartidos desde ${inputPath}`)}\n`);
+      return;
+    } catch (error) {
+      stdout.write(`${red(`No pude leer ese JSON: ${error.message}`)}\n`);
+    }
+  }
+}
+
+async function maybePreloadDisclaimerFromPrivacy(rl, state) {
+  const reuse = await promptYesNo(
+    rl,
+    'Reutilizar datos desde privacidad',
+    'Marcá sí si ya generaste una política de privacidad y querés precargar negocio y contacto.',
+    false,
+    false
+  );
+  if (!reuse) return;
+
+  const candidates = await listReusablePrivacyInputs();
+  if (candidates.length > 0) {
+    stdout.write(`\n${bold(cyan('JSON de privacidad detectados'))}\n`);
+    candidates.forEach((candidate, index) => {
+      stdout.write(`  ${yellow(String(index + 1))}. ${bold(candidate.label)}\n`);
+      stdout.write(`     ${dim(candidate.description)}\n`);
+    });
+    stdout.write(`  ${yellow(String(candidates.length + 1))}. ${bold('Otro')}\n`);
+    stdout.write(`     ${dim('Escribís manualmente la ruta de otro JSON de privacidad.')}\n`);
+
+    while (true) {
+      const answer = (await rl.question(`${green('Elegí un número')}: `)).trim();
+      const choice = Number.parseInt(answer, 10);
+      if (Number.isInteger(choice) && choice >= 1 && choice <= candidates.length) {
+        const imported = await readJsonFile(candidates[choice - 1].path);
+        state.business.name = imported.business?.name || state.business.name;
+        state.business.websiteUrl = imported.business?.websiteUrl || state.business.websiteUrl;
+        state.business.country = imported.business?.country || state.business.country;
+        state.business.address = imported.business?.address || state.business.address;
+        state.contact.email = imported.contact?.email || state.contact.email;
+        state.contact.phone = imported.contact?.phone || state.contact.phone;
+        state.contact.pageUrl = imported.contact?.pageUrl || state.contact.pageUrl;
+        state.output.importPath = candidates[choice - 1].path;
+        stdout.write(`${green(`Importé datos compartidos desde ${candidates[choice - 1].label}`)}\n`);
+        return;
+      }
+      if (choice === candidates.length + 1) break;
+      stdout.write(`${red('Opción inválida. Probá de nuevo.')}\n`);
+    }
+  }
+
+  while (true) {
+    const inputPath = await promptText(rl, 'Ruta del JSON de privacidad a reutilizar', {
+      required: true,
+      allowEmpty: false,
+      defaultValue: state.output.importPath || 'wizard-input.json'
+    });
+    if (inputPath === BACK) continue;
+    try {
+      const imported = await readJsonFile(inputPath);
+      state.business.name = imported.business?.name || state.business.name;
+      state.business.websiteUrl = imported.business?.websiteUrl || state.business.websiteUrl;
+      state.business.country = imported.business?.country || state.business.country;
+      state.business.address = imported.business?.address || state.business.address;
+      state.contact.email = imported.contact?.email || state.contact.email;
+      state.contact.phone = imported.contact?.phone || state.contact.phone;
+      state.contact.pageUrl = imported.contact?.pageUrl || state.contact.pageUrl;
       state.output.importPath = inputPath;
       stdout.write(`${green(`Importé datos compartidos desde ${inputPath}`)}\n`);
       return;
@@ -1354,6 +1940,820 @@ function printTermsSummary(state, validation) {
   }
 }
 
+async function collectDeletionSection(rl, state) {
+  await runQuestions([
+    async () => {
+      const choice = await promptSingleChoice(rl, 'Cómo se solicita la eliminación de datos', DELETION_CHANNEL_OPTIONS, { allowOther: false });
+      if (choice === BACK) return BACK;
+      state.deletion.requestChannel = choice.value;
+    },
+    async () => {
+      if (!['email', 'both'].includes(state.deletion.requestChannel)) return;
+      const value = await promptText(rl, 'Email para pedidos de eliminación', {
+        allowEmpty: true,
+        defaultValue: state.deletion.requestEmail || state.contact.email
+      });
+      if (value === BACK) return BACK;
+      state.deletion.requestEmail = value;
+    },
+    async () => {
+      if (!['form', 'both'].includes(state.deletion.requestChannel)) return;
+      const value = await promptText(rl, 'URL de página o formulario de eliminación', {
+        allowEmpty: true,
+        defaultValue: state.deletion.requestUrl || state.contact.pageUrl || state.business.websiteUrl
+      });
+      if (value === BACK) return BACK;
+      state.deletion.requestUrl = value;
+    },
+    async () => {
+      const choice = await promptMultiChoice(rl, 'Qué datos debe incluir el usuario en la solicitud', DELETION_IDENTITY_OPTIONS, { allowNone: false });
+      if (choice === BACK) return BACK;
+      state.deletion.identityRequirements = choice.values;
+    },
+    async () => {
+      const choice = await promptMultiChoice(rl, 'Qué datos o recursos se eliminarán normalmente', DELETION_SCOPE_OPTIONS, { allowNone: false });
+      if (choice === BACK) return BACK;
+      state.deletion.deletionScope = choice.values;
+    },
+    async () => {
+      const choice = await promptMultiChoice(rl, 'Qué datos podrían conservarse por excepción', DELETION_RETENTION_OPTIONS);
+      if (choice === BACK) return BACK;
+      state.deletion.retentionExceptions = choice.values;
+    },
+    async () => {
+      const value = await promptText(rl, 'Tiempo estimado para responder', {
+        allowEmpty: true,
+        defaultValue: state.deletion.responseTime || '10 días hábiles'
+      });
+      if (value === BACK) return BACK;
+      state.deletion.responseTime = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Tiempo estimado para completar la eliminación', {
+        allowEmpty: true,
+        defaultValue: state.deletion.completionTime || '30 días'
+      });
+      if (value === BACK) return BACK;
+      state.deletion.completionTime = value;
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Conexión con Meta o Facebook',
+        'Marcá sí si la app usa login con Meta/Facebook o se conecta a APIs de Meta.',
+        state.deletion.hasMetaConnection
+      );
+      if (value === BACK) return BACK;
+      state.deletion.hasMetaConnection = value;
+    },
+    async () => {
+      if (!state.deletion.hasMetaConnection) return;
+      const value = await promptText(rl, 'Instrucción adicional para revocar permisos o desvincular Meta', {
+        allowEmpty: true,
+        defaultValue: state.deletion.metaDisconnectInstructions
+      });
+      if (value === BACK) return BACK;
+      state.deletion.metaDisconnectInstructions = value;
+    }
+  ]);
+}
+
+function printDeletionSummary(state, validation) {
+  stdout.write(`\n${bold(magenta('Resumen antes de generar'))}\n`);
+  stdout.write(`- Documento: Eliminación de datos\n`);
+  stdout.write(`- Negocio: ${state.business.name || '(sin definir)'}\n`);
+  stdout.write(`- Sitio: ${state.business.websiteUrl || '(sin definir)'}\n`);
+  stdout.write(`- Canal de solicitud: ${optionLabel(DELETION_CHANNEL_OPTIONS, state.deletion.requestChannel || '(sin definir)')}\n`);
+  stdout.write(`- Email de eliminación: ${state.deletion.requestEmail || '(sin definir)'}\n`);
+  stdout.write(`- URL de eliminación: ${state.deletion.requestUrl || '(sin definir)'}\n`);
+  stdout.write(`- Datos requeridos: ${state.deletion.identityRequirements.length || 0}\n`);
+  stdout.write(`- Alcance de eliminación: ${state.deletion.deletionScope.length || 0}\n`);
+  stdout.write(`- Meta/Facebook: ${state.deletion.hasMetaConnection ? 'sí' : 'no'}\n`);
+  stdout.write(`- Idioma de salida: ${optionLabel(OUTPUT_LANGUAGE_OPTIONS, state.output.language || 'es')}\n`);
+  stdout.write(`- Formato: ${optionLabel(OUTPUT_FORMAT_OPTIONS, state.output.format || 'markdown')}\n`);
+  stdout.write(`- URL pública hasheada: ${state.output.publishHashedUrl ? state.output.baseUrl : 'no'}\n`);
+  if (state.output.publishHashedUrl) {
+    stdout.write(`- Directorio publicable: ${state.output.publishDir}\n`);
+  }
+  stdout.write(`- Guardar a archivo: ${state.output.writeToFile ? state.output.outputPath : 'no'}\n`);
+  stdout.write(`- Guardar input JSON: ${state.output.saveInput ? state.output.inputPath : 'no'}\n`);
+  if (validation.warnings.length > 0) {
+    stdout.write(`\n${bold(yellow('Advertencias de revisión:'))}\n`);
+    validation.warnings.forEach((warning) => stdout.write(`- ${warning}\n`));
+  }
+}
+
+async function collectCookiesSection(rl, state) {
+  await runQuestions([
+    async () => {
+      const choice = await promptMultiChoice(rl, 'Qué categorías de cookies o tecnologías similares usás', COOKIE_CATEGORY_OPTIONS, { allowNone: false, allowOther: false });
+      if (choice === BACK) return BACK;
+      state.cookies.categories = choice.values;
+    },
+    async () => {
+      const choice = await promptMultiChoice(rl, 'Qué terceros pueden colocar o leer cookies', COOKIE_PROVIDER_OPTIONS, { allowOther: true });
+      if (choice === BACK) return BACK;
+      state.cookies.thirdParties = choice.values;
+      state.cookies.notes = choice.manualNotes;
+    },
+    async () => {
+      const choice = await promptSingleChoice(rl, 'Cómo gestionás el consentimiento de cookies', COOKIE_CONSENT_OPTIONS, { allowOther: false });
+      if (choice === BACK) return BACK;
+      state.cookies.consentMode = choice.value;
+    },
+    async () => {
+      const value = await promptText(rl, 'URL o página para gestionar cookies', {
+        allowEmpty: true,
+        defaultValue: state.cookies.managementUrl || state.contact.pageUrl || state.business.websiteUrl
+      });
+      if (value === BACK) return BACK;
+      state.cookies.managementUrl = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Cómo puede el usuario deshabilitar cookies desde navegador o dispositivo', {
+        allowEmpty: true,
+        defaultValue: state.cookies.browserControls || 'Puede usar la configuración del navegador para bloquear o eliminar cookies.'
+      });
+      if (value === BACK) return BACK;
+      state.cookies.browserControls = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Nota sobre duración o retención de cookies', {
+        allowEmpty: true,
+        defaultValue: state.cookies.retentionPolicy || 'Algunas cookies son de sesión y otras persisten por más tiempo según su finalidad y proveedor.'
+      });
+      if (value === BACK) return BACK;
+      state.cookies.retentionPolicy = value;
+    }
+  ]);
+}
+
+function printCookiesSummary(state, validation) {
+  stdout.write(`\n${bold(magenta('Resumen antes de generar'))}\n`);
+  stdout.write(`- Documento: Política de cookies\n`);
+  stdout.write(`- Negocio: ${state.business.name || '(sin definir)'}\n`);
+  stdout.write(`- Sitio: ${state.business.websiteUrl || '(sin definir)'}\n`);
+  stdout.write(`- Categorías: ${state.cookies.categories.length > 0 ? state.cookies.categories.map((value) => optionLabel(COOKIE_CATEGORY_OPTIONS, value)).join(', ') : '(sin definir)'}\n`);
+  stdout.write(`- Terceros: ${state.cookies.thirdParties.length > 0 ? state.cookies.thirdParties.map((value) => optionLabel(COOKIE_PROVIDER_OPTIONS, value)).join(', ') : '(sin definir)'}\n`);
+  stdout.write(`- Consentimiento: ${optionLabel(COOKIE_CONSENT_OPTIONS, state.cookies.consentMode || '(sin definir)')}\n`);
+  stdout.write(`- Página de gestión: ${state.cookies.managementUrl || '(sin definir)'}\n`);
+  stdout.write(`- Idioma de salida: ${optionLabel(OUTPUT_LANGUAGE_OPTIONS, state.output.language || 'es')}\n`);
+  stdout.write(`- Formato: ${optionLabel(OUTPUT_FORMAT_OPTIONS, state.output.format || 'markdown')}\n`);
+  stdout.write(`- URL pública hasheada: ${state.output.publishHashedUrl ? state.output.baseUrl : 'no'}\n`);
+  if (state.output.publishHashedUrl) {
+    stdout.write(`- Directorio publicable: ${state.output.publishDir}\n`);
+  }
+  stdout.write(`- Guardar a archivo: ${state.output.writeToFile ? state.output.outputPath : 'no'}\n`);
+  stdout.write(`- Guardar input JSON: ${state.output.saveInput ? state.output.inputPath : 'no'}\n`);
+  if (validation.warnings.length > 0) {
+    stdout.write(`\n${bold(yellow('Advertencias de revisión:'))}\n`);
+    validation.warnings.forEach((warning) => stdout.write(`- ${warning}\n`));
+  }
+}
+
+async function promptCookiesReviewAction(rl) {
+  stdout.write(`\n${bold(cyan('Qué querés hacer ahora'))}\n`);
+  stdout.write(`  ${yellow('1')}. ${bold('Generar política de cookies')}\n`);
+  stdout.write(`  ${yellow('2')}. ${bold('Editar negocio')}\n`);
+  stdout.write(`  ${yellow('3')}. ${bold('Editar contacto')}\n`);
+  stdout.write(`  ${yellow('4')}. ${bold('Editar jurisdicción y operación')}\n`);
+  stdout.write(`  ${yellow('5')}. ${bold('Editar cookies y consentimiento')}\n`);
+  stdout.write(`  ${yellow('6')}. ${bold('Editar formato y guardado')}\n`);
+  stdout.write(`  ${yellow('7')}. ${bold('Cancelar')}\n`);
+
+  while (true) {
+    const answer = (await rl.question(`${green('Elegí un número')}: `)).trim();
+    const choice = Number.parseInt(answer, 10);
+    if (choice >= 1 && choice <= 7) {
+      return choice;
+    }
+    stdout.write(`${red('Opción inválida. Probá de nuevo.')}\n`);
+  }
+}
+
+async function runCookiesWizard(generator) {
+  const rl = readline.createInterface({ input: stdin, output: stdout });
+  const state = {
+    documentType: 'cookies',
+    business: { name: '', type: 'saas', websiteUrl: '', country: 'Argentina', address: '' },
+    contact: { email: '', phone: '', pageUrl: '' },
+    operations: { primaryJurisdiction: 'ar', sellRegions: ['ar'] },
+    cookies: {
+      categories: ['necessary'],
+      thirdParties: [],
+      consentMode: 'banner',
+      managementUrl: '',
+      browserControls: 'Puede usar la configuración del navegador para bloquear o eliminar cookies.',
+      retentionPolicy: 'Algunas cookies son de sesión y otras persisten por más tiempo según su finalidad y proveedor.',
+      notes: []
+    },
+    output: { language: 'es', format: 'markdown', publishHashedUrl: false, baseUrl: defaultBaseUrlForDocument('cookies'), publishDir: defaultPublishDirForDocument('cookies'), writeToFile: false, outputPath: '', saveInput: true, inputPath: '', importPath: '' },
+    manualDisclosures: []
+  };
+
+  try {
+    stdout.write(`${bold(cyan('Asistente interactivo de política de cookies'))}\n`);
+    stdout.write(`${dim('Te voy a ayudar a generar una política de cookies clara y publicable.')}\n`);
+    await maybePreloadCookiesFromPrivacy(rl, state);
+    await collectBusinessSection(rl, state);
+    await collectContactSection(rl, state);
+    await collectOperationsSection(rl, state);
+    await collectCookiesSection(rl, state);
+    await collectOutputSection(rl, state);
+
+    while (true) {
+      const input = buildCookiesInputFromState(state);
+      const validation = await generator.validate(input);
+
+      if (!validation.ok) {
+        stdout.write(`\n${bold(red('Todavía faltan datos obligatorios:'))}\n`);
+        validation.errors.forEach((error) => stdout.write(`- ${error}\n`));
+      }
+
+      printCookiesSummary(state, validation);
+      const action = await promptCookiesReviewAction(rl);
+
+      if (action === 2) { await collectBusinessSection(rl, state); continue; }
+      if (action === 3) { await collectContactSection(rl, state); continue; }
+      if (action === 4) { await collectOperationsSection(rl, state); continue; }
+      if (action === 5) { await collectCookiesSection(rl, state); continue; }
+      if (action === 6) { await collectOutputSection(rl, state); continue; }
+      if (action === 7) { stdout.write(`${yellow('Wizard cancelado.')}\n`); return; }
+
+      if (!validation.ok) {
+        stdout.write(`${red('No puedo generar hasta que corrijas los datos faltantes.')}\n`);
+        continue;
+      }
+
+      if (state.output.saveInput) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.inputPath || `${slugify(state.business.name)}-cookies-policy-input.json`), `${JSON.stringify(input, null, 2)}\n`, 'utf8');
+        stdout.write(`\n${green(`Guardé el input en ${state.output.inputPath || `${slugify(state.business.name)}-cookies-policy-input.json`}`)}\n`);
+      }
+
+      const result = await generator.generate(input);
+      const output = result[state.output.format];
+      let published = null;
+
+      if (state.output.publishHashedUrl) {
+        published = await publishGeneratedPolicy(input, result, {
+          publishDir: state.output.publishDir || defaultPublishDirForDocument('cookies'),
+          baseUrl: state.output.baseUrl || defaultBaseUrlForDocument('cookies')
+        });
+      }
+
+      if (state.output.writeToFile) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.outputPath), output, 'utf8');
+        stdout.write(`${green(`Guardé la política de cookies en ${state.output.outputPath}`)}\n`);
+      } else {
+        stdout.write(`\n${output}\n`);
+      }
+
+      if (published) {
+        stdout.write(`\n${bold(green('URL pública generada:'))} ${published.publicUrl}\n`);
+        stdout.write(`${green('Archivo HTML publicado:')} ${published.filePath}\n`);
+        stdout.write(`${green('Manifest:')} ${published.manifestPath}\n`);
+      }
+
+      if (result.warnings.length > 0) {
+        stdout.write(`\n${bold(yellow('Advertencias de revisión:'))}\n`);
+        result.warnings.forEach((warning) => stdout.write(`- ${warning}\n`));
+      }
+      return;
+    }
+  } finally {
+    rl.close();
+  }
+}
+
+async function collectRefundSection(rl, state) {
+  await runQuestions([
+    async () => {
+      const choice = await promptSingleChoice(rl, 'Qué tipo de compra cubre esta política', REFUND_OFFERING_OPTIONS, { allowOther: false });
+      if (choice === BACK) return BACK;
+      state.refund.offeringType = choice.value;
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Aceptás devoluciones o reembolsos',
+        'Marcá sí si normalmente aceptás devoluciones, cambios o reembolsos bajo ciertas condiciones.',
+        state.refund.acceptsReturns
+      );
+      if (value === BACK) return BACK;
+      state.refund.acceptsReturns = value;
+    },
+    async () => {
+      if (!state.refund.acceptsReturns) return;
+      const value = await promptText(rl, 'Plazo general para pedir devolución o reembolso', {
+        allowEmpty: true,
+        defaultValue: state.refund.refundWindow || '10 días'
+      });
+      if (value === BACK) return BACK;
+      state.refund.refundWindow = value;
+    },
+    async () => {
+      if (!state.refund.acceptsReturns) return;
+      const value = await promptText(rl, 'Plazo general para cambios', {
+        allowEmpty: true,
+        defaultValue: state.refund.exchangeWindow
+      });
+      if (value === BACK) return BACK;
+      state.refund.exchangeWindow = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Condiciones para aceptar la devolución o el reembolso', {
+        allowEmpty: true,
+        defaultValue: state.refund.returnConditions || 'El producto debe devolverse sin uso, con accesorios y empaque razonablemente conservado.'
+      });
+      if (value === BACK) return BACK;
+      state.refund.returnConditions = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Canal para iniciar la solicitud', {
+        allowEmpty: true,
+        defaultValue: state.refund.returnRequestChannel || state.contact.email || state.contact.pageUrl
+      });
+      if (value === BACK) return BACK;
+      state.refund.returnRequestChannel = value;
+    },
+    async () => {
+      const choice = await promptSingleChoice(rl, 'Quién asume el envío de devolución', REFUND_RETURN_SHIPPING_OPTIONS, { allowOther: false });
+      if (choice === BACK) return BACK;
+      state.refund.returnShippingResponsibility = choice.value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Método habitual del reembolso', {
+        allowEmpty: true,
+        defaultValue: state.refund.refundMethod || 'el mismo medio de pago original'
+      });
+      if (value === BACK) return BACK;
+      state.refund.refundMethod = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Tiempo estimado para procesar el reembolso', {
+        allowEmpty: true,
+        defaultValue: state.refund.refundProcessingTime || '10 días hábiles'
+      });
+      if (value === BACK) return BACK;
+      state.refund.refundProcessingTime = value;
+    },
+    async () => {
+      if (state.refund.offeringType !== 'digital_products') return;
+      const value = await promptYesNo(
+        rl,
+        'Ventas digitales finales',
+        'Marcá sí si descargas, licencias o productos digitales suelen ser finales y no reembolsables tras el acceso o la activación.',
+        state.refund.digitalGoodsFinal
+      );
+      if (value === BACK) return BACK;
+      state.refund.digitalGoodsFinal = value;
+    },
+    async () => {
+      const choice = await promptMultiChoice(rl, 'Qué categorías suelen quedar excluidas o sujetas a reglas especiales', [
+        { value: 'Productos personalizados o hechos a medida', label: 'Personalizados', description: 'Productos hechos a medida o personalizados.' },
+        { value: 'Productos perecederos o sensibles', label: 'Perecederos', description: 'Productos perecederos o sensibles.' },
+        { value: 'Licencias o descargas digitales activadas', label: 'Digitales activados', description: 'Licencias o productos digitales ya activados o descargados.' },
+        { value: 'Productos usados, dañados por mal uso o incompletos', label: 'Usados o incompletos', description: 'Productos usados, dañados por mal uso o incompletos.' }
+      ]);
+      if (choice === BACK) return BACK;
+      state.refund.nonReturnableItems = choice.values.concat(choice.manualNotes);
+    },
+    async () => {
+      const value = await promptText(rl, 'Cómo se gestionan productos dañados, incorrectos o con fallas', {
+        allowEmpty: true,
+        defaultValue: state.refund.damagedItemsProcess || 'Si el producto llega dañado, incorrecto o con fallas, pedimos que nos contactes con fotos y datos del pedido para revisar el caso.'
+      });
+      if (value === BACK) return BACK;
+      state.refund.damagedItemsProcess = value;
+    }
+  ]);
+}
+
+function printRefundSummary(state, validation) {
+  stdout.write(`\n${bold(magenta('Resumen antes de generar'))}\n`);
+  stdout.write(`- Documento: Devoluciones y reembolsos\n`);
+  stdout.write(`- Negocio: ${state.business.name || '(sin definir)'}\n`);
+  stdout.write(`- Sitio: ${state.business.websiteUrl || '(sin definir)'}\n`);
+  stdout.write(`- Tipo de oferta: ${optionLabel(REFUND_OFFERING_OPTIONS, state.refund.offeringType || '(sin definir)')}\n`);
+  stdout.write(`- Acepta devoluciones: ${state.refund.acceptsReturns ? 'sí' : 'no'}\n`);
+  stdout.write(`- Plazo de reembolso: ${state.refund.refundWindow || '(sin definir)'}\n`);
+  stdout.write(`- Canal de solicitud: ${state.refund.returnRequestChannel || '(sin definir)'}\n`);
+  stdout.write(`- Método de reembolso: ${state.refund.refundMethod || '(sin definir)'}\n`);
+  stdout.write(`- Tiempo de procesamiento: ${state.refund.refundProcessingTime || '(sin definir)'}\n`);
+  stdout.write(`- Idioma de salida: ${optionLabel(OUTPUT_LANGUAGE_OPTIONS, state.output.language || 'es')}\n`);
+  stdout.write(`- Formato: ${optionLabel(OUTPUT_FORMAT_OPTIONS, state.output.format || 'markdown')}\n`);
+  stdout.write(`- URL pública hasheada: ${state.output.publishHashedUrl ? state.output.baseUrl : 'no'}\n`);
+  if (state.output.publishHashedUrl) stdout.write(`- Directorio publicable: ${state.output.publishDir}\n`);
+  stdout.write(`- Guardar a archivo: ${state.output.writeToFile ? state.output.outputPath : 'no'}\n`);
+  stdout.write(`- Guardar input JSON: ${state.output.saveInput ? state.output.inputPath : 'no'}\n`);
+  if (validation.warnings.length > 0) {
+    stdout.write(`\n${bold(yellow('Advertencias de revisión:'))}\n`);
+    validation.warnings.forEach((warning) => stdout.write(`- ${warning}\n`));
+  }
+}
+
+async function promptRefundReviewAction(rl) {
+  stdout.write(`\n${bold(cyan('Qué querés hacer ahora'))}\n`);
+  stdout.write(`  ${yellow('1')}. ${bold('Generar política de devoluciones')}\n`);
+  stdout.write(`  ${yellow('2')}. ${bold('Editar negocio')}\n`);
+  stdout.write(`  ${yellow('3')}. ${bold('Editar contacto')}\n`);
+  stdout.write(`  ${yellow('4')}. ${bold('Editar devoluciones y reembolsos')}\n`);
+  stdout.write(`  ${yellow('5')}. ${bold('Editar formato y guardado')}\n`);
+  stdout.write(`  ${yellow('6')}. ${bold('Cancelar')}\n`);
+  while (true) {
+    const answer = (await rl.question(`${green('Elegí un número')}: `)).trim();
+    const choice = Number.parseInt(answer, 10);
+    if (choice >= 1 && choice <= 6) return choice;
+    stdout.write(`${red('Opción inválida. Probá de nuevo.')}\n`);
+  }
+}
+
+async function runRefundWizard(generator) {
+  const rl = readline.createInterface({ input: stdin, output: stdout });
+  const state = {
+    documentType: 'refund',
+    business: { name: '', type: 'ecommerce', websiteUrl: '', country: 'Argentina', address: '' },
+    contact: { email: '', phone: '', pageUrl: '' },
+    operations: { primaryJurisdiction: 'ar', sellRegions: ['ar'] },
+    refund: {
+      offeringType: 'physical_goods',
+      acceptsReturns: true,
+      refundWindow: '10 días',
+      exchangeWindow: '',
+      returnConditions: 'El producto debe devolverse sin uso, con accesorios y empaque razonablemente conservado.',
+      refundMethod: 'el mismo medio de pago original',
+      refundProcessingTime: '10 días hábiles',
+      returnShippingResponsibility: 'case_by_case',
+      returnRequestChannel: '',
+      nonReturnableItems: [],
+      digitalGoodsFinal: false,
+      damagedItemsProcess: 'Si el producto llega dañado, incorrecto o con fallas, pedimos que nos contactes con fotos y datos del pedido para revisar el caso.',
+      notes: []
+    },
+    output: { language: 'es', format: 'markdown', publishHashedUrl: false, baseUrl: defaultBaseUrlForDocument('refund'), publishDir: defaultPublishDirForDocument('refund'), writeToFile: false, outputPath: '', saveInput: true, inputPath: '', importPath: '' },
+    manualDisclosures: []
+  };
+
+  try {
+    stdout.write(`${bold(cyan('Asistente interactivo de devoluciones y reembolsos'))}\n`);
+    stdout.write(`${dim('Te voy a ayudar a generar una política operativa de devoluciones y reembolsos.')}\n`);
+    await maybePreloadRefundFromPrivacy(rl, state);
+    await collectBusinessSection(rl, state);
+    await collectContactSection(rl, state);
+    await collectRefundSection(rl, state);
+    await collectOutputSection(rl, state);
+
+    while (true) {
+      const input = buildRefundInputFromState(state);
+      const validation = await generator.validate(input);
+      if (!validation.ok) {
+        stdout.write(`\n${bold(red('Todavía faltan datos obligatorios:'))}\n`);
+        validation.errors.forEach((error) => stdout.write(`- ${error}\n`));
+      }
+      printRefundSummary(state, validation);
+      const action = await promptRefundReviewAction(rl);
+      if (action === 2) { await collectBusinessSection(rl, state); continue; }
+      if (action === 3) { await collectContactSection(rl, state); continue; }
+      if (action === 4) { await collectRefundSection(rl, state); continue; }
+      if (action === 5) { await collectOutputSection(rl, state); continue; }
+      if (action === 6) { stdout.write(`${yellow('Wizard cancelado.')}\n`); return; }
+      if (!validation.ok) {
+        stdout.write(`${red('No puedo generar hasta que corrijas los datos faltantes.')}\n`);
+        continue;
+      }
+
+      if (state.output.saveInput) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.inputPath || `${slugify(state.business.name)}-return-refund-policy-input.json`), `${JSON.stringify(input, null, 2)}\n`, 'utf8');
+        stdout.write(`\n${green(`Guardé el input en ${state.output.inputPath || `${slugify(state.business.name)}-return-refund-policy-input.json`}`)}\n`);
+      }
+
+      const result = await generator.generate(input);
+      const output = result[state.output.format];
+      let published = null;
+
+      if (state.output.publishHashedUrl) {
+        published = await publishGeneratedPolicy(input, result, {
+          publishDir: state.output.publishDir || defaultPublishDirForDocument('refund'),
+          baseUrl: state.output.baseUrl || defaultBaseUrlForDocument('refund')
+        });
+      }
+
+      if (state.output.writeToFile) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.outputPath), output, 'utf8');
+        stdout.write(`${green(`Guardé la política de devoluciones en ${state.output.outputPath}`)}\n`);
+      } else {
+        stdout.write(`\n${output}\n`);
+      }
+
+      if (published) {
+        stdout.write(`\n${bold(green('URL pública generada:'))} ${published.publicUrl}\n`);
+        stdout.write(`${green('Archivo HTML publicado:')} ${published.filePath}\n`);
+        stdout.write(`${green('Manifest:')} ${published.manifestPath}\n`);
+      }
+
+      if (result.warnings.length > 0) {
+        stdout.write(`\n${bold(yellow('Advertencias de revisión:'))}\n`);
+        result.warnings.forEach((warning) => stdout.write(`- ${warning}\n`));
+      }
+      return;
+    }
+  } finally {
+    rl.close();
+  }
+}
+
+async function collectDisclaimerSection(rl, state) {
+  await runQuestions([
+    async () => {
+      const choice = await promptMultiChoice(rl, 'Qué tipos de disclaimer querés incluir', DISCLAIMER_OPTIONS, { allowNone: false, allowOther: false });
+      if (choice === BACK) return BACK;
+      state.disclaimer.categories = choice.values;
+    },
+    async () => {
+      if (!state.disclaimer.categories.some((value) => ['medical', 'fitness'].includes(value))) return;
+      const value = await promptText(rl, 'Aclaración adicional sobre asesoramiento profesional', {
+        allowEmpty: true,
+        defaultValue: state.disclaimer.professionalAdviceChannel || 'Este contenido no reemplaza evaluación, diagnóstico ni asesoramiento profesional individual.'
+      });
+      if (value === BACK) return BACK;
+      state.disclaimer.professionalAdviceChannel = value;
+    },
+    async () => {
+      if (!state.disclaimer.categories.includes('external_links')) return;
+      const value = await promptText(rl, 'Política breve sobre enlaces externos', {
+        allowEmpty: true,
+        defaultValue: state.disclaimer.externalLinksPolicy
+      });
+      if (value === BACK) return BACK;
+      state.disclaimer.externalLinksPolicy = value;
+    },
+    async () => {
+      if (!state.disclaimer.categories.includes('product_reviews')) return;
+      const value = await promptText(rl, 'Cómo se hacen las reseñas o evaluaciones', {
+        allowEmpty: true,
+        defaultValue: state.disclaimer.reviewMethodology
+      });
+      if (value === BACK) return BACK;
+      state.disclaimer.reviewMethodology = value;
+    },
+    async () => {
+      if (!state.disclaimer.categories.includes('product_reviews')) return;
+      const value = await promptText(rl, 'Disclosure comercial, afiliado o compensación', {
+        allowEmpty: true,
+        defaultValue: state.disclaimer.affiliateDisclosure
+      });
+      if (value === BACK) return BACK;
+      state.disclaimer.affiliateDisclosure = value;
+    },
+    async () => {
+      if (!state.disclaimer.categories.includes('own_risk')) return;
+      const value = await promptText(rl, 'Frase personalizada de uso bajo propio riesgo', {
+        allowEmpty: true,
+        defaultValue: state.disclaimer.customRiskStatement
+      });
+      if (value === BACK) return BACK;
+      state.disclaimer.customRiskStatement = value;
+    }
+  ]);
+}
+
+function printDisclaimerSummary(state, validation) {
+  stdout.write(`\n${bold(magenta('Resumen antes de generar'))}\n`);
+  stdout.write(`- Documento: Disclaimer / descargo\n`);
+  stdout.write(`- Negocio: ${state.business.name || '(sin definir)'}\n`);
+  stdout.write(`- Sitio: ${state.business.websiteUrl || '(sin definir)'}\n`);
+  stdout.write(`- Tipos: ${state.disclaimer.categories.length > 0 ? state.disclaimer.categories.map((value) => optionLabel(DISCLAIMER_OPTIONS, value)).join(', ') : '(sin definir)'}\n`);
+  stdout.write(`- Idioma de salida: ${optionLabel(OUTPUT_LANGUAGE_OPTIONS, state.output.language || 'es')}\n`);
+  stdout.write(`- Formato: ${optionLabel(OUTPUT_FORMAT_OPTIONS, state.output.format || 'markdown')}\n`);
+  stdout.write(`- URL pública hasheada: ${state.output.publishHashedUrl ? state.output.baseUrl : 'no'}\n`);
+  if (state.output.publishHashedUrl) stdout.write(`- Directorio publicable: ${state.output.publishDir}\n`);
+  stdout.write(`- Guardar a archivo: ${state.output.writeToFile ? state.output.outputPath : 'no'}\n`);
+  stdout.write(`- Guardar input JSON: ${state.output.saveInput ? state.output.inputPath : 'no'}\n`);
+  if (validation.warnings.length > 0) {
+    stdout.write(`\n${bold(yellow('Advertencias de revisión:'))}\n`);
+    validation.warnings.forEach((warning) => stdout.write(`- ${warning}\n`));
+  }
+}
+
+async function promptDisclaimerReviewAction(rl) {
+  stdout.write(`\n${bold(cyan('Qué querés hacer ahora'))}\n`);
+  stdout.write(`  ${yellow('1')}. ${bold('Generar disclaimer')}\n`);
+  stdout.write(`  ${yellow('2')}. ${bold('Editar negocio')}\n`);
+  stdout.write(`  ${yellow('3')}. ${bold('Editar contacto')}\n`);
+  stdout.write(`  ${yellow('4')}. ${bold('Editar disclaimers')}\n`);
+  stdout.write(`  ${yellow('5')}. ${bold('Editar formato y guardado')}\n`);
+  stdout.write(`  ${yellow('6')}. ${bold('Cancelar')}\n`);
+  while (true) {
+    const answer = (await rl.question(`${green('Elegí un número')}: `)).trim();
+    const choice = Number.parseInt(answer, 10);
+    if (choice >= 1 && choice <= 6) return choice;
+    stdout.write(`${red('Opción inválida. Probá de nuevo.')}\n`);
+  }
+}
+
+async function runDisclaimerWizard(generator) {
+  const rl = readline.createInterface({ input: stdin, output: stdout });
+  const state = {
+    documentType: 'disclaimer',
+    business: { name: '', websiteUrl: '', country: 'Argentina', address: '' },
+    contact: { email: '', phone: '', pageUrl: '' },
+    disclaimer: {
+      categories: ['errors_omissions', 'external_links', 'own_risk'],
+      audienceDescription: '',
+      professionalAdviceChannel: '',
+      externalLinksPolicy: '',
+      affiliateDisclosure: '',
+      reviewMethodology: '',
+      customRiskStatement: '',
+      notes: []
+    },
+    output: { language: 'es', format: 'markdown', publishHashedUrl: false, baseUrl: defaultBaseUrlForDocument('disclaimer'), publishDir: defaultPublishDirForDocument('disclaimer'), writeToFile: false, outputPath: '', saveInput: true, inputPath: '', importPath: '' },
+    manualDisclosures: []
+  };
+
+  try {
+    stdout.write(`${bold(cyan('Asistente interactivo de disclaimer'))}\n`);
+    stdout.write(`${dim('Te voy a ayudar a generar uno o varios descargos de responsabilidad en una sola página.')}\n`);
+    await maybePreloadDisclaimerFromPrivacy(rl, state);
+    await collectBusinessSection(rl, state);
+    await collectContactSection(rl, state);
+    await collectDisclaimerSection(rl, state);
+    await collectOutputSection(rl, state);
+
+    while (true) {
+      const input = buildDisclaimerInputFromState(state);
+      const validation = await generator.validate(input);
+      if (!validation.ok) {
+        stdout.write(`\n${bold(red('Todavía faltan datos obligatorios:'))}\n`);
+        validation.errors.forEach((error) => stdout.write(`- ${error}\n`));
+      }
+      printDisclaimerSummary(state, validation);
+      const action = await promptDisclaimerReviewAction(rl);
+      if (action === 2) { await collectBusinessSection(rl, state); continue; }
+      if (action === 3) { await collectContactSection(rl, state); continue; }
+      if (action === 4) { await collectDisclaimerSection(rl, state); continue; }
+      if (action === 5) { await collectOutputSection(rl, state); continue; }
+      if (action === 6) { stdout.write(`${yellow('Wizard cancelado.')}\n`); return; }
+      if (!validation.ok) {
+        stdout.write(`${red('No puedo generar hasta que corrijas los datos faltantes.')}\n`);
+        continue;
+      }
+
+      if (state.output.saveInput) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.inputPath || `${slugify(state.business.name)}-disclaimer-input.json`), `${JSON.stringify(input, null, 2)}\n`, 'utf8');
+        stdout.write(`\n${green(`Guardé el input en ${state.output.inputPath || `${slugify(state.business.name)}-disclaimer-input.json`}`)}\n`);
+      }
+
+      const result = await generator.generate(input);
+      const output = result[state.output.format];
+      let published = null;
+
+      if (state.output.publishHashedUrl) {
+        published = await publishGeneratedPolicy(input, result, {
+          publishDir: state.output.publishDir || defaultPublishDirForDocument('disclaimer'),
+          baseUrl: state.output.baseUrl || defaultBaseUrlForDocument('disclaimer')
+        });
+      }
+
+      if (state.output.writeToFile) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.outputPath), output, 'utf8');
+        stdout.write(`${green(`Guardé el disclaimer en ${state.output.outputPath}`)}\n`);
+      } else {
+        stdout.write(`\n${output}\n`);
+      }
+
+      if (published) {
+        stdout.write(`\n${bold(green('URL pública generada:'))} ${published.publicUrl}\n`);
+        stdout.write(`${green('Archivo HTML publicado:')} ${published.filePath}\n`);
+        stdout.write(`${green('Manifest:')} ${published.manifestPath}\n`);
+      }
+
+      if (result.warnings.length > 0) {
+        stdout.write(`\n${bold(yellow('Advertencias de revisión:'))}\n`);
+        result.warnings.forEach((warning) => stdout.write(`- ${warning}\n`));
+      }
+      return;
+    }
+  } finally {
+    rl.close();
+  }
+}
+
+async function promptDeletionReviewAction(rl) {
+  stdout.write(`\n${bold(cyan('Qué querés hacer ahora'))}\n`);
+  stdout.write(`  ${yellow('1')}. ${bold('Generar instrucciones de eliminación')}\n`);
+  stdout.write(`  ${yellow('2')}. ${bold('Editar negocio')}\n`);
+  stdout.write(`  ${yellow('3')}. ${bold('Editar contacto')}\n`);
+  stdout.write(`  ${yellow('4')}. ${bold('Editar instrucciones de eliminación')}\n`);
+  stdout.write(`  ${yellow('5')}. ${bold('Editar formato y guardado')}\n`);
+  stdout.write(`  ${yellow('6')}. ${bold('Cancelar')}\n`);
+
+  while (true) {
+    const answer = (await rl.question(`${green('Elegí un número')}: `)).trim();
+    const choice = Number.parseInt(answer, 10);
+    if (choice >= 1 && choice <= 6) {
+      return choice;
+    }
+    stdout.write(`${red('Opción inválida. Probá de nuevo.')}\n`);
+  }
+}
+
+async function runDeletionWizard(generator) {
+  const rl = readline.createInterface({ input: stdin, output: stdout });
+  const state = {
+    documentType: 'deletion',
+    business: { name: '', type: 'saas', websiteUrl: '', country: 'Argentina', address: '' },
+    contact: { email: '', phone: '', pageUrl: '' },
+    operations: { primaryJurisdiction: 'ar', sellRegions: ['ar'] },
+    deletion: {
+      requestChannel: 'email',
+      requestEmail: '',
+      requestUrl: '',
+      identityRequirements: [],
+      deletionScope: [],
+      retentionExceptions: [],
+      responseTime: '10 días hábiles',
+      completionTime: '30 días',
+      hasMetaConnection: false,
+      metaDisconnectInstructions: '',
+      notes: []
+    },
+    output: { language: 'es', format: 'markdown', publishHashedUrl: false, baseUrl: defaultBaseUrlForDocument('deletion'), publishDir: defaultPublishDirForDocument('deletion'), writeToFile: false, outputPath: '', saveInput: true, inputPath: '', importPath: '' },
+    manualDisclosures: []
+  };
+
+  try {
+    stdout.write(`${bold(cyan('Asistente interactivo de eliminación de datos'))}\n`);
+    stdout.write(`${dim('Te voy a ayudar a generar una página pública con instrucciones de eliminación de datos.')}\n`);
+    await maybePreloadDeletionFromPrivacy(rl, state);
+    await collectBusinessSection(rl, state);
+    await collectContactSection(rl, state);
+    await collectDeletionSection(rl, state);
+    await collectOutputSection(rl, state);
+
+    while (true) {
+      const input = buildDeletionInputFromState(state);
+      const validation = await generator.validate(input);
+
+      if (!validation.ok) {
+        stdout.write(`\n${bold(red('Todavía faltan datos obligatorios:'))}\n`);
+        validation.errors.forEach((error) => stdout.write(`- ${error}\n`));
+      }
+
+      printDeletionSummary(state, validation);
+      const action = await promptDeletionReviewAction(rl);
+
+      if (action === 2) { await collectBusinessSection(rl, state); continue; }
+      if (action === 3) { await collectContactSection(rl, state); continue; }
+      if (action === 4) { await collectDeletionSection(rl, state); continue; }
+      if (action === 5) { await collectOutputSection(rl, state); continue; }
+      if (action === 6) { stdout.write(`${yellow('Wizard cancelado.')}\n`); return; }
+
+      if (!validation.ok) {
+        stdout.write(`${red('No puedo generar hasta que corrijas los datos faltantes.')}\n`);
+        continue;
+      }
+
+      if (state.output.saveInput) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.inputPath || `${slugify(state.business.name)}-deletion-input.json`), `${JSON.stringify(input, null, 2)}\n`, 'utf8');
+        stdout.write(`\n${green(`Guardé el input en ${state.output.inputPath || `${slugify(state.business.name)}-deletion-input.json`}`)}\n`);
+      }
+
+      const result = await generator.generate(input);
+      const output = result[state.output.format];
+      let published = null;
+
+      if (state.output.publishHashedUrl) {
+        published = await publishGeneratedPolicy(input, result, {
+          publishDir: state.output.publishDir || defaultPublishDirForDocument('deletion'),
+          baseUrl: state.output.baseUrl || defaultBaseUrlForDocument('deletion')
+        });
+      }
+
+      if (state.output.writeToFile) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.outputPath), output, 'utf8');
+        stdout.write(`${green(`Guardé las instrucciones en ${state.output.outputPath}`)}\n`);
+      } else {
+        stdout.write(`\n${output}\n`);
+      }
+
+      if (published) {
+        stdout.write(`\n${bold(green('URL pública generada:'))} ${published.publicUrl}\n`);
+        stdout.write(`${green('Archivo HTML publicado:')} ${published.filePath}\n`);
+        stdout.write(`${green('Manifest:')} ${published.manifestPath}\n`);
+      }
+
+      if (result.warnings.length > 0) {
+        stdout.write(`\n${bold(yellow('Advertencias de revisión:'))}\n`);
+        result.warnings.forEach((warning) => stdout.write(`- ${warning}\n`));
+      }
+      return;
+    }
+  } finally {
+    rl.close();
+  }
+}
+
 async function promptTermsReviewAction(rl) {
   stdout.write(`\n${bold(cyan('Qué querés hacer ahora'))}\n`);
   stdout.write(`  ${yellow('1')}. ${bold('Generar términos')}\n`);
@@ -1621,10 +3021,10 @@ function usage() {
   return [
     'Usage:',
     '  privacy-policy wizard',
-    '  privacy-policy generate --document privacy|terms --input <file.json> [--format html|markdown|text] [--output file]',
-    '  privacy-policy publish --document privacy|terms --input <file.json> --base-url <url> [--publish-dir <dir>]',
-    '  privacy-policy validate --document privacy|terms --input <file.json>',
-    '  privacy-policy explain --document privacy|terms --input <file.json>',
+    '  privacy-policy generate --document privacy|terms|deletion|cookies|refund|disclaimer --input <file.json> [--format html|markdown|text] [--output file]',
+    '  privacy-policy publish --document privacy|terms|deletion|cookies|refund|disclaimer --input <file.json> --base-url <url> [--publish-dir <dir>]',
+    '  privacy-policy validate --document privacy|terms|deletion|cookies|refund|disclaimer --input <file.json>',
+    '  privacy-policy explain --document privacy|terms|deletion|cookies|refund|disclaimer --input <file.json>',
     '',
     'If you run `privacy-policy` with no command, the interactive wizard starts automatically.'
   ].join('\n');
@@ -1634,6 +3034,10 @@ async function main() {
   const { command, options } = parseArgs(process.argv.slice(2));
   const privacyGenerator = new PrivacyPolicyGenerator();
   const termsGenerator = new TermsGenerator();
+  const deletionGenerator = new DataDeletionGenerator();
+  const cookiesGenerator = new CookiesPolicyGenerator();
+  const refundGenerator = new ReturnRefundPolicyGenerator();
+  const disclaimerGenerator = new DisclaimerGenerator();
 
   if (!command || command === 'wizard') {
     const rl = readline.createInterface({ input: stdin, output: stdout });
@@ -1643,6 +3047,14 @@ async function main() {
       const documentType = await promptDocumentChoice(rl);
       if (documentType === 'terms') {
         await runTermsWizard(termsGenerator);
+      } else if (documentType === 'deletion') {
+        await runDeletionWizard(deletionGenerator);
+      } else if (documentType === 'cookies') {
+        await runCookiesWizard(cookiesGenerator);
+      } else if (documentType === 'refund') {
+        await runRefundWizard(refundGenerator);
+      } else if (documentType === 'disclaimer') {
+        await runDisclaimerWizard(disclaimerGenerator);
       } else {
         await runWizard(privacyGenerator);
       }
@@ -1658,7 +3070,17 @@ async function main() {
 
   const input = await readInput(options);
   const documentType = resolveDocumentType(options, input);
-  const generator = documentType === 'terms' ? termsGenerator : privacyGenerator;
+  const generator = documentType === 'terms'
+      ? termsGenerator
+    : documentType === 'deletion'
+      ? deletionGenerator
+      : documentType === 'cookies'
+        ? cookiesGenerator
+        : documentType === 'refund'
+          ? refundGenerator
+          : documentType === 'disclaimer'
+            ? disclaimerGenerator
+        : privacyGenerator;
 
   if (command === 'validate') {
     const validation = await generator.validate(input);

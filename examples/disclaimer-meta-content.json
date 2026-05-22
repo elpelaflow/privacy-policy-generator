@@ -1,0 +1,24 @@
+{
+  "documentType": "disclaimer",
+  "business": {
+    "name": "AutoPost CLI Operator",
+    "websiteUrl": "https://dev-flow.duckdns.org/",
+    "country": "Argentina",
+    "address": "Adolfo Alsina 3135, B1849, Buenos Aires, Argentina"
+  },
+  "contact": {
+    "email": "thechief@dev-flow.duckdns.org",
+    "phone": "+5491123317940",
+    "pageUrl": "https://dev-flow.duckdns.org/contacto"
+  },
+  "disclaimer": {
+    "categories": ["errors_omissions", "external_links", "own_risk", "product_reviews"],
+    "externalLinksPolicy": "El servicio puede enlazar recursos o documentación de terceros. No controlamos ni garantizamos el contenido, disponibilidad o políticas de esos sitios externos.",
+    "affiliateDisclosure": "Algunas recomendaciones o herramientas mencionadas pueden generar vínculos comerciales, comisiones o beneficios indirectos para el operador.",
+    "reviewMethodology": "Las reseñas o comentarios se basan en criterio editorial, experiencia de uso, pruebas puntuales o análisis operativo al momento de publicación.",
+    "customRiskStatement": "El uso de la aplicación, sus flujos, automatizaciones y materiales se realiza bajo exclusiva responsabilidad del usuario."
+  },
+  "settings": {
+    "language": "es"
+  }
+}
