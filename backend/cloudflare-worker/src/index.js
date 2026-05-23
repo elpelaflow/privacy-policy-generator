@@ -64,6 +64,7 @@ async function startOAuth(request, env) {
     httpOnly: true,
     sameSite: 'None',
     secure: true,
+    partitioned: true,
     maxAge: 600
   });
 
@@ -121,6 +122,7 @@ async function finishOAuth(request, env) {
     httpOnly: true,
     sameSite: 'None',
     secure: true,
+    partitioned: true,
     maxAge: 60 * 60 * 8
   });
 
@@ -129,6 +131,7 @@ async function finishOAuth(request, env) {
     httpOnly: true,
     sameSite: 'None',
     secure: true,
+    partitioned: true,
     maxAge: 0
   });
 
@@ -160,6 +163,7 @@ async function logout(env, origin) {
     httpOnly: true,
     sameSite: 'None',
     secure: true,
+    partitioned: true,
     maxAge: 0
   });
 
@@ -326,6 +330,7 @@ function serializeCookie(name, value, options = {}) {
   if (options.httpOnly) parts.push('HttpOnly');
   if (options.secure) parts.push('Secure');
   if (options.sameSite) parts.push(`SameSite=${options.sameSite}`);
+  if (options.partitioned) parts.push('Partitioned');
   return parts.join('; ');
 }
 
