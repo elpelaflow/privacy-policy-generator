@@ -611,7 +611,11 @@ function triggerDownload(filename, contents, type) {
 
 function buildPreparedPath() {
   const businessName = document.querySelector('[name="business.name"]')?.value || 'your-project';
-  return `https://YOUR-USER.github.io/YOUR-REPO/${DOCUMENTS[appState.documentType].basePath}/${slugify(businessName)}-hash.html`;
+  return `https://YOUR-USER.github.io/YOUR-REPO/${buildRepoDocumentPath(appState.documentType, `${slugify(businessName)}-hash.html`)}`;
+}
+
+function buildRepoDocumentPath(documentType, filename) {
+  return `legal/${DOCUMENTS[documentType].basePath}/${filename}`;
 }
 
 function setPreviewPlaceholder(message) {
@@ -853,7 +857,7 @@ async function publishToGitHubPages() {
     const html = appState.lastGenerated.html;
     const slug = slugify(appState.lastInput?.business?.name || 'legal-document');
     const hash = await shortHash(html);
-    const path = `${DOCUMENTS[appState.documentType].basePath}/${slug}-${hash}.html`;
+    const path = buildRepoDocumentPath(appState.documentType, `${slug}-${hash}.html`);
     const response = await backendFetch('/api/github/publish', {
       method: 'POST',
       headers: {
