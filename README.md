@@ -71,6 +71,25 @@ It is not active by default. To enable it you need:
 3. a public worker URL
 4. `backendBaseUrl` configured in the static web app
 
+### Frontend config files
+
+The static app now reads its backend configuration from dedicated config files instead of hardcoding the Worker URL in `web/index.html`.
+
+- `web/config.example.js`
+  default example shipped with the repo
+- `web/config.js`
+  optional local override for your own instance
+- `docs/config.js`
+  config used by the published GitHub Pages build
+
+Build behavior:
+
+- if `web/config.js` exists, `npm run build:web` copies it into `docs/config.js`
+- otherwise, if `docs/config.js` already exists, the build preserves that config
+- otherwise, the build falls back to `web/config.example.js`
+
+This keeps the source tree generic while still allowing the public instance to stay connected to its real backend.
+
 Worker files:
 
 - [backend/cloudflare-worker/src/index.js](backend/cloudflare-worker/src/index.js)
@@ -187,16 +206,15 @@ backend/cloudflare-worker/
 
 10. set the worker URL in the web app through:
 
-```html
-<script>
-  globalThis.__LEGAL_HUB_CONFIG__ = {
-    backendBaseUrl: "https://your-worker.workers.dev"
-  };
-</script>
+```js
+globalThis.__LEGAL_HUB_CONFIG__ = {
+  backendBaseUrl: "https://your-worker.workers.dev"
+};
 ```
 
-11. rebuild and republish the static site
-12. test the full browser flow:
+11. save that into `web/config.js`
+12. rebuild and republish the static site
+13. test the full browser flow:
 
 - connect GitHub
 - list repos

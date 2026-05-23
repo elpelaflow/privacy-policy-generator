@@ -48,15 +48,15 @@ This is intentionally separated from the site root so the user's existing homepa
 3. Configurar `PUBLIC_APP_URL` con la URL pública de la app web
 4. Cargar `GITHUB_CLIENT_SECRET` y `SESSION_SECRET` como secrets del worker
 5. Desplegar el worker
-6. En la web, definir:
+6. En la web, crear `web/config.js` con:
 
-```html
-<script>
-  globalThis.__LEGAL_HUB_CONFIG__ = {
-    backendBaseUrl: "https://tu-worker.tu-dominio.workers.dev"
-  };
-</script>
+```js
+globalThis.__LEGAL_HUB_CONFIG__ = {
+  backendBaseUrl: "https://tu-worker.tu-dominio.workers.dev"
+};
 ```
+
+7. Ejecutar `npm run build:web` para copiar esa config a `docs/config.js`
 
 ## Notas
 
