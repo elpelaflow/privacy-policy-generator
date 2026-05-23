@@ -62,7 +62,7 @@ async function startOAuth(request, env) {
   const stateCookie = serializeCookie(env.STATE_COOKIE_NAME || 'ppg_state', JSON.stringify({ state, returnTo }), {
     path: '/',
     httpOnly: true,
-    sameSite: 'Lax',
+    sameSite: 'None',
     secure: true,
     maxAge: 600
   });
@@ -119,7 +119,7 @@ async function finishOAuth(request, env) {
   const sessionCookie = serializeCookie(env.COOKIE_NAME || 'ppg_session', sessionValue, {
     path: '/',
     httpOnly: true,
-    sameSite: 'Lax',
+    sameSite: 'None',
     secure: true,
     maxAge: 60 * 60 * 8
   });
@@ -127,7 +127,7 @@ async function finishOAuth(request, env) {
   const clearStateCookie = serializeCookie(env.STATE_COOKIE_NAME || 'ppg_state', '', {
     path: '/',
     httpOnly: true,
-    sameSite: 'Lax',
+    sameSite: 'None',
     secure: true,
     maxAge: 0
   });
@@ -158,7 +158,7 @@ async function logout(env, origin) {
   const expired = serializeCookie(env.COOKIE_NAME || 'ppg_session', '', {
     path: '/',
     httpOnly: true,
-    sameSite: 'Lax',
+    sameSite: 'None',
     secure: true,
     maxAge: 0
   });
