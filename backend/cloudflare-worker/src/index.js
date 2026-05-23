@@ -8,7 +8,7 @@ const corsHeaders = (origin) => ({
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const origin = env.PUBLIC_APP_URL || '*';
+    const origin = publicAppOrigin(env);
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders(origin) });
@@ -285,6 +285,14 @@ async function githubApi(path, token, init = {}) {
 function workerBaseUrl(request) {
   const url = new URL(request.url);
   return `${url.protocol}//${url.host}`;
+}
+
+function publicAppOrigin(env) {
+  try {
+    return new URL(env.PUBLIC_APP_URL).origin;
+  } catch {
+    return env.PUBLIC_APP_URL || '*';
+  }
 }
 
 function json(payload, origin, status = 200) {

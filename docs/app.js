@@ -632,6 +632,7 @@ function setStatus(message) {
 function setExportState(enabled) {
   for (const button of [downloadHtmlEl, downloadMarkdownEl, downloadTextEl, downloadJsonEl]) {
     button.disabled = !enabled;
+    button.classList.toggle('button-disabled', !enabled);
   }
   updatePublishControls();
 }
@@ -714,6 +715,12 @@ function renderGitHubSession() {
     connectGitHubEl.disabled = false;
     logoutGitHubEl.disabled = true;
   }
+  connectGitHubEl.classList.toggle('button-primary', !githubState.session);
+  connectGitHubEl.classList.toggle('button-secondary', !!githubState.session);
+  connectGitHubEl.classList.toggle('button-disabled', !!githubState.session);
+  logoutGitHubEl.classList.toggle('button-primary', !!githubState.session);
+  logoutGitHubEl.classList.toggle('button-secondary', !githubState.session);
+  logoutGitHubEl.classList.toggle('button-disabled', !githubState.session);
 }
 
 async function loadGitHubRepos() {
@@ -749,6 +756,7 @@ function updatePublishControls() {
 
   publishGitHubPagesEl.disabled = !canPublish;
   publishGitHubPagesEl.classList.toggle('button-disabled', !canPublish);
+  publishGitHubPagesEl.classList.toggle('button-primary', canPublish);
 }
 
 function connectGitHub() {
