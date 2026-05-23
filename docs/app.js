@@ -792,11 +792,21 @@ function renderRepoOptions() {
   for (const repo of githubState.repos) {
     const option = document.createElement('option');
     option.value = repo.full_name;
-    option.textContent = `${repo.full_name}${repo.pages_active ? ' · Pages activo' : ''}`;
+    option.textContent = `${repo.full_name}${repoLabel(repo)}`;
     option.dataset.defaultBranch = repo.default_branch || 'main';
     githubRepoSelectEl.appendChild(option);
   }
   githubRepoSelectEl.disabled = !githubState.session || githubState.repos.length === 0;
+}
+
+function repoLabel(repo) {
+  if (repo.pages_accessible) {
+    return ' · Pages accesible';
+  }
+  if (repo.pages_active) {
+    return ' · Pages activo';
+  }
+  return '';
 }
 
 function updatePublishControls() {

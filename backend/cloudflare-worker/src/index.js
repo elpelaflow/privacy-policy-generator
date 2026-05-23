@@ -183,13 +183,25 @@ async function listRepos(request, env, origin) {
   const repos = await githubApi('/user/repos?per_page=100&sort=updated', session.accessToken);
   const pagesStatuses = await Promise.all(repos.map(async (repo) => {
     try {
-      await githubApi(`/repos/${repo.full_name}/pages`, session.accessToken);
-      return { name: repo.full_name, active: true };
+      const pages = await githubApi(`/repos/${repo.full_name}/pages`, session.accessToken);
+      const publicBaseUrl = buildRepoPagesBaseUrl(repo.owner?.login, repo.name, pages.html_url || repo.homepage);
+      const accessible = publicBaseUrl ? await isPublicUrlAccessible(publicBaseUrl) : false;
+      return {
+        name: repo.full_name,
+        active: true,
+        accessible,
+        publicBaseUrl
+      };
     } catch {
-      return { name: repo.full_name, active: false };
+      return {
+        name: repo.full_name,
+        active: false,
+        accessible: false,
+        publicBaseUrl: buildRepoPagesBaseUrl(repo.owner?.login, repo.name, repo.homepage)
+      };
     }
   }));
-  const pagesMap = new Map(pagesStatuses.map((item) => [item.name, item.active]));
+  const pagesMap = new Map(pagesStatuses.map((item) => [item.name, item]));
 
   return json({
     repos: repos.map((repo) => ({
@@ -197,7 +209,9 @@ async function listRepos(request, env, origin) {
       default_branch: repo.default_branch,
       owner: repo.owner?.login,
       name: repo.name,
-      pages_active: pagesMap.get(repo.full_name) || false
+      pages_active: pagesMap.get(repo.full_name)?.active || false,
+      pages_accessible: pagesMap.get(repo.full_name)?.accessible || false,
+      pages_url: pagesMap.get(repo.full_name)?.publicBaseUrl || buildRepoPagesBaseUrl(repo.owner?.login, repo.name, repo.homepage)
     }))
   }, origin);
 }
@@ -248,11 +262,42 @@ async function hasPages(repo, token) {
 }
 
 function buildPublicUrl(owner, repo, path, homepage) {
-  if (homepage) {
-    const base = homepage.replace(/\/$/, '');
+  const baseUrl = buildRepoPagesBaseUrl(owner, repo, homepage);
+  if (baseUrl) {
+    const base = baseUrl.replace(/\/$/, '');
     return `${base}/${path}`.replace(/([^:]\/)\/+/g, '$1');
   }
   return `https://${owner}.github.io/${repo}/${path}`;
+}
+
+function buildRepoPagesBaseUrl(owner, repo, homepage) {
+  if (homepage) {
+    return homepage.replace(/\/$/, '');
+  }
+  if (!owner || !repo) return '';
+  return `https://${owner}.github.io/${repo}`;
+}
+
+async function isPublicUrlAccessible(url) {
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD',
+      redirect: 'follow'
+    });
+    if (response.ok) return true;
+  } catch {
+    // fall through to GET fallback
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow'
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
 }
 
 async function requireSession(request, env) {
