@@ -2,7 +2,7 @@ const corsHeaders = (origin) => ({
   'access-control-allow-origin': origin,
   'access-control-allow-credentials': 'true',
   'access-control-allow-methods': 'GET,POST,OPTIONS',
-  'access-control-allow-headers': 'content-type'
+  'access-control-allow-headers': 'content-type, authorization'
 });
 
 export default {
@@ -135,8 +135,11 @@ async function finishOAuth(request, env) {
     maxAge: 0
   });
 
+  const returnUrl = new URL(stored.returnTo || env.PUBLIC_APP_URL);
+  returnUrl.hash = buildSessionHash(sessionValue, user.login);
+
   const headers = new Headers({
-    location: stored.returnTo || env.PUBLIC_APP_URL
+    location: returnUrl.toString()
   });
   headers.append('set-cookie', sessionCookie);
   headers.append('set-cookie', clearStateCookie);
@@ -261,10 +264,23 @@ async function requireSession(request, env) {
 }
 
 async function readSession(request, env) {
+  const authHeader = request.headers.get('authorization') || '';
+  if (authHeader.startsWith('Bearer ')) {
+    return unsealSession(authHeader.slice('Bearer '.length), env.SESSION_SECRET);
+  }
+
   const cookies = parseCookies(request.headers.get('cookie') || '');
   const raw = cookies[env.COOKIE_NAME || 'ppg_session'];
   if (!raw) return null;
   return unsealSession(raw, env.SESSION_SECRET);
+}
+
+function buildSessionHash(sessionValue, login) {
+  const params = new URLSearchParams({
+    gh_session: sessionValue,
+    gh_login: login || ''
+  });
+  return params.toString();
 }
 
 async function githubApi(path, token, init = {}) {

@@ -289,9 +289,11 @@ let validationRequestId = 0;
 let validationTimer = null;
 const generatorCache = new Map();
 const backendConfig = globalThis.__LEGAL_HUB_CONFIG__ || {};
+const GH_SESSION_STORAGE_KEY = 'ppg_github_session';
 const githubState = {
   backendEnabled: Boolean(backendConfig.backendBaseUrl),
   session: null,
+  sessionToken: readStoredGitHubSessionToken(),
   repos: []
 };
 
@@ -315,6 +317,7 @@ for (const button of document.querySelectorAll('.format-button')) {
 }
 
 function init() {
+  bootstrapOAuthSessionFromUrl();
   renderDocumentCards();
   renderDocumentSelect();
   renderForm();
@@ -683,11 +686,60 @@ function backendUrl(path) {
   return `${base}${path}`;
 }
 
+function readStoredGitHubSessionToken() {
+  try {
+    return localStorage.getItem(GH_SESSION_STORAGE_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function writeStoredGitHubSessionToken(value) {
+  githubState.sessionToken = value || '';
+  try {
+    if (value) {
+      localStorage.setItem(GH_SESSION_STORAGE_KEY, value);
+    } else {
+      localStorage.removeItem(GH_SESSION_STORAGE_KEY);
+    }
+  } catch {
+    // ignore storage issues in restricted browsers
+  }
+}
+
+function bootstrapOAuthSessionFromUrl() {
+  const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+  if (!hash) return;
+
+  const params = new URLSearchParams(hash);
+  const sessionToken = params.get('gh_session');
+  if (!sessionToken) return;
+
+  writeStoredGitHubSessionToken(sessionToken);
+  const cleanUrl = `${window.location.pathname}${window.location.search}`;
+  history.replaceState(null, '', cleanUrl);
+}
+
+function backendFetch(path, init = {}) {
+  const headers = new Headers(init.headers || {});
+  if (githubState.sessionToken) {
+    headers.set('authorization', `Bearer ${githubState.sessionToken}`);
+  }
+  return fetch(backendUrl(path), {
+    ...init,
+    credentials: 'include',
+    headers
+  });
+}
+
 async function refreshGitHubSession() {
   try {
-    const response = await fetch(backendUrl('/api/github/session'), { credentials: 'include' });
+    const response = await backendFetch('/api/github/session');
     const payload = await response.json();
     githubState.session = payload.authenticated ? payload.user : null;
+    if (!payload.authenticated && githubState.sessionToken) {
+      writeStoredGitHubSessionToken('');
+    }
     renderGitHubSession();
     if (githubState.session) {
       await loadGitHubRepos();
@@ -725,7 +777,7 @@ function renderGitHubSession() {
 
 async function loadGitHubRepos() {
   try {
-    const response = await fetch(backendUrl('/api/github/repos'), { credentials: 'include' });
+    const response = await backendFetch('/api/github/repos');
     const payload = await response.json();
     githubState.repos = Array.isArray(payload.repos) ? payload.repos : [];
     renderRepoOptions();
@@ -767,10 +819,10 @@ function connectGitHub() {
 
 async function logoutGitHub() {
   if (!githubState.backendEnabled) return;
-  await fetch(backendUrl('/api/github/logout'), {
-    method: 'POST',
-    credentials: 'include'
+  await backendFetch('/api/github/logout', {
+    method: 'POST'
   });
+  writeStoredGitHubSessionToken('');
   githubState.session = null;
   githubState.repos = [];
   renderGitHubSession();
@@ -792,9 +844,8 @@ async function publishToGitHubPages() {
     const slug = slugify(appState.lastInput?.business?.name || 'legal-document');
     const hash = await shortHash(html);
     const path = `${DOCUMENTS[appState.documentType].basePath}/${slug}-${hash}.html`;
-    const response = await fetch(backendUrl('/api/github/publish'), {
+    const response = await backendFetch('/api/github/publish', {
       method: 'POST',
-      credentials: 'include',
       headers: {
         'content-type': 'application/json'
       },
