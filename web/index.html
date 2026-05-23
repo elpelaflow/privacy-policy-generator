@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Legal Generator Hub</title>
-  <meta name="description" content="Generador estático de documentos legales con preview, exportación y preparación para GitHub Pages.">
+  <meta name="description" content="Generador estático de documentos legales con vista previa, exportación y preparación para GitHub Pages.">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -15,50 +15,50 @@
           <span class="brand-mark">LG</span>
           <span class="brand-copy">
             <strong>Legal Generator Hub</strong>
-            <small>Static-ready legal docs</small>
+            <small>Documentos legales listos para estático</small>
           </span>
         </div>
         <div class="topbar-actions">
-          <a href="#generator" class="ghost-link">Open generator</a>
-          <a href="https://github.com/elpelaflow/privacy-policy-generator" class="solid-link">GitHub repo</a>
+          <a href="#generator" class="ghost-link">Abrir generador</a>
+          <a href="https://github.com/elpelaflow/privacy-policy-generator" class="solid-link">Repo en GitHub</a>
         </div>
       </nav>
 
       <section class="hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">GitHub Pages-ready</p>
-          <h1>Generate legal documents in the browser and export them as public-ready files.</h1>
+          <p class="eyebrow">Listo para GitHub Pages</p>
+          <h1>Generá documentos legales en el navegador y exportalos como archivos listos para publicar.</h1>
           <p class="lead">
-            Privacy, terms, cookies, refunds, disclaimers, and data deletion instructions in one static app,
-            with Argentina-first defaults and a future-ready GitHub Pages publishing flow.
+            Privacidad, términos, cookies, devoluciones, disclaimers e instrucciones de eliminación de datos
+            en una sola app estática, con defaults pensados para Argentina y un flujo preparado para GitHub Pages.
           </p>
           <div class="hero-cta">
-            <a href="#generator" class="button button-primary">Start generating</a>
-            <a href="#capabilities" class="button button-secondary">See capabilities</a>
+            <a href="#generator" class="button button-primary">Empezar a generar</a>
+            <a href="#capabilities" class="button button-secondary">Ver capacidades</a>
           </div>
           <ul class="hero-badges">
-            <li>Client-side generation</li>
-            <li>Download HTML / Markdown / TXT / JSON</li>
-            <li>Prepared for future GitHub Pages publishing</li>
+            <li>Generación client-side</li>
+            <li>Descarga HTML / Markdown / TXT / JSON</li>
+            <li>Preparado para publicar en GitHub Pages</li>
           </ul>
         </div>
         <div class="hero-panel">
           <div class="panel-card">
-            <span class="panel-pill">Now working</span>
-            <h2>What this static version already does</h2>
+            <span class="panel-pill">Disponible ahora</span>
+            <h2>Qué ya hace esta versión estática</h2>
             <ul>
-              <li>Guided document setup</li>
-              <li>Live validation and warnings</li>
-              <li>Readable preview</li>
-              <li>Export package for manual publishing</li>
+              <li>Configuración guiada de documentos</li>
+              <li>Validación mientras completás el formulario</li>
+              <li>Vista previa legible</li>
+              <li>Exportación para publicación manual</li>
             </ul>
           </div>
           <div class="panel-card accent">
-            <span class="panel-pill">Next phase</span>
-            <h2>Future GitHub publishing</h2>
+            <span class="panel-pill">Siguiente fase</span>
+            <h2>Publicación futura en GitHub</h2>
             <p>
-              The UI already includes a placeholder for publishing directly to a user repository through GitHub auth
-              once the backend piece is added.
+              La interfaz ya incluye el punto de entrada para publicar directo en el repositorio de un usuario
+              mediante autenticación con GitHub cuando se agregue la capa de backend.
             </p>
           </div>
         </div>
@@ -68,39 +68,39 @@
     <main>
       <section id="capabilities" class="capabilities">
         <div class="section-heading">
-          <p class="eyebrow">Documents</p>
-          <h2>Everything this web app can generate</h2>
+          <p class="eyebrow">Documentos</p>
+          <h2>Todo lo que esta web puede generar</h2>
         </div>
         <div class="cards-grid" id="document-cards"></div>
       </section>
 
       <section id="generator" class="generator-shell">
         <div class="section-heading">
-          <p class="eyebrow">Static app</p>
-          <h2>Browser generator</h2>
-          <p>Choose a document, fill the fields, review warnings, and export the final files.</p>
+          <p class="eyebrow">App estática</p>
+          <h2>Generador en navegador</h2>
+          <p>Elegí un documento, completá los campos, revisá advertencias y exportá los archivos finales.</p>
         </div>
 
         <div class="generator-layout">
           <aside class="control-rail">
             <div class="rail-card">
-              <label for="document-type">Document type</label>
+              <label for="document-type">Tipo de documento</label>
               <select id="document-type"></select>
               <p id="document-description" class="muted-copy"></p>
             </div>
             <div class="rail-card">
-              <h3>Static limits</h3>
+              <h3>Límites del modo estático</h3>
               <ul class="mini-list">
-                <li>Generates documents fully in browser</li>
-                <li>Downloads files and JSON input</li>
-                <li>Prepares GitHub Pages flow for later</li>
-                <li>Does not publish to user repos yet</li>
+                <li>Genera documentos completos en el navegador</li>
+                <li>Descarga archivos y JSON de entrada</li>
+                <li>Deja preparado el flujo GitHub Pages</li>
+                <li>Todavía no publica en repositorios de usuarios</li>
               </ul>
             </div>
             <div class="rail-card future-publish">
-              <h3>Future publish flow</h3>
-              <p>Direct publishing to a user's GitHub Pages repo will be added in the backend phase.</p>
-              <button class="button button-disabled" type="button" disabled>Publish to GitHub Pages</button>
+              <h3>Flujo futuro de publicación</h3>
+              <p>La publicación directa al GitHub Pages de un usuario se agregará en la fase de backend.</p>
+              <button class="button button-disabled" type="button" disabled>Publicar en GitHub Pages</button>
             </div>
           </aside>
 
@@ -110,33 +110,33 @@
             <div class="results-shell">
               <div class="results-top">
                 <div>
-                  <p class="eyebrow">Review</p>
-                  <h3>Generated output</h3>
+                  <p class="eyebrow">Revisión</p>
+                  <h3>Salida generada</h3>
                 </div>
                 <div class="format-switch">
                   <button type="button" data-format="html" class="format-button is-active">HTML</button>
                   <button type="button" data-format="markdown" class="format-button">Markdown</button>
-                  <button type="button" data-format="text" class="format-button">Text</button>
+                  <button type="button" data-format="text" class="format-button">Texto</button>
                 </div>
               </div>
 
               <div id="validation-box" class="validation-box"></div>
 
               <div class="download-actions">
-                <button type="button" id="generate-button" class="button button-primary">Generate document</button>
-                <button type="button" id="download-html" class="button button-secondary">Download HTML</button>
-                <button type="button" id="download-markdown" class="button button-secondary">Download Markdown</button>
-                <button type="button" id="download-text" class="button button-secondary">Download TXT</button>
-                <button type="button" id="download-json" class="button button-secondary">Download JSON input</button>
+                <button type="button" id="generate-button" class="button button-primary">Generar documento</button>
+                <button type="button" id="download-html" class="button button-secondary">Descargar HTML</button>
+                <button type="button" id="download-markdown" class="button button-secondary">Descargar Markdown</button>
+                <button type="button" id="download-text" class="button button-secondary">Descargar TXT</button>
+                <button type="button" id="download-json" class="button button-secondary">Descargar JSON</button>
               </div>
 
               <div class="publish-preview">
-                <h4>Prepared GitHub Pages path</h4>
+                <h4>Ruta preparada para GitHub Pages</h4>
                 <p id="prepared-path" class="prepared-path"></p>
               </div>
 
               <div class="preview-stage">
-                <iframe id="preview-html" class="preview-frame" title="HTML preview"></iframe>
+                <iframe id="preview-html" class="preview-frame" title="Vista previa HTML"></iframe>
                 <pre id="preview-code" class="preview-box"></pre>
               </div>
             </div>

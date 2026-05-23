@@ -1,23 +1,23 @@
 const DOCUMENTS = {
   privacy: {
-    label: 'Privacy Policy',
-    description: 'Privacy policy with regions, data, third parties, legal bases, and Argentina-first warnings.',
+    label: 'Política de privacidad',
+    description: 'Política de privacidad con regiones, datos, terceros, bases legales y advertencias Argentina-first.',
     basePath: 'privacy',
     generator: () => new globalThis.LegalGenerators.PrivacyPolicyGenerator(),
     sections: [
       {
-        title: 'Business',
-        description: 'Core identity of the business or app.',
+        title: 'Negocio',
+        description: 'Identidad principal del negocio o la app.',
         fields: commonBusinessFields()
       },
       {
-        title: 'Contact',
-        description: 'Privacy and contact channels shown in the document.',
+        title: 'Contacto',
+        description: 'Canales de privacidad y contacto que se muestran en el documento.',
         fields: commonContactFields()
       },
       {
-        title: 'Operations & privacy scope',
-        description: 'Jurisdiction, regions, audience, data categories, legal bases, and compliance signals.',
+        title: 'Operación y alcance de privacidad',
+        description: 'Jurisdicción, regiones, audiencia, categorías de datos, bases legales y señales de cumplimiento.',
         fields: [
           selectField('operations.primaryJurisdiction', 'Primary jurisdiction', JURISDICTIONS, 'ar'),
           checkboxField('operations.sellRegions', 'Operational regions', REGIONS, ['ar']),
@@ -43,24 +43,24 @@ const DOCUMENTS = {
     }
   },
   terms: {
-    label: 'Terms & Conditions',
-    description: 'Service terms with consumer, ecommerce, account, payment, and dispute language.',
+    label: 'Términos y condiciones',
+    description: 'Términos del servicio con consumo, e-commerce, cuentas, pagos y disputas.',
     basePath: 'terms',
     generator: () => new globalThis.LegalGenerators.TermsGenerator(),
     sections: [
-      { title: 'Business', description: 'Business identity and site.', fields: commonBusinessFields('ecommerce') },
-      { title: 'Contact', description: 'Commercial and legal contact channels.', fields: commonContactFields() },
+      { title: 'Negocio', description: 'Identidad del negocio y sitio.', fields: commonBusinessFields('ecommerce') },
+      { title: 'Contacto', description: 'Canales comerciales y legales de contacto.', fields: commonContactFields() },
       {
-        title: 'Operations',
-        description: 'Jurisdiction and selling regions.',
+        title: 'Operación',
+        description: 'Jurisdicción y regiones de venta.',
         fields: [
           selectField('operations.primaryJurisdiction', 'Primary jurisdiction', JURISDICTIONS, 'ar'),
           checkboxField('operations.sellRegions', 'Operational regions', REGIONS, ['ar'])
         ]
       },
       {
-        title: 'Service & commerce',
-        description: 'Core commercial terms and account model.',
+        title: 'Servicio y comercio',
+        description: 'Términos comerciales principales y modelo de cuentas.',
         fields: [
           selectField('terms.offeringType', 'Offering type', OFFERINGS, 'physical_goods'),
           booleanField('terms.hasAccounts', 'User accounts', 'Users can create accounts or profiles.', false),
@@ -78,8 +78,8 @@ const DOCUMENTS = {
         ]
       },
       {
-        title: 'Rules & legal',
-        description: 'Restrictions, IP, suspension, notice, disputes, and additional disclaimers.',
+        title: 'Reglas y legal',
+        description: 'Restricciones, propiedad intelectual, suspensión, avisos, disputas y disclaimers adicionales.',
         fields: [
           checkboxField('terms.prohibitedActivities', 'Prohibited conduct', PROHIBITED_ACTIVITIES, ['No usar el sitio para actividades ilegales.']),
           textField('terms.ipOwner', 'IP owner', 'AutoPost CLI Operator'),
@@ -108,16 +108,16 @@ const DOCUMENTS = {
     }
   },
   cookies: {
-    label: 'Cookie Policy',
-    description: 'Cookie categories, consent, third parties, browser controls, and privacy alignment.',
+    label: 'Política de cookies',
+    description: 'Categorías de cookies, consentimiento, terceros, controles del navegador y alineación con privacidad.',
     basePath: 'cookies',
     generator: () => new globalThis.LegalGenerators.CookiesPolicyGenerator(),
     sections: [
-      { title: 'Business', description: 'Business identity and site.', fields: commonBusinessFields('saas') },
-      { title: 'Contact', description: 'Cookie contact and management references.', fields: commonContactFields() },
+      { title: 'Negocio', description: 'Identidad del negocio y sitio.', fields: commonBusinessFields('saas') },
+      { title: 'Contacto', description: 'Canales de contacto y gestión para cookies.', fields: commonContactFields() },
       {
-        title: 'Cookies setup',
-        description: 'Categories, third parties, consent, retention, and controls.',
+        title: 'Configuración de cookies',
+        description: 'Categorías, terceros, consentimiento, retención y controles.',
         fields: [
           selectField('operations.primaryJurisdiction', 'Primary jurisdiction', JURISDICTIONS, 'ar'),
           checkboxField('operations.sellRegions', 'Operational regions', REGIONS, ['ar']),
@@ -143,16 +143,16 @@ const DOCUMENTS = {
     }
   },
   refund: {
-    label: 'Return & Refund Policy',
-    description: 'Return windows, refunds, exchanges, shipping responsibility, defects, and consumer expectations.',
+    label: 'Política de devoluciones y reembolsos',
+    description: 'Plazos de devolución, reembolsos, cambios, envíos, fallas y expectativas del consumidor.',
     basePath: 'refunds',
     generator: () => new globalThis.LegalGenerators.ReturnRefundPolicyGenerator(),
     sections: [
-      { title: 'Business', description: 'Business identity and selling context.', fields: commonBusinessFields('ecommerce') },
-      { title: 'Contact', description: 'Return request channels.', fields: commonContactFields() },
+      { title: 'Negocio', description: 'Identidad del negocio y contexto de venta.', fields: commonBusinessFields('ecommerce') },
+      { title: 'Contacto', description: 'Canales para solicitudes de devolución.', fields: commonContactFields() },
       {
-        title: 'Refund rules',
-        description: 'Windows, conditions, defects, digital sales, and exceptions.',
+        title: 'Reglas de devolución y reembolso',
+        description: 'Plazos, condiciones, fallas, ventas digitales y excepciones.',
         fields: [
           selectField('refund.offeringType', 'Offering type', OFFERINGS, 'physical_goods'),
           booleanField('refund.acceptsReturns', 'Accepts returns/refunds', 'Enable for distance sales or operational return flows.', true),
@@ -185,15 +185,15 @@ const DOCUMENTS = {
   },
   disclaimer: {
     label: 'Disclaimer',
-    description: 'Modular disclaimers for links, errors, health, fitness, risks, and reviews.',
+    description: 'Disclaimers modulares para enlaces, errores, salud, fitness, riesgos y reseñas.',
     basePath: 'disclaimer',
     generator: () => new globalThis.LegalGenerators.DisclaimerGenerator(),
     sections: [
-      { title: 'Business', description: 'Business identity and site.', fields: commonBusinessFields('saas') },
-      { title: 'Contact', description: 'Contact and support channels.', fields: commonContactFields() },
+      { title: 'Negocio', description: 'Identidad del negocio y sitio.', fields: commonBusinessFields('saas') },
+      { title: 'Contacto', description: 'Canales de contacto y soporte.', fields: commonContactFields() },
       {
-        title: 'Disclaimer modules',
-        description: 'Choose one or more disclaimer types and tailor the optional language.',
+        title: 'Módulos de disclaimer',
+        description: 'Elegí uno o más tipos de disclaimer y ajustá el lenguaje opcional.',
         fields: [
           checkboxField('disclaimer.categories', 'Disclaimer types', DISCLAIMER_TYPES, ['errors_omissions', 'external_links', 'own_risk']),
           textareaField('disclaimer.professionalAdviceChannel', 'Professional advice note', ''),
@@ -216,16 +216,16 @@ const DOCUMENTS = {
     }
   },
   deletion: {
-    label: 'Data Deletion Instructions',
-    description: 'Deletion channel, scope, retention exceptions, and Meta-linked account guidance.',
+    label: 'Instrucciones de eliminación de datos',
+    description: 'Canal de eliminación, alcance, excepciones de retención y guía para cuentas conectadas con Meta.',
     basePath: 'data-deletion',
     generator: () => new globalThis.LegalGenerators.DataDeletionGenerator(),
     sections: [
-      { title: 'Business', description: 'Business identity and site.', fields: commonBusinessFields('saas') },
-      { title: 'Contact', description: 'Deletion contact channels.', fields: commonContactFields() },
+      { title: 'Negocio', description: 'Identidad del negocio y sitio.', fields: commonBusinessFields('saas') },
+      { title: 'Contacto', description: 'Canales de contacto para eliminación.', fields: commonContactFields() },
       {
-        title: 'Deletion flow',
-        description: 'Request channels, required details, deletion scope, and response timing.',
+        title: 'Flujo de eliminación',
+        description: 'Canales de solicitud, datos requeridos, alcance de eliminación y tiempos de respuesta.',
         fields: [
           selectField('deletion.requestChannel', 'Request channel', DELETION_CHANNELS, 'both'),
           textField('deletion.requestEmail', 'Deletion email', 'thechief@dev-flow.duckdns.org'),
@@ -267,12 +267,20 @@ const validationEl = document.getElementById('validation-box');
 const documentSelectEl = document.getElementById('document-type');
 const documentDescriptionEl = document.getElementById('document-description');
 const preparedPathEl = document.getElementById('prepared-path');
+const generateButtonEl = document.getElementById('generate-button');
+const downloadHtmlEl = document.getElementById('download-html');
+const downloadMarkdownEl = document.getElementById('download-markdown');
+const downloadTextEl = document.getElementById('download-text');
+const downloadJsonEl = document.getElementById('download-json');
 
-document.getElementById('generate-button').addEventListener('click', generateDocument);
-document.getElementById('download-html').addEventListener('click', () => downloadOutput('html'));
-document.getElementById('download-markdown').addEventListener('click', () => downloadOutput('markdown'));
-document.getElementById('download-text').addEventListener('click', () => downloadOutput('text'));
-document.getElementById('download-json').addEventListener('click', downloadJson);
+let validationRequestId = 0;
+let validationTimer = null;
+
+generateButtonEl.addEventListener('click', generateDocument);
+downloadHtmlEl.addEventListener('click', () => downloadOutput('html'));
+downloadMarkdownEl.addEventListener('click', () => downloadOutput('markdown'));
+downloadTextEl.addEventListener('click', () => downloadOutput('text'));
+downloadJsonEl.addEventListener('click', downloadJson);
 
 for (const button of document.querySelectorAll('.format-button')) {
   button.addEventListener('click', () => {
@@ -287,7 +295,8 @@ function init() {
   renderDocumentCards();
   renderDocumentSelect();
   renderForm();
-  setPreviewPlaceholder('Generate a document to preview the output here.');
+  setPreviewPlaceholder('Generá un documento para ver la salida acá.');
+  setExportState(false);
 }
 
 function renderDocumentCards() {
@@ -297,7 +306,7 @@ function renderDocumentCards() {
       <span class="doc-tag">${key}</span>
       <h3>${config.label}</h3>
       <p>${config.description}</p>
-      <button type="button" class="button button-secondary" data-open-doc="${key}">Use this document</button>
+      <button type="button" class="button button-secondary" data-open-doc="${key}">Usar este documento</button>
     </article>
   `).join('');
 
@@ -326,10 +335,14 @@ function renderForm() {
   const config = DOCUMENTS[appState.documentType];
   documentDescriptionEl.textContent = config.description;
   const defaults = createDefaults(appState.documentType);
+  appState.lastGenerated = null;
+  appState.lastInput = null;
+  validationRequestId += 1;
+  clearTimeout(validationTimer);
 
   formEl.innerHTML = config.sections.map((section, index) => `
     <section class="form-section">
-      <p class="eyebrow">Section ${index + 1}</p>
+      <p class="eyebrow">Sección ${index + 1}</p>
       <h3>${section.title}</h3>
       <p>${section.description}</p>
       <div class="field-grid">
@@ -340,12 +353,14 @@ function renderForm() {
 
   formEl.oninput = () => {
     preparedPathEl.textContent = buildPreparedPath();
+    scheduleLiveValidation();
   };
 
   preparedPathEl.textContent = buildPreparedPath();
   validationEl.className = 'validation-box';
   validationEl.innerHTML = '';
-  setPreviewPlaceholder('Generate a document to preview the output here.');
+  setPreviewPlaceholder('Generá un documento para ver la salida acá.');
+  setExportState(false);
 }
 
 function renderField(field, defaults) {
@@ -368,7 +383,7 @@ function renderField(field, defaults) {
   if (field.type === 'boolean') {
     return `<div class="field full"><label>${field.label}</label><label class="checkbox-item">
       <input type="checkbox" name="${field.name}" ${value ? 'checked' : ''}>
-      <span><strong>${value ? 'Enabled' : 'Disabled by default'}</strong><small>${field.description || ''}</small></span>
+      <span><strong>${value ? 'Activado' : 'Desactivado por default'}</strong><small>${field.description || ''}</small></span>
     </label></div>`;
   }
   return `<div class="field ${field.full ? 'full' : ''}"><label>${field.label}</label><input name="${field.name}" value="${escapeHtml(String(value ?? ''))}" placeholder="${field.placeholder || ''}">${hint(field)}</div>`;
@@ -381,16 +396,16 @@ function hint(field) {
 function createDefaults(type) {
   const common = {
     business: {
-      name: 'AutoPost CLI Operator',
+      name: 'Mi proyecto',
       type: type === 'privacy' ? 'saas' : 'ecommerce',
-      websiteUrl: 'https://dev-flow.duckdns.org/',
+      websiteUrl: '',
       country: 'Argentina',
-      address: 'Adolfo Alsina 3135, B1849, Buenos Aires, Argentina'
+      address: ''
     },
     contact: {
-      email: 'thechief@dev-flow.duckdns.org',
-      phone: '+5491123317940',
-      pageUrl: 'https://dev-flow.duckdns.org/privacy'
+      email: '',
+      phone: '',
+      pageUrl: ''
     },
     settings: { language: 'es' }
   };
@@ -462,18 +477,21 @@ async function generateDocument() {
     const validation = await generator.validate(input);
     renderValidation(validation);
     if (!validation.ok) {
-      setPreviewPlaceholder('Resolve required fields before generating the document.');
+      setPreviewPlaceholder('Resolvé los campos obligatorios antes de generar el documento.');
       appState.lastGenerated = null;
+      setExportState(false);
       return;
     }
     const result = await generator.generate(input);
     appState.lastGenerated = result;
+    setExportState(true);
     refreshPreview();
   } catch (error) {
     validationEl.className = 'validation-box is-visible';
-    validationEl.innerHTML = `<div class="errors"><strong>Generation error</strong><ul><li>${escapeHtml(error.message)}</li></ul></div>`;
-    setPreviewPlaceholder('Generation failed.');
+    validationEl.innerHTML = `<div class="errors"><strong>Error de generación</strong><ul><li>${escapeHtml(error.message)}</li></ul></div>`;
+    setPreviewPlaceholder('La generación falló.');
     appState.lastGenerated = null;
+    setExportState(false);
   }
 }
 
@@ -488,8 +506,8 @@ function renderValidation(validation) {
 
   validationEl.className = 'validation-box is-visible';
   validationEl.innerHTML = `
-    ${errors.length ? `<div class="errors"><strong>Required fixes</strong><ul>${errors.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
-    ${warnings.length ? `<div class="warnings"><strong>Review warnings</strong><ul>${warnings.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
+    ${errors.length ? `<div class="errors"><strong>Ajustes obligatorios</strong><ul>${errors.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
+    ${warnings.length ? `<div class="warnings"><strong>Advertencias de revisión</strong><ul>${warnings.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
   `;
 }
 
@@ -564,6 +582,33 @@ function setPreviewPlaceholder(message) {
   previewCodeEl.textContent = message;
 }
 
+function setExportState(enabled) {
+  for (const button of [downloadHtmlEl, downloadMarkdownEl, downloadTextEl, downloadJsonEl]) {
+    button.disabled = !enabled;
+  }
+}
+
+function scheduleLiveValidation() {
+  clearTimeout(validationTimer);
+  const currentRequestId = ++validationRequestId;
+  validationTimer = setTimeout(async () => {
+    const config = DOCUMENTS[appState.documentType];
+    const generator = config.generator();
+    const values = gatherFormValues();
+    const input = config.buildInput(values);
+
+    try {
+      const validation = await generator.validate(input);
+      if (currentRequestId !== validationRequestId) return;
+      renderValidation(validation);
+    } catch {
+      if (currentRequestId !== validationRequestId) return;
+      validationEl.className = 'validation-box is-visible';
+      validationEl.innerHTML = '<div class="errors"><strong>Error de validación</strong><ul><li>No se pudo validar el formulario en tiempo real.</li></ul></div>';
+    }
+  }, 250);
+}
+
 function slugify(value) {
   return String(value || 'legal-document').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'legal-document';
 }
@@ -595,29 +640,29 @@ function booleanField(name, label, description, value = false) { return { type: 
 
 function outputFields() {
   return {
-    title: 'Output',
-    description: 'Language defaults, export, and GitHub Pages preparation.',
+    title: 'Salida',
+    description: 'Idioma, exportación y preparación para GitHub Pages.',
     fields: [
-      selectField('settings.language', 'Output language', [{ value: 'es', label: 'Español' }, { value: 'en', label: 'English' }], 'es')
+      selectField('settings.language', 'Idioma de salida', [{ value: 'es', label: 'Español' }, { value: 'en', label: 'English' }], 'es')
     ]
   };
 }
 
 function commonBusinessFields(defaultType = 'saas') {
   return [
-    textField('business.name', 'Business or project name', 'AutoPost CLI Operator'),
-    selectField('business.type', 'Business type', BUSINESS_TYPES, defaultType),
-    textField('business.websiteUrl', 'Website / app URL', 'https://dev-flow.duckdns.org/'),
-    textField('business.country', 'Country', 'Argentina'),
-    textareaField('business.address', 'Postal address', 'Adolfo Alsina 3135, B1849, Buenos Aires, Argentina')
+    textField('business.name', 'Nombre del negocio o proyecto', 'Mi proyecto'),
+    selectField('business.type', 'Tipo de negocio', BUSINESS_TYPES, defaultType),
+    textField('business.websiteUrl', 'URL del sitio o app', ''),
+    textField('business.country', 'País', 'Argentina'),
+    textareaField('business.address', 'Dirección postal', '')
   ];
 }
 
 function commonContactFields() {
   return [
-    textField('contact.email', 'Contact email', 'thechief@dev-flow.duckdns.org'),
-    textField('contact.phone', 'Phone', '+5491123317940'),
-    textField('contact.pageUrl', 'Privacy or contact page', 'https://dev-flow.duckdns.org/privacy')
+    textField('contact.email', 'Email de contacto', ''),
+    textField('contact.phone', 'Teléfono', ''),
+    textField('contact.pageUrl', 'Página de privacidad o contacto', '')
   ];
 }
 
@@ -631,10 +676,10 @@ function escapeHtml(value) {
 
 const BUSINESS_TYPES = [
   { value: 'ecommerce', label: 'E-commerce' },
-  { value: 'blog', label: 'Blog / Content' },
-  { value: 'saas', label: 'SaaS / Web App' },
-  { value: 'mobile', label: 'Mobile app' },
-  { value: 'nonprofit', label: 'Nonprofit / NGO' }
+  { value: 'blog', label: 'Blog / Contenido' },
+  { value: 'saas', label: 'SaaS / App web' },
+  { value: 'mobile', label: 'App móvil' },
+  { value: 'nonprofit', label: 'ONG / nonprofit' }
 ];
 
 const JURISDICTIONS = [
@@ -646,7 +691,10 @@ const JURISDICTIONS = [
   { value: 'au', label: 'Australia' },
   { value: 'global', label: 'Global / custom' }
 ];
-const REGIONS = JURISDICTIONS.filter((item) => item.value !== 'global').concat([{ value: 'global', label: 'Global / custom' }]).map((item) => ({ ...item, description: `Applies to ${item.label}` }));
+const REGIONS = JURISDICTIONS
+  .filter((item) => item.value !== 'global')
+  .concat([{ value: 'global', label: 'Global / custom' }])
+  .map((item) => ({ ...item, description: `Aplica a ${item.label}` }));
 const DATA_OPTIONS = [
   { value: 'personal', label: 'Personal', description: 'Names, emails, addresses, account identifiers.' },
   { value: 'financial', label: 'Financial', description: 'Payments, billing, commercial transaction details.' },

@@ -59,6 +59,10 @@ button, input, select, textarea { font: inherit; }
   color: #0b1020;
   background: linear-gradient(135deg, var(--secondary), #8cf9ff);
 }
+.button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
 .button-disabled { opacity: .55; cursor: not-allowed; background: rgba(255,255,255,0.08); color: var(--muted); }
 .ghost-link:hover, .solid-link:hover, .button:hover:not(:disabled), .format-button:hover {
   transform: translateY(-1px);
