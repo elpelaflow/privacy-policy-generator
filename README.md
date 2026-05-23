@@ -16,7 +16,7 @@ This repo now supports two delivery modes:
 - interactive wizard with document selection, guided choices, and manual "Other" notes
 - static browser app with modern UI, live validation, preview, downloads, and GitHub publishing
 - output language selection in Spanish or English
-- optional hashed public URL generation for self-hosted HTML output
+- optional hashed public URL generation for HTML published through hosting you already have
 - GitHub OAuth publish flow for user-owned GitHub Pages repos
 - safe publish paths under `legal/<document-type>/...` to avoid touching a user's site root
 - validation errors and draft warnings
@@ -229,11 +229,11 @@ but not as a full GitHub publish app.
 - compliance toggles: `ccpa`, `coppa`, `caloppa`, `pipeda`
 - output languages: `es`, `en`
 
-## Self-Hosting
+## Existing Hosting Integration
 
-Yes, it is self-hostable.
+Yes, the repo can integrate with hosting you already have.
 
-The generator can create a static HTML privacy policy and optionally publish it into a local directory using a hashed filename such as:
+The generator can create a static HTML privacy policy and optionally publish it into a directory using a hashed filename such as:
 
 ```text
 acme-cloud-7f3c1b2a9d4e6f10.html
@@ -250,29 +250,19 @@ the CLI writes the HTML file there and returns a final URL like:
 https://example.com/privacy/acme-cloud-7f3c1b2a9d4e6f10.html
 ```
 
-That URL is valid as long as your own server or static host serves that directory publicly.
+That URL is valid as long as your own server or static host already serves that directory publicly.
 
-In this machine, the recommended defaults are:
+Important:
 
-- base URL: `https://dev-flow.duckdns.org/privacy`
-- publish directory: `/home/dev-flow/tinyclaw/infra/www/privacy`
+- the repo does not create your hosting infrastructure from scratch
+- the repo does not automatically provision a VPS, web server, or static host
+- it can integrate with hosting you already have
 
-So the generated URL can be published directly under your existing public site.
+Typical examples include:
 
-For cookie policies on this machine, the recommended defaults are:
-
-- base URL: `https://dev-flow.duckdns.org/cookies`
-- publish directory: `/home/dev-flow/tinyclaw/infra/www/cookies`
-
-For return/refund policies on this machine, the recommended defaults are:
-
-- base URL: `https://dev-flow.duckdns.org/refunds`
-- publish directory: `/home/dev-flow/tinyclaw/infra/www/refunds`
-
-For disclaimers on this machine, the recommended defaults are:
-
-- base URL: `https://dev-flow.duckdns.org/disclaimer`
-- publish directory: `/home/dev-flow/tinyclaw/infra/www/disclaimer`
+- an existing website that serves `./public/privacy`
+- a static host serving a `/privacy` directory
+- a reverse-proxy setup where a public URL already maps to a filesystem path
 
 ## Install
 
@@ -388,51 +378,15 @@ privacy-policy publish \
   --publish-dir ./public/privacy
 ```
 
-On this host, the intended real command is:
-
-```bash
-privacy-policy publish --input ./examples/saas-eu.json --base-url https://dev-flow.duckdns.org/privacy
-```
-
-If you omit `--publish-dir`, the CLI now defaults to:
+If you omit `--publish-dir`, the CLI defaults to generic local directories such as:
 
 ```text
-/home/dev-flow/tinyclaw/infra/www/privacy
-```
-
-For terms, the corresponding defaults are:
-
-```text
-https://dev-flow.duckdns.org/terms
-/home/dev-flow/tinyclaw/infra/www/terms
-```
-
-For data deletion instructions, the corresponding defaults are:
-
-```text
-https://dev-flow.duckdns.org/data-deletion
-/home/dev-flow/tinyclaw/infra/www/data-deletion
-```
-
-For cookie policies, the corresponding defaults are:
-
-```text
-https://dev-flow.duckdns.org/cookies
-/home/dev-flow/tinyclaw/infra/www/cookies
-```
-
-For return/refund policies, the corresponding defaults are:
-
-```text
-https://dev-flow.duckdns.org/refunds
-/home/dev-flow/tinyclaw/infra/www/refunds
-```
-
-For disclaimers, the corresponding defaults are:
-
-```text
-https://dev-flow.duckdns.org/disclaimer
-/home/dev-flow/tinyclaw/infra/www/disclaimer
+./public/privacy
+./public/terms
+./public/data-deletion
+./public/cookies
+./public/refunds
+./public/disclaimer
 ```
 
 Generate Markdown:
@@ -447,7 +401,7 @@ Generate HTML to a file:
 privacy-policy generate --input ./examples/saas-eu.json --format html --output ./privacy-policy.html
 ```
 
-Generate and publish a hashed self-hosted URL:
+Generate and publish a hashed URL through existing hosting:
 
 ```bash
 privacy-policy generate \

@@ -2,14 +2,14 @@
   "documentType": "disclaimer",
   "business": {
     "name": "AutoPost CLI Operator",
-    "websiteUrl": "https://dev-flow.duckdns.org/",
+    "websiteUrl": "https://example.com/",
     "country": "Argentina",
     "address": "Adolfo Alsina 3135, B1849, Buenos Aires, Argentina"
   },
   "contact": {
-    "email": "thechief@dev-flow.duckdns.org",
-    "phone": "+5491123317940",
-    "pageUrl": "https://dev-flow.duckdns.org/contacto"
+    "email": "support@example.com",
+    "phone": "+54 11 4000 0000",
+    "pageUrl": "https://example.com/contacto"
   },
   "disclaimer": {
     "categories": ["errors_omissions", "external_links", "own_risk", "product_reviews"],

@@ -3,19 +3,19 @@
   "business": {
     "name": "AutoAds CLI Operator",
     "type": "saas",
-    "websiteUrl": "https://dev-flow.duckdns.org/",
+    "websiteUrl": "https://example.com/",
     "country": "Argentina",
     "address": "Adolfo Alsina 3135, B1849, Buenos Aires, Argentina"
   },
   "contact": {
-    "email": "thechief@dev-flow.duckdns.org",
-    "phone": "+5491123317940",
-    "pageUrl": "https://dev-flow.duckdns.org/"
+    "email": "privacy@example.com",
+    "phone": "+54 11 4000 0000",
+    "pageUrl": "https://example.com/"
   },
   "deletion": {
     "requestChannel": "both",
-    "requestEmail": "thechief@dev-flow.duckdns.org",
-    "requestUrl": "https://dev-flow.duckdns.org/",
+    "requestEmail": "privacy@example.com",
+    "requestUrl": "https://example.com/",
     "identityRequirements": [
       "Email de la cuenta o del usuario solicitante",
       "ID de cuenta publicitaria o recurso vinculado",

@@ -3,14 +3,14 @@
   "business": {
     "name": "AutoPost CLI Operator",
     "type": "ecommerce",
-    "websiteUrl": "https://dev-flow.duckdns.org/",
+    "websiteUrl": "https://example.com/",
     "country": "Argentina",
     "address": "Adolfo Alsina 3135, B1849, Buenos Aires, Argentina"
   },
   "contact": {
-    "email": "thechief@dev-flow.duckdns.org",
-    "phone": "+5491123317940",
-    "pageUrl": "https://dev-flow.duckdns.org/contacto"
+    "email": "support@example.com",
+    "phone": "+54 11 4000 0000",
+    "pageUrl": "https://example.com/contacto"
   },
   "refund": {
     "offeringType": "physical_goods",
@@ -21,7 +21,7 @@
     "refundMethod": "el mismo medio de pago original",
     "refundProcessingTime": "10 días hábiles",
     "returnShippingResponsibility": "case_by_case",
-    "returnRequestChannel": "thechief@dev-flow.duckdns.org",
+    "returnRequestChannel": "support@example.com",
     "nonReturnableItems": [
       "Productos personalizados o hechos a medida",
       "Productos usados, dañados por mal uso o incompletos"

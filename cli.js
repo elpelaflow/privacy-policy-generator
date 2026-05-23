@@ -199,8 +199,8 @@ const DISCLAIMER_OPTIONS = [
 ];
 
 const BACK = Symbol('back');
-const DEFAULT_PUBLIC_BASE_URL = 'https://dev-flow.duckdns.org/privacy';
-const DEFAULT_PUBLISH_DIR = '/home/dev-flow/tinyclaw/infra/www/privacy';
+const DEFAULT_PUBLIC_BASE_URL = 'https://example.com/privacy';
+const DEFAULT_PUBLISH_DIR = './public/privacy';
 const ANSI_ENABLED = Boolean(stdout.isTTY && process.env.NO_COLOR !== '1');
 
 function color(code, value) {
@@ -517,38 +517,38 @@ async function publishGeneratedPolicy(input, result, options = {}) {
 
 function defaultBaseUrlForDocument(documentType) {
   if (documentType === 'terms') {
-    return 'https://dev-flow.duckdns.org/terms';
+    return 'https://example.com/terms';
   }
   if (documentType === 'deletion') {
-    return 'https://dev-flow.duckdns.org/data-deletion';
+    return 'https://example.com/data-deletion';
   }
   if (documentType === 'cookies') {
-    return 'https://dev-flow.duckdns.org/cookies';
+    return 'https://example.com/cookies';
   }
   if (documentType === 'refund') {
-    return 'https://dev-flow.duckdns.org/refunds';
+    return 'https://example.com/refunds';
   }
   if (documentType === 'disclaimer') {
-    return 'https://dev-flow.duckdns.org/disclaimer';
+    return 'https://example.com/disclaimer';
   }
   return DEFAULT_PUBLIC_BASE_URL;
 }
 
 function defaultPublishDirForDocument(documentType) {
   if (documentType === 'terms') {
-    return '/home/dev-flow/tinyclaw/infra/www/terms';
+    return './public/terms';
   }
   if (documentType === 'deletion') {
-    return '/home/dev-flow/tinyclaw/infra/www/data-deletion';
+    return './public/data-deletion';
   }
   if (documentType === 'cookies') {
-    return '/home/dev-flow/tinyclaw/infra/www/cookies';
+    return './public/cookies';
   }
   if (documentType === 'refund') {
-    return '/home/dev-flow/tinyclaw/infra/www/refunds';
+    return './public/refunds';
   }
   if (documentType === 'disclaimer') {
-    return '/home/dev-flow/tinyclaw/infra/www/disclaimer';
+    return './public/disclaimer';
   }
   return DEFAULT_PUBLISH_DIR;
 }

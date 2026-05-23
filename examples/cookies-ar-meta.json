@@ -3,14 +3,14 @@
   "business": {
     "name": "AutoPost CLI Operator",
     "type": "saas",
-    "websiteUrl": "https://dev-flow.duckdns.org/",
+    "websiteUrl": "https://example.com/",
     "country": "Argentina",
     "address": "Adolfo Alsina 3135, B1849, Buenos Aires, Argentina"
   },
   "contact": {
-    "email": "thechief@dev-flow.duckdns.org",
-    "phone": "+5491123317940",
-    "pageUrl": "https://dev-flow.duckdns.org/privacy"
+    "email": "privacy@example.com",
+    "phone": "+54 11 4000 0000",
+    "pageUrl": "https://example.com/privacy"
   },
   "operations": {
     "primaryJurisdiction": "ar",
@@ -20,7 +20,7 @@
     "categories": ["necessary", "analytics", "advertising"],
     "thirdParties": ["analytics", "advertising", "social"],
     "consentMode": "banner",
-    "managementUrl": "https://dev-flow.duckdns.org/privacy",
+    "managementUrl": "https://example.com/privacy",
     "browserControls": "El usuario puede bloquear o eliminar cookies desde la configuración de su navegador y revisar sus preferencias cuando el banner o el centro de preferencias esté disponible.",
     "retentionPolicy": "Algunas cookies son de sesión y otras pueden persistir por más tiempo según la finalidad, la configuración técnica y las políticas del proveedor correspondiente."
   },
