@@ -279,16 +279,31 @@ const downloadHtmlEl = document.getElementById('download-html');
 const downloadMarkdownEl = document.getElementById('download-markdown');
 const downloadTextEl = document.getElementById('download-text');
 const downloadJsonEl = document.getElementById('download-json');
+const connectGitHubEl = document.getElementById('connect-github');
+const logoutGitHubEl = document.getElementById('logout-github');
+const publishGitHubPagesEl = document.getElementById('publish-github-pages');
+const githubRepoSelectEl = document.getElementById('github-repo-select');
+const githubSessionStatusEl = document.getElementById('github-session-status');
 
 let validationRequestId = 0;
 let validationTimer = null;
 const generatorCache = new Map();
+const backendConfig = globalThis.__LEGAL_HUB_CONFIG__ || {};
+const githubState = {
+  backendEnabled: Boolean(backendConfig.backendBaseUrl),
+  session: null,
+  repos: []
+};
 
 generateButtonEl.addEventListener('click', generateDocument);
 downloadHtmlEl.addEventListener('click', () => downloadOutput('html'));
 downloadMarkdownEl.addEventListener('click', () => downloadOutput('markdown'));
 downloadTextEl.addEventListener('click', () => downloadOutput('text'));
 downloadJsonEl.addEventListener('click', downloadJson);
+connectGitHubEl.addEventListener('click', connectGitHub);
+logoutGitHubEl.addEventListener('click', logoutGitHub);
+publishGitHubPagesEl.addEventListener('click', publishToGitHubPages);
+githubRepoSelectEl.addEventListener('change', updatePublishControls);
 
 for (const button of document.querySelectorAll('.format-button')) {
   button.addEventListener('click', () => {
@@ -306,6 +321,7 @@ function init() {
   setPreviewPlaceholder('Generá un documento para ver la salida acá.');
   setExportState(false);
   setStatus('');
+  initGitHubPublish();
 }
 
 function renderDocumentCards() {
@@ -500,6 +516,7 @@ async function generateDocument() {
     appState.isDirtySinceGenerate = false;
     setExportState(true);
     setStatus('Documento generado correctamente. Si cambiás el formulario, vas a tener que regenerarlo para actualizar vista previa y descargas.');
+    updatePublishControls();
     refreshPreview();
   } catch (error) {
     validationEl.className = 'validation-box is-visible';
@@ -507,6 +524,7 @@ async function generateDocument() {
     setPreviewPlaceholder('La generación falló.');
     appState.lastGenerated = null;
     setExportState(false);
+    updatePublishControls();
   }
 }
 
@@ -615,6 +633,7 @@ function setExportState(enabled) {
   for (const button of [downloadHtmlEl, downloadMarkdownEl, downloadTextEl, downloadJsonEl]) {
     button.disabled = !enabled;
   }
+  updatePublishControls();
 }
 
 function renderSummary() {
@@ -641,6 +660,156 @@ function renderSummary() {
     <h4>Resumen actual</h4>
     <div class="summary-grid">${valuesHtml}</div>
   `;
+}
+
+async function initGitHubPublish() {
+  if (!githubState.backendEnabled) {
+    githubSessionStatusEl.textContent = 'Backend no configurado todavía. Definí __LEGAL_HUB_CONFIG__.backendBaseUrl para habilitar GitHub.';
+    connectGitHubEl.disabled = true;
+    logoutGitHubEl.disabled = true;
+    githubRepoSelectEl.disabled = true;
+    publishGitHubPagesEl.disabled = true;
+    publishGitHubPagesEl.classList.add('button-disabled');
+    return;
+  }
+
+  connectGitHubEl.disabled = false;
+  await refreshGitHubSession();
+}
+
+function backendUrl(path) {
+  const base = String(backendConfig.backendBaseUrl || '').replace(/\/$/, '');
+  return `${base}${path}`;
+}
+
+async function refreshGitHubSession() {
+  try {
+    const response = await fetch(backendUrl('/api/github/session'), { credentials: 'include' });
+    const payload = await response.json();
+    githubState.session = payload.authenticated ? payload.user : null;
+    renderGitHubSession();
+    if (githubState.session) {
+      await loadGitHubRepos();
+    } else {
+      githubState.repos = [];
+      renderRepoOptions();
+    }
+  } catch {
+    githubState.session = null;
+    githubState.repos = [];
+    githubSessionStatusEl.textContent = 'No se pudo conectar con el backend de GitHub.';
+    renderRepoOptions();
+  }
+  updatePublishControls();
+}
+
+function renderGitHubSession() {
+  if (!githubState.backendEnabled) return;
+  if (githubState.session) {
+    githubSessionStatusEl.textContent = `Conectado como ${githubState.session.login}.`;
+    connectGitHubEl.disabled = true;
+    logoutGitHubEl.disabled = false;
+  } else {
+    githubSessionStatusEl.textContent = 'Todavía no conectaste una cuenta de GitHub.';
+    connectGitHubEl.disabled = false;
+    logoutGitHubEl.disabled = true;
+  }
+}
+
+async function loadGitHubRepos() {
+  try {
+    const response = await fetch(backendUrl('/api/github/repos'), { credentials: 'include' });
+    const payload = await response.json();
+    githubState.repos = Array.isArray(payload.repos) ? payload.repos : [];
+    renderRepoOptions();
+  } catch {
+    githubState.repos = [];
+    githubRepoSelectEl.innerHTML = '<option value="">No se pudieron cargar repositorios</option>';
+  }
+}
+
+function renderRepoOptions() {
+  githubRepoSelectEl.innerHTML = '<option value="">Elegí un repositorio</option>';
+  for (const repo of githubState.repos) {
+    const option = document.createElement('option');
+    option.value = repo.full_name;
+    option.textContent = `${repo.full_name}${repo.pages_active ? ' · Pages activo' : ''}`;
+    option.dataset.defaultBranch = repo.default_branch || 'main';
+    githubRepoSelectEl.appendChild(option);
+  }
+  githubRepoSelectEl.disabled = !githubState.session || githubState.repos.length === 0;
+}
+
+function updatePublishControls() {
+  const canPublish = githubState.backendEnabled
+    && Boolean(githubState.session)
+    && Boolean(githubRepoSelectEl.value)
+    && Boolean(appState.lastGenerated)
+    && !appState.isDirtySinceGenerate;
+
+  publishGitHubPagesEl.disabled = !canPublish;
+  publishGitHubPagesEl.classList.toggle('button-disabled', !canPublish);
+}
+
+function connectGitHub() {
+  if (!githubState.backendEnabled) return;
+  const returnTo = encodeURIComponent(window.location.href);
+  window.location.href = `${backendUrl('/api/github/start')}?return_to=${returnTo}`;
+}
+
+async function logoutGitHub() {
+  if (!githubState.backendEnabled) return;
+  await fetch(backendUrl('/api/github/logout'), {
+    method: 'POST',
+    credentials: 'include'
+  });
+  githubState.session = null;
+  githubState.repos = [];
+  renderGitHubSession();
+  renderRepoOptions();
+  updatePublishControls();
+}
+
+async function publishToGitHubPages() {
+  if (!githubState.backendEnabled || !appState.lastGenerated || !githubRepoSelectEl.value) {
+    return;
+  }
+
+  publishGitHubPagesEl.disabled = true;
+  publishGitHubPagesEl.textContent = 'Publicando...';
+
+  try {
+    const repo = githubState.repos.find((item) => item.full_name === githubRepoSelectEl.value);
+    const html = appState.lastGenerated.html;
+    const slug = slugify(appState.lastInput?.business?.name || 'legal-document');
+    const hash = await shortHash(html);
+    const path = `${DOCUMENTS[appState.documentType].basePath}/${slug}-${hash}.html`;
+    const response = await fetch(backendUrl('/api/github/publish'), {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        repo: githubRepoSelectEl.value,
+        branch: repo?.default_branch || 'main',
+        path,
+        content: html,
+        commitMessage: `Publish ${DOCUMENTS[appState.documentType].label}: ${slug}-${hash}.html`
+      })
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.error || 'No se pudo publicar el documento.');
+    }
+    preparedPathEl.textContent = payload.public_url || preparedPathEl.textContent;
+    setStatus(`Documento publicado. URL final: ${payload.public_url}`);
+  } catch (error) {
+    setStatus(`Error al publicar en GitHub Pages: ${error.message}`);
+  } finally {
+    publishGitHubPagesEl.textContent = 'Publicar en mi GitHub Pages';
+    updatePublishControls();
+  }
 }
 
 function scheduleLiveValidation() {
@@ -686,6 +855,15 @@ function markDirtySinceGenerate() {
 
 function slugify(value) {
   return String(value || 'legal-document').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'legal-document';
+}
+
+async function shortHash(value) {
+  const bytes = new TextEncoder().encode(String(value));
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  const hash = Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+  return hash.slice(0, 16);
 }
 
 function setByPath(target, path, value) {

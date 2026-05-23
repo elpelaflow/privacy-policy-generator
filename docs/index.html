@@ -98,9 +98,18 @@
               </ul>
             </div>
             <div class="rail-card future-publish">
-              <h3>Flujo futuro de publicación</h3>
-              <p>La publicación directa al GitHub Pages de un usuario se agregará en la fase de backend.</p>
-              <button class="button button-disabled" type="button" disabled>Publicar en GitHub Pages</button>
+              <h3>Publicación en GitHub Pages</h3>
+              <p id="github-publish-copy">Conectá GitHub para publicar el HTML generado dentro de un repo tuyo y obtener una URL pública.</p>
+              <div class="publish-stack">
+                <button class="button button-secondary" type="button" id="connect-github">Conectar GitHub</button>
+                <button class="button button-secondary" type="button" id="logout-github">Desconectar</button>
+                <p id="github-session-status" class="muted-copy">Backend no configurado todavía.</p>
+                <label for="github-repo-select">Repositorio destino</label>
+                <select id="github-repo-select" disabled>
+                  <option value="">Elegí un repositorio</option>
+                </select>
+                <button class="button button-disabled" type="button" id="publish-github-pages" disabled>Publicar en mi GitHub Pages</button>
+              </div>
             </div>
           </aside>
 
@@ -148,7 +157,12 @@
     </main>
   </div>
 
-  <script>globalThis.__LEGAL_GENERATOR_BASE__ = '.';</script>
+  <script>
+    globalThis.__LEGAL_GENERATOR_BASE__ = '.';
+    globalThis.__LEGAL_HUB_CONFIG__ = {
+      backendBaseUrl: ''
+    };
+  </script>
   <script src="./assets/generators.js"></script>
   <script type="module" src="./app.js"></script>
 </body>

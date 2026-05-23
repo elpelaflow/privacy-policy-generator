@@ -41,6 +41,35 @@ What it does not do yet:
 - publish directly into a user's repository
 - run a backend publish flow
 
+## GitHub Publish v1 Scaffold
+
+The repo now includes a backend scaffold for the next phase under:
+
+```text
+backend/cloudflare-worker/
+```
+
+This Cloudflare Worker is prepared to handle:
+
+- GitHub OAuth start/callback
+- session cookie handling
+- repo listing for the authenticated user
+- publishing generated HTML files into a selected repo path
+- returning an expected GitHub Pages public URL
+
+It is not active by default. To enable it you need:
+
+1. a GitHub OAuth App
+2. a deployed Cloudflare Worker with secrets
+3. a public worker URL
+4. `backendBaseUrl` configured in the static web app
+
+Worker files:
+
+- [backend/cloudflare-worker/src/index.js](backend/cloudflare-worker/src/index.js)
+- [backend/cloudflare-worker/wrangler.toml.example](backend/cloudflare-worker/wrangler.toml.example)
+- [backend/cloudflare-worker/README.md](backend/cloudflare-worker/README.md)
+
 Build the static site:
 
 ```bash

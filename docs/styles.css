@@ -130,6 +130,23 @@ button, input, select, textarea { font: inherit; }
 .rail-card { padding: 20px; }
 .rail-card h3 { margin-top: 0; }
 .mini-list { margin: 0; padding-left: 18px; color: var(--muted); line-height: 1.7; }
+.publish-stack {
+  display: grid;
+  gap: 12px;
+}
+.publish-stack label {
+  font-size: .92rem;
+  color: #f3f6ff;
+}
+.publish-stack select {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  padding: 12px 14px;
+}
 
 .workspace { display: grid; gap: 20px; }
 .form-shell { display: grid; gap: 18px; }
