@@ -261,7 +261,8 @@ const appState = {
   documentType: 'privacy',
   previewFormat: 'html',
   lastGenerated: null,
-  lastInput: null
+  lastInput: null,
+  isDirtySinceGenerate: false
 };
 
 const formEl = document.getElementById('generator-form');
@@ -279,6 +280,7 @@ const downloadJsonEl = document.getElementById('download-json');
 
 let validationRequestId = 0;
 let validationTimer = null;
+const generatorCache = new Map();
 
 generateButtonEl.addEventListener('click', generateDocument);
 downloadHtmlEl.addEventListener('click', () => downloadOutput('html'));
@@ -341,6 +343,7 @@ function renderForm() {
   const defaults = createDefaults(appState.documentType);
   appState.lastGenerated = null;
   appState.lastInput = null;
+  appState.isDirtySinceGenerate = false;
   validationRequestId += 1;
   clearTimeout(validationTimer);
 
@@ -357,6 +360,7 @@ function renderForm() {
 
   formEl.oninput = () => {
     preparedPathEl.textContent = buildPreparedPath();
+    markDirtySinceGenerate();
     scheduleLiveValidation();
   };
 
@@ -472,7 +476,7 @@ function createDefaults(type) {
 async function generateDocument() {
   const values = gatherFormValues();
   const config = DOCUMENTS[appState.documentType];
-  const generator = config.generator();
+  const generator = getGenerator(appState.documentType);
   const input = config.buildInput(values);
   appState.lastInput = input;
   preparedPathEl.textContent = buildPreparedPath();
@@ -488,6 +492,7 @@ async function generateDocument() {
     }
     const result = await generator.generate(input);
     appState.lastGenerated = result;
+    appState.isDirtySinceGenerate = false;
     setExportState(true);
     refreshPreview();
   } catch (error) {
@@ -597,7 +602,7 @@ function scheduleLiveValidation() {
   const currentRequestId = ++validationRequestId;
   validationTimer = setTimeout(async () => {
     const config = DOCUMENTS[appState.documentType];
-    const generator = config.generator();
+    const generator = getGenerator(appState.documentType);
     const values = gatherFormValues();
     const input = config.buildInput(values);
 
@@ -611,6 +616,24 @@ function scheduleLiveValidation() {
       validationEl.innerHTML = '<div class="errors"><strong>Error de validación</strong><ul><li>No se pudo validar el formulario en tiempo real.</li></ul></div>';
     }
   }, 250);
+}
+
+function getGenerator(documentType) {
+  if (!generatorCache.has(documentType)) {
+    generatorCache.set(documentType, DOCUMENTS[documentType].generator());
+  }
+  return generatorCache.get(documentType);
+}
+
+function markDirtySinceGenerate() {
+  if (!appState.lastGenerated || appState.isDirtySinceGenerate) {
+    return;
+  }
+
+  appState.isDirtySinceGenerate = true;
+  appState.lastGenerated = null;
+  setExportState(false);
+  setPreviewPlaceholder('El formulario cambió desde la última generación. Volvé a generar el documento para actualizar la vista previa y las descargas.');
 }
 
 function slugify(value) {
