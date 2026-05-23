@@ -1,6 +1,6 @@
 # Privacy Policy Generator
 
-CLI-first generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, automated tests, and a static web app prepared for GitHub Pages.
+CLI-first and web-enabled generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, automated tests, and GitHub Pages publishing support.
 
 ## Scope
 
@@ -14,9 +14,11 @@ This repo now supports two delivery modes:
 - structured rules instead of string-based condition parsing
 - canonical JSON input format
 - interactive wizard with document selection, guided choices, and manual "Other" notes
-- static browser app with modern UI, live validation, preview, and downloads
+- static browser app with modern UI, live validation, preview, downloads, and GitHub publishing
 - output language selection in Spanish or English
 - optional hashed public URL generation for self-hosted HTML output
+- GitHub OAuth publish flow for user-owned GitHub Pages repos
+- safe publish paths under `legal/<document-type>/...` to avoid touching a user's site root
 - validation errors and draft warnings
 - explainable `decisionLog` output
 - HTML, Markdown, and plain text generation
@@ -33,29 +35,34 @@ What the static app can do today:
 - generate the final document client-side
 - preview HTML, Markdown, or text output
 - download `html`, `md`, `txt`, and input `json`
-- show a prepared GitHub Pages path for future publishing
+- authenticate with GitHub through a Cloudflare Worker backend
+- list repositories from the authenticated user
+- detect whether a repo has `Pages activo` or `Pages accesible`
+- publish generated HTML into a selected repo under a safe route such as `legal/privacy/...`
+- return the final expected GitHub Pages URL
 
 What it does not do yet:
 
-- authenticate with GitHub
-- publish directly into a user's repository
-- run a backend publish flow
+- auto-edit the user's existing homepage or footer to insert legal links
+- auto-enable GitHub Pages on repos where Pages is not configured
+- publish arbitrary custom document roots outside the current guided flow
 
-## GitHub Publish v1 Scaffold
+## GitHub Publish v1
 
-The repo now includes a backend scaffold for the next phase under:
+The repo includes a Cloudflare Worker backend under:
 
 ```text
 backend/cloudflare-worker/
 ```
 
-This Cloudflare Worker is prepared to handle:
+This Cloudflare Worker handles:
 
 - GitHub OAuth start/callback
-- session cookie handling
+- session resolution for the browser app
 - repo listing for the authenticated user
+- GitHub Pages status checks
 - publishing generated HTML files into a selected repo path
-- returning an expected GitHub Pages public URL
+- returning the final expected GitHub Pages public URL
 
 It is not active by default. To enable it you need:
 
@@ -84,6 +91,33 @@ docs/
 ```
 
 That folder is ready to be served by GitHub Pages.
+
+## GitHub Pages Publish Flow
+
+Once the static app and backend are configured, the browser flow is:
+
+1. open the web app
+2. choose a document type
+3. complete the form and generate the HTML
+4. click `Conectar GitHub`
+5. authorize the GitHub OAuth app
+6. choose a repository from the dropdown
+7. publish the generated document into a safe repo path such as:
+
+```text
+legal/privacy/my-app-abc123.html
+legal/terms/my-app-abc123.html
+legal/cookies/my-app-abc123.html
+```
+
+If the selected repository already has GitHub Pages enabled and accessible, the final URL should be usable immediately.
+
+Important:
+
+- the publish flow does not overwrite `index.html`
+- it does not modify the user's homepage or site navigation
+- it only adds standalone legal-document files under `legal/...`
+- the user can later link those URLs from their site manually if they want
 
 ## Supported Documents
 
@@ -499,6 +533,9 @@ Current test coverage checks:
 
 ```text
 cli.js
+web/
+docs/
+backend/cloudflare-worker/
 data/policy-sections.json
 examples/saas-eu.json
 examples/terms-ar-ecommerce.json
