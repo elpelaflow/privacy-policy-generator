@@ -1161,7 +1161,7 @@ async function collectOutputSection(rl, state) {
       const value = await promptYesNo(
         rl,
         'Generar URL pública hasheada',
-        'Si respondés sí, se crea un HTML con nombre hasheado en un directorio publicable y se imprime la URL final lista para usar.',
+        'Si respondés sí, se crea un HTML con nombre hasheado en un directorio local publicable y se imprime una URL final esperada. Esa URL sólo funciona si ya tenés hosting o un servidor que sirva públicamente ese directorio.',
         state.output.publishHashedUrl
       );
       if (value === BACK) return BACK;
@@ -3119,6 +3119,7 @@ async function main() {
     process.stdout.write(`${published.publicUrl}\n`);
     process.stdout.write(`Published file: ${published.filePath}\n`);
     process.stdout.write(`Manifest: ${published.manifestPath}\n`);
+    process.stdout.write('Note: this command writes a local file and assumes your existing hosting or server already serves that directory publicly. Without that hosting, the result is only a local file plus an expected URL.\n');
     return;
   }
 
@@ -3146,6 +3147,7 @@ async function main() {
     });
     process.stdout.write(`Published URL: ${published.publicUrl}\n`);
     process.stdout.write(`Published file: ${published.filePath}\n`);
+    process.stdout.write('Note: this publish step assumes your existing hosting or server already serves that directory publicly. Without that hosting, the result is only a local file plus an expected URL.\n');
   }
 }
 

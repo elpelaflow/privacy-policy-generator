@@ -396,6 +396,8 @@ privacy-policy publish \
   --publish-dir ./public/privacy
 ```
 
+Important: this CLI publish flow writes a local file and assumes your existing hosting or server already serves that directory publicly. If you do not already have hosting for that path, the practical result is only a local file plus an expected URL.
+
 If you omit `--publish-dir`, the CLI defaults to generic local directories such as:
 
 ```text
