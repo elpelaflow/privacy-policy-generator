@@ -27,8 +27,18 @@ class PrivacyPolicyGenerator {
   }
 
   async readJson(filename) {
-    const fs = require('node:fs/promises');
-    const path = require('node:path');
+    if (typeof window !== 'undefined' && typeof fetch === 'function') {
+      const base = String(globalThis.__LEGAL_GENERATOR_BASE__ || '.').replace(/\/$/, '');
+      const response = await fetch(`${base}/data/${filename}`);
+      if (!response.ok) {
+        throw new Error(`Failed to load ${filename}: ${response.status}`);
+      }
+      return response.json();
+    }
+
+    const nodeRequire = eval('require');
+    const fs = nodeRequire('node:fs/promises');
+    const path = nodeRequire('node:path');
     const filePath = path.join(__dirname, '..', 'data', filename);
     const raw = await fs.readFile(filePath, 'utf8');
     return JSON.parse(raw);

@@ -1,27 +1,60 @@
 # Privacy Policy Generator
 
-CLI-first generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, and automated tests.
+CLI-first generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, automated tests, and a static web app prepared for GitHub Pages.
 
 ## Scope
 
-This repo is now intentionally terminal-focused.
+This repo now supports two delivery modes:
 
-- no browser UI
-- no static site assets
-- no client-side generation path
 - terminal-first generators for privacy, terms, cookies, return/refund, disclaimers, and deletion-instructions documents
+- a client-side static web app that runs fully in the browser and can be deployed to GitHub Pages
 
 ## Features
 
 - structured rules instead of string-based condition parsing
 - canonical JSON input format
 - interactive wizard with document selection, guided choices, and manual "Other" notes
+- static browser app with modern UI, live validation, preview, and downloads
 - output language selection in Spanish or English
 - optional hashed public URL generation for self-hosted HTML output
 - validation errors and draft warnings
 - explainable `decisionLog` output
 - HTML, Markdown, and plain text generation
 - automated regression tests
+
+## Static Web App
+
+The repo now includes a browser-based static app under `web/` and a GitHub Pages-ready build output under `docs/`.
+
+What the static app can do today:
+
+- choose any supported legal document
+- complete a guided form in the browser
+- generate the final document client-side
+- preview HTML, Markdown, or text output
+- download `html`, `md`, `txt`, and input `json`
+- show a prepared GitHub Pages path for future publishing
+
+What it does not do yet:
+
+- authenticate with GitHub
+- publish directly into a user's repository
+- run a backend publish flow
+
+Build the static site:
+
+```bash
+npm install
+npm run build:web
+```
+
+This writes the deployable static site into:
+
+```text
+docs/
+```
+
+That folder is ready to be served by GitHub Pages.
 
 ## Supported Documents
 
@@ -90,11 +123,12 @@ For disclaimers on this machine, the recommended defaults are:
 ## Install
 
 ```bash
-git clone https://github.com/Tempest-Solutions-Company/privacy-policy-generator
+git clone https://github.com/elpelaflow/privacy-policy-generator
 cd privacy-policy-generator
+npm install
 ```
 
-No runtime dependencies are required beyond Node.js.
+Runtime usage only needs Node.js, but `npm install` is required if you want to build the static web app for GitHub Pages.
 
 To install the command for the current user without root:
 

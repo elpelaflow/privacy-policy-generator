@@ -9,6 +9,8 @@
   },
   "scripts": {
     "test": "node --test",
+    "build": "npm run build:web",
+    "build:web": "node ./scripts/build-web.js",
     "validate:example": "node ./cli.js validate --input ./examples/saas-eu.json",
     "generate:example": "node ./cli.js generate --input ./examples/saas-eu.json --format markdown",
     "validate:terms": "node ./cli.js validate --document terms --input ./examples/terms-ar-ecommerce.json",
@@ -21,5 +23,8 @@
     "generate:refund": "node ./cli.js generate --document refund --input ./examples/refund-ar-ecommerce.json --format markdown",
     "validate:disclaimer": "node ./cli.js validate --document disclaimer --input ./examples/disclaimer-meta-content.json",
     "generate:disclaimer": "node ./cli.js generate --document disclaimer --input ./examples/disclaimer-meta-content.json --format markdown"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
   }
 }
