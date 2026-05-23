@@ -22,13 +22,13 @@ function buildDocuments() {
         title: 'Operación y alcance de privacidad',
         description: 'Jurisdicción, regiones, audiencia, categorías de datos, bases legales y señales de cumplimiento.',
         fields: [
-          selectField('operations.primaryJurisdiction', 'Primary jurisdiction', JURISDICTIONS, 'ar'),
-          checkboxField('operations.sellRegions', 'Operational regions', REGIONS, ['ar']),
-          booleanField('operations.childrenAudience', 'Children audience', 'Mark this only if the service is directed to minors or knowingly handles children data.', false),
-          checkboxField('dataPractices.collectedData', 'Collected data', DATA_OPTIONS, ['personal', 'usage', 'cookies']),
-          checkboxField('dataPractices.thirdParties', 'Third parties', THIRD_PARTIES, ['analytics']),
-          checkboxField('dataPractices.legalBases', 'Legal bases', LEGAL_BASES, ['contract']),
-          checkboxField('compliance.requestedFrameworks', 'Compliance focus', COMPLIANCE, [])
+          selectField('operations.primaryJurisdiction', 'Jurisdicción principal', JURISDICTIONS, 'ar'),
+          checkboxField('operations.sellRegions', 'Regiones operativas', REGIONS, ['ar']),
+          booleanField('operations.childrenAudience', 'Audiencia infantil', 'Marcá esto sólo si el servicio está dirigido a menores o si trata datos de niños de forma intencional.', false),
+          checkboxField('dataPractices.collectedData', 'Datos recolectados', DATA_OPTIONS, ['personal', 'usage', 'cookies']),
+          checkboxField('dataPractices.thirdParties', 'Terceros', THIRD_PARTIES, ['analytics']),
+          checkboxField('dataPractices.legalBases', 'Bases legales', LEGAL_BASES, ['contract']),
+          checkboxField('compliance.requestedFrameworks', 'Foco de cumplimiento', COMPLIANCE, [])
         ]
       },
       outputFields()
@@ -57,44 +57,44 @@ function buildDocuments() {
         title: 'Operación',
         description: 'Jurisdicción y regiones de venta.',
         fields: [
-          selectField('operations.primaryJurisdiction', 'Primary jurisdiction', JURISDICTIONS, 'ar'),
-          checkboxField('operations.sellRegions', 'Operational regions', REGIONS, ['ar'])
+          selectField('operations.primaryJurisdiction', 'Jurisdicción principal', JURISDICTIONS, 'ar'),
+          checkboxField('operations.sellRegions', 'Regiones operativas', REGIONS, ['ar'])
         ]
       },
       {
         title: 'Servicio y comercio',
         description: 'Términos comerciales principales y modelo de cuentas.',
         fields: [
-          selectField('terms.offeringType', 'Offering type', OFFERINGS, 'physical_goods'),
-          booleanField('terms.hasAccounts', 'User accounts', 'Users can create accounts or profiles.', false),
-          booleanField('terms.requiresRegistration', 'Registration required', 'Registration is required for main usage or purchase.', false),
-          booleanField('terms.allowsUserContent', 'User-generated content', 'Users can upload reviews, comments, or similar content.', false),
-          booleanField('terms.pricesIncludeTaxes', 'Prices include taxes', 'Typical for ARS/Argentina consumer-facing commerce.', true),
-          textField('terms.currency', 'Main currency', 'ARS'),
-          textField('terms.paymentProvider', 'Payment provider', 'Mercado Pago'),
-          booleanField('terms.refundsOffered', 'Refunds / returns / exchanges offered', 'Enable if you offer any kind of return or refund path.', true),
-          textField('terms.refundWindow', 'Refund window', '10 días'),
-          textareaField('terms.refundConditions', 'Refund conditions', 'El producto debe devolverse sin uso, con accesorios y empaque razonablemente conservado.'),
-          selectField('terms.returnShippingResponsibility', 'Return shipping responsibility', RETURN_SHIPPING, 'case_by_case'),
-          booleanField('terms.warrantyOffered', 'Warranty offered', 'Enable if physical goods or service warranties apply.', true),
-          textareaField('terms.warrantyDetails', 'Warranty details', 'La garantía legal y cualquier remedio aplicable se interpretarán de forma compatible con la normativa de defensa del consumidor aplicable.')
+          selectField('terms.offeringType', 'Tipo de oferta', OFFERINGS, 'physical_goods'),
+          booleanField('terms.hasAccounts', 'Cuentas de usuario', 'Los usuarios pueden crear cuentas o perfiles.', false),
+          booleanField('terms.requiresRegistration', 'Registro obligatorio', 'Se requiere registro para el uso principal o para comprar.', false),
+          booleanField('terms.allowsUserContent', 'Contenido generado por usuarios', 'Los usuarios pueden subir reseñas, comentarios o contenido similar.', false),
+          booleanField('terms.pricesIncludeTaxes', 'Precios con impuestos incluidos', 'Típico para comercio orientado a consumidores en ARS/Argentina.', true),
+          textField('terms.currency', 'Moneda principal', 'ARS'),
+          textField('terms.paymentProvider', 'Proveedor de pago', 'Mercado Pago'),
+          booleanField('terms.refundsOffered', 'Ofrecés devoluciones / reembolsos / cambios', 'Activá esto si ofrecés algún flujo de devolución o reembolso.', true),
+          textField('terms.refundWindow', 'Plazo de devolución', '10 días'),
+          textareaField('terms.refundConditions', 'Condiciones de devolución', 'El producto debe devolverse sin uso, con accesorios y empaque razonablemente conservado.'),
+          selectField('terms.returnShippingResponsibility', 'Responsable del envío de devolución', RETURN_SHIPPING, 'case_by_case'),
+          booleanField('terms.warrantyOffered', 'Ofrecés garantía', 'Activá esto si aplican garantías sobre bienes físicos o servicios.', true),
+          textareaField('terms.warrantyDetails', 'Detalle de la garantía', 'La garantía legal y cualquier remedio aplicable se interpretarán de forma compatible con la normativa de defensa del consumidor aplicable.')
         ]
       },
       {
         title: 'Reglas y legal',
         description: 'Restricciones, propiedad intelectual, suspensión, avisos, disputas y disclaimers adicionales.',
         fields: [
-          checkboxField('terms.prohibitedActivities', 'Prohibited conduct', PROHIBITED_ACTIVITIES, ['No usar el sitio para actividades ilegales.']),
-          textField('terms.ipOwner', 'IP owner', 'AutoPost CLI Operator'),
-          booleanField('terms.ugcLicenseGranted', 'UGC license granted', 'If users submit reviews or content, enable if you want a display license.', false),
-          booleanField('terms.limitIndirectDamages', 'Limit indirect damages', 'Standard indirect damages limitation clause.', true),
-          booleanField('terms.shippingDelayDisclaimer', 'Shipping delay disclaimer', 'Useful for physical goods and couriers.', true),
-          textareaField('terms.customDisclaimer', 'Extra disclaimer', ''),
-          booleanField('terms.maySuspendAccounts', 'May suspend accounts/orders', 'Reserve suspension or restriction rights for misuse.', true),
-          textareaField('terms.terminationGrounds', 'Termination grounds', 'Podemos suspender cuentas, pedidos o acceso por fraude, abuso, incumplimiento o riesgos operativos o legales.'),
-          selectField('terms.changeNotification', 'Change notification method', CHANGE_NOTIFICATION, 'both'),
-          textField('terms.disputesForum', 'Disputes forum', 'Tribunales competentes de la Ciudad Autónoma de Buenos Aires'),
-          selectField('terms.adrMethod', 'Alternative dispute resolution', ADR_OPTIONS, 'none')
+          checkboxField('terms.prohibitedActivities', 'Conductas prohibidas', PROHIBITED_ACTIVITIES, ['No usar el sitio para actividades ilegales.']),
+          textField('terms.ipOwner', 'Titular de la propiedad intelectual', 'Mi proyecto'),
+          booleanField('terms.ugcLicenseGranted', 'Licencia sobre contenido de usuarios', 'Si los usuarios envían reseñas o contenido, activá esto si querés una licencia de exhibición.', false),
+          booleanField('terms.limitIndirectDamages', 'Limitar daños indirectos', 'Cláusula estándar de limitación de daños indirectos.', true),
+          booleanField('terms.shippingDelayDisclaimer', 'Disclaimer por demoras de envío', 'Útil para bienes físicos y correos.', true),
+          textareaField('terms.customDisclaimer', 'Disclaimer adicional', ''),
+          booleanField('terms.maySuspendAccounts', 'Podés suspender cuentas o pedidos', 'Reservá derechos de suspensión o restricción por uso indebido.', true),
+          textareaField('terms.terminationGrounds', 'Causales de terminación', 'Podemos suspender cuentas, pedidos o acceso por fraude, abuso, incumplimiento o riesgos operativos o legales.'),
+          selectField('terms.changeNotification', 'Método de aviso de cambios', CHANGE_NOTIFICATION, 'both'),
+          textField('terms.disputesForum', 'Foro o jurisdicción de disputas', 'Tribunales competentes de la Ciudad Autónoma de Buenos Aires'),
+          selectField('terms.adrMethod', 'Resolución alternativa de disputas', ADR_OPTIONS, 'none')
         ]
       },
       outputFields()
@@ -122,14 +122,14 @@ function buildDocuments() {
         title: 'Configuración de cookies',
         description: 'Categorías, terceros, consentimiento, retención y controles.',
         fields: [
-          selectField('operations.primaryJurisdiction', 'Primary jurisdiction', JURISDICTIONS, 'ar'),
-          checkboxField('operations.sellRegions', 'Operational regions', REGIONS, ['ar']),
-          checkboxField('cookies.categories', 'Cookie categories', COOKIE_CATEGORIES, ['necessary', 'analytics']),
-          checkboxField('cookies.thirdParties', 'Cookie-related third parties', COOKIE_THIRD_PARTIES, ['analytics']),
-          selectField('cookies.consentMode', 'Consent mode', COOKIE_CONSENT, 'banner'),
-          textField('cookies.managementUrl', 'Cookie management URL', 'https://dev-flow.duckdns.org/privacy'),
-          textareaField('cookies.browserControls', 'Browser/device controls', 'El usuario puede bloquear o eliminar cookies desde la configuración del navegador y revisar sus preferencias cuando el banner o el centro de preferencias esté disponible.'),
-          textareaField('cookies.retentionPolicy', 'Cookie retention note', 'Algunas cookies son de sesión y otras pueden persistir por más tiempo según la finalidad, la configuración técnica y las políticas del proveedor correspondiente.')
+          selectField('operations.primaryJurisdiction', 'Jurisdicción principal', JURISDICTIONS, 'ar'),
+          checkboxField('operations.sellRegions', 'Regiones operativas', REGIONS, ['ar']),
+          checkboxField('cookies.categories', 'Categorías de cookies', COOKIE_CATEGORIES, ['necessary', 'analytics']),
+          checkboxField('cookies.thirdParties', 'Terceros relacionados con cookies', COOKIE_THIRD_PARTIES, ['analytics']),
+          selectField('cookies.consentMode', 'Modo de consentimiento', COOKIE_CONSENT, 'banner'),
+          textField('cookies.managementUrl', 'URL de gestión de cookies', ''),
+          textareaField('cookies.browserControls', 'Controles del navegador o dispositivo', 'El usuario puede bloquear o eliminar cookies desde la configuración del navegador y revisar sus preferencias cuando el banner o el centro de preferencias esté disponible.'),
+          textareaField('cookies.retentionPolicy', 'Nota de retención de cookies', 'Algunas cookies son de sesión y otras pueden persistir por más tiempo según la finalidad, la configuración técnica y las políticas del proveedor correspondiente.')
         ]
       },
       outputFields()
@@ -157,18 +157,18 @@ function buildDocuments() {
         title: 'Reglas de devolución y reembolso',
         description: 'Plazos, condiciones, fallas, ventas digitales y excepciones.',
         fields: [
-          selectField('refund.offeringType', 'Offering type', OFFERINGS, 'physical_goods'),
-          booleanField('refund.acceptsReturns', 'Accepts returns/refunds', 'Enable for distance sales or operational return flows.', true),
-          textField('refund.refundWindow', 'Refund window', '10 días'),
-          textField('refund.exchangeWindow', 'Exchange window', '10 días'),
-          textareaField('refund.returnConditions', 'Return conditions', 'El producto debe devolverse sin uso, con accesorios y empaque razonablemente conservado.'),
-          textField('refund.refundMethod', 'Refund method', 'el mismo medio de pago original'),
-          textField('refund.refundProcessingTime', 'Refund processing time', '10 días hábiles'),
-          selectField('refund.returnShippingResponsibility', 'Return shipping responsibility', RETURN_SHIPPING, 'case_by_case'),
-          textField('refund.returnRequestChannel', 'Return request channel', 'thechief@dev-flow.duckdns.org'),
-          textareaField('refund.nonReturnableItems', 'Non-returnable items (one per line)', 'Productos personalizados o hechos a medida\nProductos usados, dañados por mal uso o incompletos'),
-          booleanField('refund.digitalGoodsFinal', 'Digital sales final', 'Useful for downloads, licenses, or activated access.', false),
-          textareaField('refund.damagedItemsProcess', 'Damaged / incorrect item process', 'Si el producto llega dañado, incorrecto o con fallas, pedimos que nos contactes con fotos y datos del pedido para revisar el caso.')
+          selectField('refund.offeringType', 'Tipo de oferta', OFFERINGS, 'physical_goods'),
+          booleanField('refund.acceptsReturns', 'Aceptás devoluciones o reembolsos', 'Activá esto para ventas a distancia o flujos operativos de devolución.', true),
+          textField('refund.refundWindow', 'Plazo de reembolso', '10 días'),
+          textField('refund.exchangeWindow', 'Plazo de cambio', '10 días'),
+          textareaField('refund.returnConditions', 'Condiciones de devolución', 'El producto debe devolverse sin uso, con accesorios y empaque razonablemente conservado.'),
+          textField('refund.refundMethod', 'Método de reembolso', 'el mismo medio de pago original'),
+          textField('refund.refundProcessingTime', 'Tiempo de procesamiento del reembolso', '10 días hábiles'),
+          selectField('refund.returnShippingResponsibility', 'Responsable del envío de devolución', RETURN_SHIPPING, 'case_by_case'),
+          textField('refund.returnRequestChannel', 'Canal para pedir la devolución', ''),
+          textareaField('refund.nonReturnableItems', 'Productos no retornables (uno por línea)', 'Productos personalizados o hechos a medida\nProductos usados, dañados por mal uso o incompletos'),
+          booleanField('refund.digitalGoodsFinal', 'Venta digital definitiva', 'Útil para descargas, licencias o accesos ya activados.', false),
+          textareaField('refund.damagedItemsProcess', 'Proceso por producto dañado o incorrecto', 'Si el producto llega dañado, incorrecto o con fallas, pedimos que nos contactes con fotos y datos del pedido para revisar el caso.')
         ]
       },
       outputFields()
@@ -198,12 +198,12 @@ function buildDocuments() {
         title: 'Módulos de disclaimer',
         description: 'Elegí uno o más tipos de disclaimer y ajustá el lenguaje opcional.',
         fields: [
-          checkboxField('disclaimer.categories', 'Disclaimer types', DISCLAIMER_TYPES, ['errors_omissions', 'external_links', 'own_risk']),
-          textareaField('disclaimer.professionalAdviceChannel', 'Professional advice note', ''),
-          textareaField('disclaimer.externalLinksPolicy', 'External links policy', 'El servicio puede enlazar recursos o documentación de terceros. No controlamos ni garantizamos el contenido, disponibilidad o políticas de esos sitios externos.'),
-          textareaField('disclaimer.affiliateDisclosure', 'Affiliate / compensation disclosure', ''),
-          textareaField('disclaimer.reviewMethodology', 'Review methodology', ''),
-          textareaField('disclaimer.customRiskStatement', 'Use-at-your-own-risk note', 'El uso de la aplicación, sus flujos, automatizaciones y materiales se realiza bajo exclusiva responsabilidad del usuario.')
+          checkboxField('disclaimer.categories', 'Tipos de disclaimer', DISCLAIMER_TYPES, ['errors_omissions', 'external_links', 'own_risk']),
+          textareaField('disclaimer.professionalAdviceChannel', 'Nota sobre asesoramiento profesional', ''),
+          textareaField('disclaimer.externalLinksPolicy', 'Política de enlaces externos', 'El servicio puede enlazar recursos o documentación de terceros. No controlamos ni garantizamos el contenido, disponibilidad o políticas de esos sitios externos.'),
+          textareaField('disclaimer.affiliateDisclosure', 'Divulgación de afiliados o compensaciones', ''),
+          textareaField('disclaimer.reviewMethodology', 'Metodología de reseñas', ''),
+          textareaField('disclaimer.customRiskStatement', 'Nota de uso bajo propio riesgo', 'El uso de la aplicación, sus flujos, automatizaciones y materiales se realiza bajo exclusiva responsabilidad del usuario.')
         ]
       },
       outputFields()
@@ -230,16 +230,16 @@ function buildDocuments() {
         title: 'Flujo de eliminación',
         description: 'Canales de solicitud, datos requeridos, alcance de eliminación y tiempos de respuesta.',
         fields: [
-          selectField('deletion.requestChannel', 'Request channel', DELETION_CHANNELS, 'both'),
-          textField('deletion.requestEmail', 'Deletion email', 'thechief@dev-flow.duckdns.org'),
-          textField('deletion.requestUrl', 'Deletion page URL', 'https://dev-flow.duckdns.org/'),
-          checkboxField('deletion.identityRequirements', 'Identity requirements', DELETION_IDENTITY, ['Email de la cuenta o del usuario solicitante']),
-          checkboxField('deletion.deletionScope', 'Deletion scope', DELETION_SCOPE, ['Datos de perfil o cuenta asociados al usuario']),
-          checkboxField('deletion.retentionExceptions', 'Retention exceptions', DELETION_RETENTION, ['Registros necesarios para cumplir obligaciones legales o regulatorias']),
-          textField('deletion.responseTime', 'Response time', '10 días hábiles'),
-          textField('deletion.completionTime', 'Completion time', '30 días'),
-          booleanField('deletion.hasMetaConnection', 'Meta/Facebook connection', 'Enable if the app connects to Meta or Facebook accounts.', true),
-          textareaField('deletion.metaDisconnectInstructions', 'Meta disconnection instructions', 'El usuario puede revocar permisos desde Meta y además pedir eliminación por email.')
+          selectField('deletion.requestChannel', 'Canal de solicitud', DELETION_CHANNELS, 'both'),
+          textField('deletion.requestEmail', 'Email para eliminación', ''),
+          textField('deletion.requestUrl', 'URL de la página de eliminación', ''),
+          checkboxField('deletion.identityRequirements', 'Requisitos de identidad', DELETION_IDENTITY, ['Email de la cuenta o del usuario solicitante']),
+          checkboxField('deletion.deletionScope', 'Alcance de la eliminación', DELETION_SCOPE, ['Datos de perfil o cuenta asociados al usuario']),
+          checkboxField('deletion.retentionExceptions', 'Excepciones de retención', DELETION_RETENTION, ['Registros necesarios para cumplir obligaciones legales o regulatorias']),
+          textField('deletion.responseTime', 'Tiempo de respuesta', '10 días hábiles'),
+          textField('deletion.completionTime', 'Tiempo de finalización', '30 días'),
+          booleanField('deletion.hasMetaConnection', 'Conexión con Meta/Facebook', 'Activá esto si la app se conecta con cuentas de Meta o Facebook.', true),
+          textareaField('deletion.metaDisconnectInstructions', 'Instrucciones para desconectar Meta', 'El usuario puede revocar permisos desde Meta y además pedir eliminación por email.')
         ]
       },
       outputFields()
@@ -269,6 +269,8 @@ const formEl = document.getElementById('generator-form');
 const previewFrameEl = document.getElementById('preview-html');
 const previewCodeEl = document.getElementById('preview-code');
 const validationEl = document.getElementById('validation-box');
+const statusEl = document.getElementById('document-status');
+const summaryEl = document.getElementById('summary-box');
 const documentSelectEl = document.getElementById('document-type');
 const documentDescriptionEl = document.getElementById('document-description');
 const preparedPathEl = document.getElementById('prepared-path');
@@ -303,6 +305,7 @@ function init() {
   renderForm();
   setPreviewPlaceholder('Generá un documento para ver la salida acá.');
   setExportState(false);
+  setStatus('');
 }
 
 function renderDocumentCards() {
@@ -367,8 +370,10 @@ function renderForm() {
   preparedPathEl.textContent = buildPreparedPath();
   validationEl.className = 'validation-box';
   validationEl.innerHTML = '';
+  renderSummary();
   setPreviewPlaceholder('Generá un documento para ver la salida acá.');
   setExportState(false);
+  setStatus('');
 }
 
 function renderField(field, defaults) {
@@ -494,6 +499,7 @@ async function generateDocument() {
     appState.lastGenerated = result;
     appState.isDirtySinceGenerate = false;
     setExportState(true);
+    setStatus('Documento generado correctamente. Si cambiás el formulario, vas a tener que regenerarlo para actualizar vista previa y descargas.');
     refreshPreview();
   } catch (error) {
     validationEl.className = 'validation-box is-visible';
@@ -518,6 +524,9 @@ function renderValidation(validation) {
     ${errors.length ? `<div class="errors"><strong>Ajustes obligatorios</strong><ul>${errors.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
     ${warnings.length ? `<div class="warnings"><strong>Advertencias de revisión</strong><ul>${warnings.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
   `;
+  if (errors.length === 0 && warnings.length === 0 && !appState.isDirtySinceGenerate) {
+    setStatus('');
+  }
 }
 
 function refreshPreview() {
@@ -591,10 +600,47 @@ function setPreviewPlaceholder(message) {
   previewCodeEl.textContent = message;
 }
 
+function setStatus(message) {
+  if (!message) {
+    statusEl.className = 'status-banner';
+    statusEl.textContent = '';
+    return;
+  }
+
+  statusEl.className = 'status-banner is-visible';
+  statusEl.textContent = message;
+}
+
 function setExportState(enabled) {
   for (const button of [downloadHtmlEl, downloadMarkdownEl, downloadTextEl, downloadJsonEl]) {
     button.disabled = !enabled;
   }
+}
+
+function renderSummary() {
+  const values = gatherFormValues();
+  const items = [
+    ['Documento', DOCUMENTS[appState.documentType].label],
+    ['Proyecto', values.business?.name || 'Sin definir'],
+    ['Tipo', values.business?.type || 'Sin definir'],
+    ['País', values.business?.country || 'Sin definir'],
+    ['Idioma', values.settings?.language === 'en' ? 'English' : 'Español'],
+    ['Sitio', values.business?.websiteUrl || 'Sin URL'],
+    ['Contacto', values.contact?.email || values.contact?.pageUrl || 'Sin contacto']
+  ];
+
+  const valuesHtml = items.map(([label, value]) => `
+    <div class="summary-item">
+      <strong>${escapeHtml(label)}</strong>
+      <span>${escapeHtml(String(value))}</span>
+    </div>
+  `).join('');
+
+  summaryEl.className = 'summary-box is-visible';
+  summaryEl.innerHTML = `
+    <h4>Resumen actual</h4>
+    <div class="summary-grid">${valuesHtml}</div>
+  `;
 }
 
 function scheduleLiveValidation() {
@@ -609,6 +655,7 @@ function scheduleLiveValidation() {
     try {
       const validation = await generator.validate(input);
       if (currentRequestId !== validationRequestId) return;
+      renderSummary();
       renderValidation(validation);
     } catch {
       if (currentRequestId !== validationRequestId) return;
@@ -634,6 +681,7 @@ function markDirtySinceGenerate() {
   appState.lastGenerated = null;
   setExportState(false);
   setPreviewPlaceholder('El formulario cambió desde la última generación. Volvé a generar el documento para actualizar la vista previa y las descargas.');
+  setStatus('La versión generada quedó desactualizada. Volvé a generar el documento para que la vista previa y las descargas reflejen los cambios.');
 }
 
 function slugify(value) {
@@ -723,30 +771,30 @@ const REGIONS = JURISDICTIONS
   .concat([{ value: 'global', label: 'Global / custom' }])
   .map((item) => ({ ...item, description: `Aplica a ${item.label}` }));
 const DATA_OPTIONS = [
-  { value: 'personal', label: 'Personal', description: 'Names, emails, addresses, account identifiers.' },
-  { value: 'financial', label: 'Financial', description: 'Payments, billing, commercial transaction details.' },
-  { value: 'tax', label: 'Tax / invoicing', description: 'CUIT, tax records, fiscal or accounting data.' },
-  { value: 'identity', label: 'Identity', description: 'Verification or commercial identity details.' },
-  { value: 'usage', label: 'Usage', description: 'Logs, analytics, interaction events, IP.' },
-  { value: 'cookies', label: 'Cookies', description: 'Cookies and similar technologies.' },
-  { value: 'location', label: 'Location', description: 'Approximate or precise location.' },
-  { value: 'profiling', label: 'Profiling', description: 'Segmentation, scoring, automated decisions.' }
+  { value: 'personal', label: 'Personales', description: 'Nombres, emails, direcciones e identificadores de cuenta.' },
+  { value: 'financial', label: 'Financieros', description: 'Pagos, facturación y datos de transacciones comerciales.' },
+  { value: 'tax', label: 'Fiscales / facturación', description: 'CUIT, registros fiscales y datos contables.' },
+  { value: 'identity', label: 'Identidad', description: 'Verificación o identidad comercial.' },
+  { value: 'usage', label: 'Uso', description: 'Logs, analítica, eventos de interacción e IP.' },
+  { value: 'cookies', label: 'Cookies', description: 'Cookies y tecnologías similares.' },
+  { value: 'location', label: 'Ubicación', description: 'Ubicación aproximada o precisa.' },
+  { value: 'profiling', label: 'Perfilado', description: 'Segmentación, scoring y decisiones automatizadas.' }
 ];
 const THIRD_PARTIES = [
-  { value: 'analytics', label: 'Analytics', description: 'Analytics or measurement providers.' },
-  { value: 'advertising', label: 'Advertising', description: 'Ads, attribution, or remarketing platforms.' },
-  { value: 'payment', label: 'Payment processors', description: 'General payment gateways or processors.' },
-  { value: 'paypal_only', label: 'PayPal only', description: 'Payments handled only through PayPal.' },
-  { value: 'shipping', label: 'Shipping / logistics', description: 'Carriers, couriers, or fulfillment.' },
-  { value: 'cloud', label: 'Cloud / hosting', description: 'Cloud infrastructure and hosting vendors.' },
-  { value: 'social', label: 'Social integrations', description: 'Embeds, social login, social APIs.' },
-  { value: 'email', label: 'Email / marketing', description: 'Transactional email or marketing automation.' }
+  { value: 'analytics', label: 'Analítica', description: 'Proveedores de analítica o medición.' },
+  { value: 'advertising', label: 'Publicidad', description: 'Plataformas de anuncios, atribución o remarketing.' },
+  { value: 'payment', label: 'Procesadores de pago', description: 'Pasarelas o procesadores de pago generales.' },
+  { value: 'paypal_only', label: 'Sólo PayPal', description: 'Pagos manejados únicamente por PayPal.' },
+  { value: 'shipping', label: 'Envíos / logística', description: 'Correos, couriers o fulfillment.' },
+  { value: 'cloud', label: 'Cloud / hosting', description: 'Infraestructura cloud y hosting.' },
+  { value: 'social', label: 'Integraciones sociales', description: 'Embeds, login social o APIs sociales.' },
+  { value: 'email', label: 'Email / marketing', description: 'Email transaccional o automatización de marketing.' }
 ];
 const LEGAL_BASES = [
-  { value: 'contract', label: 'Contract', description: 'Needed to provide the service or complete a purchase.' },
-  { value: 'consent', label: 'Consent', description: 'Explicit user consent.' },
-  { value: 'legal_obligation', label: 'Legal obligation', description: 'Tax, accounting, regulatory, or legal duties.' },
-  { value: 'legitimate_interest', label: 'Legitimate interest', description: 'Security, fraud prevention, or limited operations.' }
+  { value: 'contract', label: 'Contrato', description: 'Necesaria para prestar el servicio o completar una compra.' },
+  { value: 'consent', label: 'Consentimiento', description: 'Consentimiento explícito del usuario.' },
+  { value: 'legal_obligation', label: 'Obligación legal', description: 'Deberes fiscales, contables, regulatorios o legales.' },
+  { value: 'legitimate_interest', label: 'Interés legítimo', description: 'Seguridad, prevención de fraude u operaciones limitadas.' }
 ];
 const COMPLIANCE = [
   { value: 'ccpa', label: 'CCPA / CPRA', description: 'California privacy language.' },
@@ -755,25 +803,25 @@ const COMPLIANCE = [
   { value: 'pipeda', label: 'PIPEDA', description: 'Canada privacy language.' }
 ];
 const OFFERINGS = [
-  { value: 'physical_goods', label: 'Physical goods' },
-  { value: 'digital_products', label: 'Digital products' },
-  { value: 'services', label: 'Services' },
-  { value: 'subscriptions', label: 'Subscriptions' }
+  { value: 'physical_goods', label: 'Productos físicos' },
+  { value: 'digital_products', label: 'Productos digitales' },
+  { value: 'services', label: 'Servicios' },
+  { value: 'subscriptions', label: 'Suscripciones' }
 ];
 const RETURN_SHIPPING = [
-  { value: 'customer', label: 'Customer' },
-  { value: 'merchant', label: 'Merchant' },
-  { value: 'case_by_case', label: 'Case by case' }
+  { value: 'customer', label: 'Cliente' },
+  { value: 'merchant', label: 'Comercio' },
+  { value: 'case_by_case', label: 'Caso por caso' }
 ];
 const CHANGE_NOTIFICATION = [
-  { value: 'site_notice', label: 'Site notice' },
+  { value: 'site_notice', label: 'Aviso en el sitio' },
   { value: 'email', label: 'Email' },
-  { value: 'both', label: 'Both' }
+  { value: 'both', label: 'Ambos' }
 ];
 const ADR_OPTIONS = [
-  { value: 'none', label: 'None' },
-  { value: 'mediation', label: 'Mediation' },
-  { value: 'arbitration', label: 'Arbitration' }
+  { value: 'none', label: 'Ninguna' },
+  { value: 'mediation', label: 'Mediación' },
+  { value: 'arbitration', label: 'Arbitraje' }
 ];
 const PROHIBITED_ACTIVITIES = [
   { value: 'No usar el sitio para actividades ilegales.', label: 'Illegal use', description: 'No unlawful or fraudulent use.' },

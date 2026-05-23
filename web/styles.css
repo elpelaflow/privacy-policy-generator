@@ -175,6 +175,54 @@ button, input, select, textarea { font: inherit; }
 .validation-box .warnings { color: #ffd166; }
 .validation-box .errors { color: #ff8f8f; }
 
+.status-banner {
+  display: none;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 122, 24, 0.35);
+  background: rgba(255, 122, 24, 0.12);
+  color: #ffd7b3;
+}
+.status-banner.is-visible {
+  display: block;
+}
+
+.summary-box {
+  display: none;
+  margin-bottom: 16px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+}
+.summary-box.is-visible {
+  display: block;
+}
+.summary-box h4 {
+  margin: 0 0 12px;
+}
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.summary-item {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+}
+.summary-item strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #ffffff;
+}
+.summary-item span {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 .download-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .prepared-path {
   margin: 8px 0 18px;
