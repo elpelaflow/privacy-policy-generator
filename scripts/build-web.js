@@ -10,6 +10,22 @@ const DOCS_DIR = path.join(ROOT, 'docs');
 const DOCS_ASSETS_DIR = path.join(DOCS_DIR, 'assets');
 const DOCS_DATA_DIR = path.join(DOCS_DIR, 'data');
 
+async function resolveConfigSource() {
+  const localConfig = path.join(WEB_DIR, 'config.js');
+  try {
+    await fs.access(localConfig);
+    return localConfig;
+  } catch {}
+
+  const existingDocsConfig = path.join(DOCS_DIR, 'config.js');
+  try {
+    await fs.access(existingDocsConfig);
+    return existingDocsConfig;
+  } catch {}
+
+  return path.join(WEB_DIR, 'config.example.js');
+}
+
 async function copyFile(from, to) {
   await fs.mkdir(path.dirname(to), { recursive: true });
   await fs.copyFile(from, to);
@@ -45,10 +61,13 @@ async function main() {
   await fs.mkdir(DOCS_ASSETS_DIR, { recursive: true });
   await fs.mkdir(DOCS_DATA_DIR, { recursive: true });
 
+  const configSource = await resolveConfigSource();
+
   await Promise.all([
     copyFile(path.join(WEB_DIR, 'index.html'), path.join(DOCS_DIR, 'index.html')),
     copyFile(path.join(WEB_DIR, 'styles.css'), path.join(DOCS_DIR, 'styles.css')),
-    copyFile(path.join(WEB_DIR, 'app.js'), path.join(DOCS_DIR, 'app.js'))
+    copyFile(path.join(WEB_DIR, 'app.js'), path.join(DOCS_DIR, 'app.js')),
+    copyFile(configSource, path.join(DOCS_DIR, 'config.js'))
   ]);
 
   await copyDirFlat(path.join(ROOT, 'data'), DOCS_DATA_DIR);

@@ -54,11 +54,11 @@
             </ul>
           </div>
           <div class="panel-card accent">
-            <span class="panel-pill">Siguiente fase</span>
-            <h2>Publicación futura en GitHub</h2>
+            <span class="panel-pill">Publicación activa</span>
+            <h2>Publicá directo en GitHub Pages</h2>
             <p>
-              La interfaz ya incluye el punto de entrada para publicar directo en el repositorio de un usuario
-              mediante autenticación con GitHub cuando se agregue la capa de backend.
+              La app ya puede autenticarse con GitHub, listar repositorios del usuario y publicar documentos
+              bajo rutas seguras tipo <code>legal/...</code> dentro de GitHub Pages.
             </p>
           </div>
         </div>
@@ -93,8 +93,8 @@
               <ul class="mini-list">
                 <li>Genera documentos completos en el navegador</li>
                 <li>Descarga archivos y JSON de entrada</li>
-                <li>Deja preparado el flujo GitHub Pages</li>
-                <li>Todavía no publica en repositorios de usuarios</li>
+                <li>Publica en repositorios del usuario vía GitHub Pages</li>
+                <li>No modifica la home ni la navegación del sitio del usuario</li>
               </ul>
             </div>
             <div class="rail-card future-publish">
@@ -159,10 +159,8 @@
 
   <script>
     globalThis.__LEGAL_GENERATOR_BASE__ = '.';
-    globalThis.__LEGAL_HUB_CONFIG__ = {
-      backendBaseUrl: 'https://privacy-policy-generator-worker.scuff-mouse-emit.workers.dev'
-    };
   </script>
+  <script src="./config.js"></script>
   <script src="./assets/generators.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
