@@ -119,6 +119,97 @@ Important:
 - it only adds standalone legal-document files under `legal/...`
 - the user can later link those URLs from their site manually if they want
 
+## How To Use This Project
+
+### Option A: use the public app
+
+If you only want to generate legal documents, you do not need to fork this repo.
+
+Typical flow:
+
+1. open the public web app
+2. choose a document type
+3. complete the form
+4. generate the document in the browser
+5. download the output
+6. optionally connect GitHub and publish into your own repository
+
+This is the intended path for normal users. They do not need to understand the internal backend details as long as the public instance is already configured and running.
+
+### Option B: run your own copy
+
+If you want your own independent instance, your own branding, or your own backend and OAuth setup, then you should fork the repo and run your own deployment.
+
+What that means:
+
+- your own GitHub repo and GitHub Pages site
+- your own Cloudflare Worker backend
+- your own GitHub OAuth App
+- your own worker secrets
+- your own `backendBaseUrl`
+
+Recommended setup order:
+
+1. fork this repository
+2. clone your fork locally
+3. install dependencies:
+
+```bash
+npm install
+```
+
+4. build the static web app:
+
+```bash
+npm run build:web
+```
+
+5. publish the generated `docs/` folder with GitHub Pages in your fork
+6. create a GitHub OAuth App
+7. set the callback URL to:
+
+```text
+https://YOUR-WORKER/api/github/callback
+```
+
+8. deploy the Cloudflare Worker from:
+
+```text
+backend/cloudflare-worker/
+```
+
+9. configure these values in the worker:
+
+- `PUBLIC_APP_URL`
+- `GITHUB_CLIENT_ID`
+- `GITHUB_CLIENT_SECRET`
+- `SESSION_SECRET`
+
+10. set the worker URL in the web app through:
+
+```html
+<script>
+  globalThis.__LEGAL_HUB_CONFIG__ = {
+    backendBaseUrl: "https://your-worker.workers.dev"
+  };
+</script>
+```
+
+11. rebuild and republish the static site
+12. test the full browser flow:
+
+- connect GitHub
+- list repos
+- generate a document
+- publish to a repo
+
+If you skip the Worker or OAuth setup, your fork will still work as:
+
+- a CLI generator
+- a browser generator with downloads
+
+but not as a full GitHub publish app.
+
 ## Supported Documents
 
 - `privacy`: privacy policy generator
