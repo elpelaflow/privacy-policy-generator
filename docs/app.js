@@ -1,4 +1,7 @@
-const DOCUMENTS = {
+let DOCUMENTS;
+
+function buildDocuments() {
+  return {
   privacy: {
     label: 'Política de privacidad',
     description: 'Política de privacidad con regiones, datos, terceros, bases legales y advertencias Argentina-first.',
@@ -251,7 +254,8 @@ const DOCUMENTS = {
       };
     }
   }
-};
+  };
+}
 
 const appState = {
   documentType: 'privacy',
@@ -803,5 +807,7 @@ const DELETION_RETENTION = [
   { value: 'Registros mínimos para seguridad, prevención de fraude o auditoría', label: 'Security / fraud', description: 'Minimal security or anti-fraud records.' },
   { value: 'Información necesaria para resolver disputas o hacer cumplir acuerdos', label: 'Disputes / contracts', description: 'Records needed for disputes or agreements.' }
 ];
+
+DOCUMENTS = buildDocuments();
 
 init();
