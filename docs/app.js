@@ -304,7 +304,8 @@ const appState = {
   previewFormat: 'html',
   lastGenerated: null,
   lastInput: null,
-  isDirtySinceGenerate: false
+  isDirtySinceGenerate: false,
+  formSeed: null
 };
 
 const formEl = document.getElementById('generator-form');
@@ -315,6 +316,8 @@ const statusEl = document.getElementById('document-status');
 const summaryEl = document.getElementById('summary-box');
 const documentSelectEl = document.getElementById('document-type');
 const documentDescriptionEl = document.getElementById('document-description');
+const loadConfigButtonEl = document.getElementById('load-config-button');
+const loadConfigInputEl = document.getElementById('load-config-input');
 const preparedPathEl = document.getElementById('prepared-path');
 const generateButtonEl = document.getElementById('generate-button');
 const downloadHtmlEl = document.getElementById('download-html');
@@ -348,6 +351,8 @@ connectGitHubEl.addEventListener('click', connectGitHub);
 logoutGitHubEl.addEventListener('click', logoutGitHub);
 publishGitHubPagesEl.addEventListener('click', publishToGitHubPages);
 githubRepoSelectEl.addEventListener('change', updatePublishControls);
+loadConfigButtonEl.addEventListener('click', () => loadConfigInputEl.click());
+loadConfigInputEl.addEventListener('change', loadExistingConfig);
 
 for (const button of document.querySelectorAll('.format-button')) {
   button.addEventListener('click', () => {
@@ -383,6 +388,7 @@ function renderDocumentCards() {
   cards.querySelectorAll('[data-open-doc]').forEach((button) => {
     button.addEventListener('click', () => {
       appState.documentType = button.dataset.openDoc;
+      appState.formSeed = null;
       documentSelectEl.value = appState.documentType;
       renderForm();
       document.getElementById('generator').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -397,6 +403,7 @@ function renderDocumentSelect() {
   documentSelectEl.value = appState.documentType;
   documentSelectEl.addEventListener('change', () => {
     appState.documentType = documentSelectEl.value;
+    appState.formSeed = null;
     renderForm();
   });
 }
@@ -404,7 +411,7 @@ function renderDocumentSelect() {
 function renderForm() {
   const config = DOCUMENTS[appState.documentType];
   documentDescriptionEl.textContent = config.description;
-  const defaults = createDefaults(appState.documentType);
+  const defaults = createDefaults(appState.documentType, appState.formSeed);
   appState.lastGenerated = null;
   appState.lastInput = null;
   appState.isDirtySinceGenerate = false;
@@ -467,7 +474,7 @@ function hint(field) {
   return field.hint ? `<span class="field-hint">${field.hint}</span>` : '';
 }
 
-function createDefaults(type) {
+function createDefaults(type, seed = null) {
   const common = {
     business: {
       name: 'Mi proyecto',
@@ -485,7 +492,7 @@ function createDefaults(type) {
   };
 
   if (type === 'privacy') {
-    return {
+    return mergeSeed({
       ...common,
       business: { ...common.business, type: 'saas' },
       operations: { primaryJurisdiction: 'ar', sellRegions: ['ar'], childrenAudience: false },
@@ -495,56 +502,126 @@ function createDefaults(type) {
         legalBases: ['contract', 'legitimate_interest']
       },
       compliance: { requestedFrameworks: [] }
-    };
+    }, seed);
   }
 
   if (type === 'terms') {
-    return {
+    return mergeSeed({
       ...common,
       business: { ...common.business, type: 'ecommerce' },
       operations: { primaryJurisdiction: 'ar', sellRegions: ['ar'] },
       terms: {}
-    };
+    }, seed);
   }
 
   if (type === 'cookies') {
-    return {
+    return mergeSeed({
       ...common,
       business: { ...common.business, type: 'saas' },
       operations: { primaryJurisdiction: 'ar', sellRegions: ['ar'] },
       cookies: {}
-    };
+    }, seed);
   }
 
   if (type === 'refund') {
-    return {
+    return mergeSeed({
       ...common,
       business: { ...common.business, type: 'ecommerce' },
       refund: {}
-    };
+    }, seed);
   }
 
   if (type === 'disclaimer') {
-    return {
+    return mergeSeed({
       ...common,
       business: { ...common.business, type: 'saas' },
       disclaimer: {}
-    };
+    }, seed);
   }
 
   if (type === 'security') {
-    return {
+    return mergeSeed({
       ...common,
       business: { ...common.business, type: 'saas' },
       security: {}
-    };
+    }, seed);
   }
 
-  return {
+  return mergeSeed({
     ...common,
     business: { ...common.business, type: 'saas' },
     deletion: {}
-  };
+  }, seed);
+}
+
+function mergeSeed(base, seed) {
+  if (!seed || typeof seed !== 'object') return base;
+  return deepMerge(base, seed);
+}
+
+function deepMerge(base, source) {
+  if (Array.isArray(base) || Array.isArray(source)) {
+    return Array.isArray(source) ? [...source] : Array.isArray(base) ? [...base] : source;
+  }
+  if (!base || typeof base !== 'object') return source;
+  const output = { ...base };
+  for (const [key, value] of Object.entries(source || {})) {
+    if (value && typeof value === 'object' && !Array.isArray(value) && output[key] && typeof output[key] === 'object' && !Array.isArray(output[key])) {
+      output[key] = deepMerge(output[key], value);
+    } else {
+      output[key] = Array.isArray(value) ? [...value] : value;
+    }
+  }
+  return output;
+}
+
+async function loadExistingConfig(event) {
+  const [file] = event.target.files || [];
+  event.target.value = '';
+  if (!file) return;
+
+  try {
+    const contents = await file.text();
+    const parsed = JSON.parse(contents);
+    const documentType = resolveInputDocumentType(parsed);
+    if (!documentType || !DOCUMENTS[documentType]) {
+      throw new Error('No pude detectar un tipo de documento soportado dentro del JSON.');
+    }
+
+    appState.documentType = documentType;
+    appState.formSeed = normalizeLoadedSeed(documentType, parsed);
+    documentSelectEl.value = documentType;
+    renderForm();
+    scheduleLiveValidation();
+    setStatus(`Configuración cargada para ${DOCUMENTS[documentType].label}. Revisá los campos y regenerá cuando quieras.`);
+  } catch (error) {
+    setStatus(`No pude cargar la configuración: ${error.message}`);
+  }
+}
+
+function resolveInputDocumentType(input) {
+  if (input && typeof input.documentType === 'string' && DOCUMENTS[input.documentType]) {
+    return input.documentType;
+  }
+  if (input?.terms) return 'terms';
+  if (input?.cookies) return 'cookies';
+  if (input?.refund) return 'refund';
+  if (input?.disclaimer) return 'disclaimer';
+  if (input?.security) return 'security';
+  if (input?.deletion) return 'deletion';
+  return 'privacy';
+}
+
+function normalizeLoadedSeed(documentType, input) {
+  const seed = { ...input };
+  delete seed.documentType;
+  if (documentType === 'refund' && Array.isArray(seed.refund?.nonReturnableItems)) {
+    seed.refund = {
+      ...seed.refund,
+      nonReturnableItems: seed.refund.nonReturnableItems.join('\n')
+    };
+  }
+  return seed;
 }
 
 async function generateDocument() {
