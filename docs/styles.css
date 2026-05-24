@@ -189,6 +189,38 @@ button, input, select, textarea { font: inherit; }
   display: grid;
   gap: 12px;
 }
+.preset-panel {
+  display: grid;
+  gap: 12px;
+}
+.preset-panel.is-empty {
+  color: var(--muted);
+}
+.preset-panel .preset-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.preset-panel .preset-summary {
+  display: none;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+}
+.preset-panel .preset-summary.is-visible {
+  display: grid;
+}
+.preset-panel .preset-summary strong {
+  color: var(--secondary);
+}
+.preset-panel .preset-summary ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.6;
+}
 .advisor-panel .advisor-grid {
   display: grid;
   gap: 12px;

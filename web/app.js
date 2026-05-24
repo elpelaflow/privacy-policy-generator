@@ -1,5 +1,203 @@
 let DOCUMENTS;
 
+const DOCUMENT_PRESETS = {
+  dpa: [
+    {
+      value: 'saas_b2b_eu',
+      label: 'SaaS B2B con clientes UE',
+      description: 'Controller-processor clásico con foco GDPR, subprocessors y transferencias documentadas.',
+      summary: [
+        'Asume cliente controller y proveedor processor.',
+        'Activa scope UE, subprocessors y transferencias internacionales.',
+        'Deja SCC/equivalentes marcados como probables y completa textos base más enterprise.'
+      ],
+      patch: {
+        business: { type: 'saas', country: 'Germany' },
+        settings: { language: 'es' },
+        dpa: {
+          counterpartyRole: 'controller',
+          regulatoryScope: ['eu'],
+          servicesDescription: 'Prestación SaaS B2B con hosting de cuentas, soporte operativo, automatización de flujos y procesamiento limitado a la ejecución del servicio contratado.',
+          processingPurpose: 'Procesar datos personales por cuenta del cliente para prestar, asegurar, soportar y administrar el servicio SaaS contratado.',
+          personalDataCategories: [
+            'Datos de identificación y contacto',
+            'Datos de cuenta o credenciales de acceso',
+            'Datos de uso, eventos y registros técnicos'
+          ],
+          dataSubjectCategories: ['Usuarios finales del cliente', 'Empleados o contratistas del cliente'],
+          subprocessorsUsed: true,
+          subprocessorMethodology: 'Se seleccionan subprocessors con garantías razonables, revisión contractual y obligaciones de protección de datos alineadas con el servicio.',
+          internationalTransfers: true,
+          transferMechanism: 'Cuando corresponde, usamos cláusulas contractuales tipo SCC, salvaguardas equivalentes o controles regionales compatibles con la jurisdicción aplicable.',
+          euSccRequired: true,
+          assistanceCommitments: 'Brindamos asistencia razonable para solicitudes de titulares, evaluaciones de impacto y consultas regulatorias dentro del alcance del servicio y de la información disponible.',
+          deletionReturnPeriod: 'Al finalizar el servicio, devolvemos o eliminamos los datos personales dentro de un plazo razonable, sujeto a retención legal y backups con ciclo controlado.',
+          auditRights: 'Podemos proporcionar información razonable, respuestas documentadas, certificaciones o evidencia equivalente, sujeto a confidencialidad y límites operativos razonables.'
+        }
+      }
+    },
+    {
+      value: 'saas_b2b_latam',
+      label: 'SaaS B2B LATAM / Argentina',
+      description: 'Proveedor regional con estructura processor simple y menos carga contractual UE.',
+      summary: [
+        'Mantiene la lógica controller-processor pero sin asumir scope UE.',
+        'Deja transferencias internacionales desactivadas por default.',
+        'Sirve como base para clientes AR/LATAM con vendor review más liviano.'
+      ],
+      patch: {
+        business: { type: 'saas', country: 'Argentina' },
+        settings: { language: 'es' },
+        dpa: {
+          counterpartyRole: 'controller',
+          regulatoryScope: ['ar', 'latam'],
+          servicesDescription: 'Prestación SaaS B2B para gestión operativa, soporte y procesamiento limitado a la prestación del servicio contratado.',
+          processingPurpose: 'Procesar datos personales por cuenta del cliente para operar el servicio, brindar soporte y mantener su seguridad y disponibilidad.',
+          personalDataCategories: [
+            'Datos de identificación y contacto',
+            'Datos de cuenta o credenciales de acceso',
+            'Datos de uso, eventos y registros técnicos'
+          ],
+          dataSubjectCategories: ['Usuarios finales del cliente', 'Empleados o contratistas del cliente'],
+          subprocessorsUsed: true,
+          subprocessorMethodology: 'Se utilizan proveedores operativos con garantías razonables y obligaciones contractuales de protección de datos acordes al servicio.',
+          internationalTransfers: false,
+          transferMechanism: '',
+          euSccRequired: false,
+          assistanceCommitments: 'Brindamos asistencia razonable para solicitudes del cliente y consultas vinculadas al tratamiento en la medida compatible con el servicio.',
+          deletionReturnPeriod: 'Al finalizar el servicio, los datos se devuelven o eliminan dentro de un plazo razonable, salvo retenciones legales o backups controlados.',
+          auditRights: 'Podemos compartir información razonable, cuestionarios o evidencia documental sobre el tratamiento y las medidas de seguridad aplicables.'
+        }
+      }
+    },
+    {
+      value: 'global_vendor_chain',
+      label: 'Proveedor con cloud y subprocessors globales',
+      description: 'Base para SaaS con hosting internacional, soporte distribuido y cadena real de vendors.',
+      summary: [
+        'Asume uso activo de subprocessors y accesos cross-border.',
+        'Refuerza metodología de vendors, transferencias y evidencia de auditoría.',
+        'Útil para SaaS con infraestructura global o soporte follow-the-sun.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        dpa: {
+          counterpartyRole: 'controller',
+          regulatoryScope: ['eu', 'us'],
+          subprocessorsUsed: true,
+          subprocessorMethodology: 'Se mantiene una cadena documentada de subprocessors críticos, con due diligence razonable, obligaciones contractuales y controles de cambio compatibles con el servicio.',
+          internationalTransfers: true,
+          transferMechanism: 'Las transferencias se cubren mediante cláusulas contractuales, salvaguardas equivalentes, evaluación razonable del proveedor y controles regionales cuando corresponda.',
+          euSccRequired: true,
+          breachNotificationTime: 'Sin demoras indebidas y dentro de un plazo razonable desde la confirmación del incidente, con coordinación adicional cuando el contrato principal lo exija.',
+          auditRights: 'Podemos ofrecer cuestionarios, certificaciones, informes resumidos o evidencia equivalente, y evaluar pedidos de auditoría adicional sujetos a confidencialidad y razonabilidad operativa.'
+        }
+      }
+    }
+  ],
+  ai: [
+    {
+      value: 'external_ai_saas',
+      label: 'AI SaaS con proveedor externo',
+      description: 'Asistente o generación con API/model provider de tercero y controles de mejora del producto.',
+      summary: [
+        'Marca sistemas visibles al usuario y providers externos.',
+        'Asume uso para service improvement con opt-out disponible.',
+        'Sirve para SaaS que consume modelos de terceros y guarda señales operativas.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        ai: {
+          systemsUsed: ['chatbot_or_assistant', 'content_generation'],
+          useCases: ['customer_support', 'drafting_or_generation'],
+          userFacingAi: true,
+          generatedContentLabeling: true,
+          trainingDataUse: 'service_improvement',
+          dataSources: ['customer_inputs', 'service_logs', 'feedback_signals'],
+          personalDataInTraining: false,
+          modelImprovementUses: ['quality_evaluation', 'safety_testing'],
+          optOutAvailable: true,
+          optOutMethod: 'Configuración de cuenta, soporte o canal contractual para clientes con restricciones de uso de datos.',
+          retentionPeriod: 'Los datos vinculados a IA se retienen sólo por el tiempo razonablemente necesario para prestación, seguridad, soporte, evaluación o mejora del servicio.',
+          thirdPartyProviders: ['third_party_model_api', 'cloud_infrastructure'],
+          automatedDecisionMaking: false,
+          humanReviewAvailable: true,
+          sensitiveDataRestrictions: 'No pedimos ni recomendamos cargar datos sensibles salvo necesidad operativa clara, base legal suficiente y controles reforzados.',
+          securityControls: 'Aplicamos minimización, controles de acceso, registros operativos y medidas razonables de seguridad sobre prompts, outputs y datos vinculados a IA.'
+        }
+      }
+    },
+    {
+      value: 'no_training_internal_ai',
+      label: 'IA interna sin training sobre datos de clientes',
+      description: 'IA usada para soporte interno o productividad, sin entrenamiento ni mejora sobre datos de clientes.',
+      summary: [
+        'Marca uso no visible o parcialmente interno.',
+        'Deja explícito no-training y sin opt-out asociado.',
+        'Útil para equipos que usan IA como apoyo interno pero no reciclan prompts o logs para mejorar modelos.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        ai: {
+          systemsUsed: ['internal_analytics_or_classification'],
+          useCases: ['internal_analytics', 'operational_automation'],
+          userFacingAi: false,
+          generatedContentLabeling: false,
+          trainingDataUse: 'no_training',
+          dataSources: ['service_logs'],
+          personalDataInTraining: false,
+          modelImprovementUses: [],
+          optOutAvailable: false,
+          optOutMethod: '',
+          retentionPeriod: 'Los registros vinculados a funciones de IA se conservan sólo por el tiempo necesario para operación, soporte y seguridad, sin reutilización para entrenamiento de modelos.',
+          thirdPartyProviders: ['cloud_infrastructure'],
+          automatedDecisionMaking: false,
+          humanReviewAvailable: true,
+          appealChannel: '',
+          sensitiveDataRestrictions: 'Los flujos internos de IA no deben usarse con datos sensibles salvo autorización específica, base legal y controles reforzados.',
+          securityControls: 'Se aplican minimización, acceso restringido y medidas razonables de seguridad sobre logs, inputs internos y outputs generados.'
+        }
+      }
+    },
+    {
+      value: 'user_facing_human_review',
+      label: 'Asistente visible con revisión humana',
+      description: 'IA visible para usuarios, con soporte, generación y posibilidad de escalamiento humano.',
+      summary: [
+        'Activa experiencia visible, etiquetado y revisión humana.',
+        'Sirve para productos con asistentes, drafting o ayuda contextual de cara al usuario.',
+        'Deja un canal claro para soporte o revisión cuando la IA influye resultados.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        ai: {
+          systemsUsed: ['chatbot_or_assistant', 'content_generation'],
+          useCases: ['customer_support', 'drafting_or_generation'],
+          userFacingAi: true,
+          generatedContentLabeling: true,
+          trainingDataUse: 'evaluation_only',
+          dataSources: ['customer_inputs', 'feedback_signals'],
+          personalDataInTraining: false,
+          modelImprovementUses: ['quality_evaluation'],
+          optOutAvailable: true,
+          optOutMethod: 'Soporte, configuración de cuenta o canal contractual para limitar ciertos usos de evaluación o mejora.',
+          retentionPeriod: 'Prompts y outputs se conservan sólo por el tiempo razonablemente necesario para soporte, seguridad, troubleshooting y evaluación controlada del servicio.',
+          thirdPartyProviders: ['third_party_model_api', 'cloud_infrastructure'],
+          automatedDecisionMaking: false,
+          humanReviewAvailable: true,
+          appealChannel: 'Email de soporte o privacidad para pedir revisión humana cuando corresponda.',
+          sensitiveDataRestrictions: 'Se desalienta la carga de datos sensibles salvo necesidad clara, base legal y controles reforzados.',
+          securityControls: 'Aplicamos minimización, controles de acceso, logging razonable y medidas de seguridad sobre prompts, outputs y señales asociadas a la experiencia de IA.'
+        }
+      }
+    }
+  ]
+};
+
 function buildDocuments() {
   return {
   privacy: {
@@ -437,6 +635,7 @@ const documentSelectEl = document.getElementById('document-type');
 const documentDescriptionEl = document.getElementById('document-description');
 const loadConfigButtonEl = document.getElementById('load-config-button');
 const loadConfigInputEl = document.getElementById('load-config-input');
+const presetPanelEl = document.getElementById('preset-panel');
 const advisorPanelEl = document.getElementById('advisor-panel');
 const preparedPathEl = document.getElementById('prepared-path');
 const copyHtmlSnippetEl = document.getElementById('copy-html-snippet');
@@ -499,6 +698,7 @@ function init() {
   bootstrapOAuthSessionFromUrl();
   renderDocumentCards();
   renderDocumentSelect();
+  renderPresetPanel();
   renderJurisdictionAdvisor();
   renderForm();
   setPreviewPlaceholder('Generá un documento para ver la salida acá.');
@@ -525,6 +725,7 @@ function renderDocumentCards() {
       appState.documentType = button.dataset.openDoc;
       appState.formSeed = null;
       documentSelectEl.value = appState.documentType;
+      renderPresetPanel();
       renderForm();
       document.getElementById('generator').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
@@ -539,8 +740,60 @@ function renderDocumentSelect() {
   documentSelectEl.addEventListener('change', () => {
     appState.documentType = documentSelectEl.value;
     appState.formSeed = null;
+    renderPresetPanel();
     renderForm();
   });
+}
+
+function renderPresetPanel() {
+  const presets = DOCUMENT_PRESETS[appState.documentType] || [];
+  if (presets.length === 0) {
+    presetPanelEl.className = 'preset-panel is-empty';
+    presetPanelEl.innerHTML = '<p class="muted-copy">Este documento todavía no tiene presets específicos. Acá conviene completar el formulario manualmente o usar el recomendador de jurisdicción si aplica.</p>';
+    return;
+  }
+
+  presetPanelEl.className = 'preset-panel';
+  presetPanelEl.innerHTML = `
+    <div class="field">
+      <label for="document-preset">Escenario sugerido</label>
+      <select id="document-preset">
+        <option value="">Elegí un preset</option>
+        ${presets.map((preset) => `<option value="${preset.value}">${preset.label}</option>`).join('')}
+      </select>
+      <span class="field-hint">Los presets precargan campos típicos del documento actual, pero después podés editar todo.</span>
+    </div>
+    <div class="preset-actions">
+      <button type="button" class="button button-secondary button-disabled" id="apply-document-preset" disabled>Aplicar preset</button>
+    </div>
+    <div class="preset-summary" id="preset-summary"></div>
+  `;
+
+  const selectEl = presetPanelEl.querySelector('#document-preset');
+  const applyButtonEl = presetPanelEl.querySelector('#apply-document-preset');
+  const summaryEl = presetPanelEl.querySelector('#preset-summary');
+
+  selectEl.addEventListener('change', () => {
+    const preset = presets.find((item) => item.value === selectEl.value);
+    if (!preset) {
+      applyButtonEl.disabled = true;
+      applyButtonEl.classList.add('button-disabled');
+      summaryEl.className = 'preset-summary';
+      summaryEl.innerHTML = '';
+      return;
+    }
+
+    applyButtonEl.disabled = false;
+    applyButtonEl.classList.remove('button-disabled');
+    summaryEl.className = 'preset-summary is-visible';
+    summaryEl.innerHTML = `
+      <strong>${preset.label}</strong>
+      <p class="muted-copy">${escapeHtml(preset.description)}</p>
+      <ul>${preset.summary.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
+    `;
+  });
+
+  applyButtonEl.addEventListener('click', () => applyDocumentPreset(selectEl.value));
 }
 
 function renderJurisdictionAdvisor() {
@@ -627,6 +880,18 @@ function renderForm() {
   renderAdvisorRecommendation();
   renderSnippetState();
   renderSuiteState();
+}
+
+function applyDocumentPreset(presetValue) {
+  const presets = DOCUMENT_PRESETS[appState.documentType] || [];
+  const preset = presets.find((item) => item.value === presetValue);
+  if (!preset) return;
+
+  const currentValues = gatherFormValues();
+  appState.formSeed = deepMerge(currentValues, preset.patch);
+  renderForm();
+  scheduleLiveValidation();
+  setStatus(`Preset aplicado sobre ${DOCUMENTS[appState.documentType].label}: ${preset.label}. Revisá los campos y ajustá lo que no refleje tu operación real.`);
 }
 
 function renderField(field, defaults) {
@@ -800,6 +1065,7 @@ async function loadExistingConfig(event) {
     appState.documentType = documentType;
     appState.formSeed = normalizeLoadedSeed(documentType, parsed);
     documentSelectEl.value = documentType;
+    renderPresetPanel();
     renderForm();
     scheduleLiveValidation();
     setStatus(`Configuración cargada para ${DOCUMENTS[documentType].label}. Revisá los campos y regenerá cuando quieras.`);
