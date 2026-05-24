@@ -15,6 +15,7 @@ This repo now supports two delivery modes:
 - canonical JSON input format
 - interactive wizard with document selection, guided choices, and manual "Other" notes
 - static browser app with modern UI, live validation, preview, downloads, and GitHub publishing
+- document-specific presets for complex flows such as DPA and AI policy setup
 - output language selection in Spanish or English
 - optional hashed public URL generation for HTML published through hosting you already have
 - GitHub OAuth publish flow for user-owned GitHub Pages repos
@@ -37,10 +38,13 @@ What the static app can do today:
 - generate the final document client-side
 - preview HTML, Markdown, or text output
 - download `html`, `md`, `txt`, and input `json`
+- import previously generated JSON to continue editing without starting from zero
+- apply document-specific presets for `dpa` and `ai`
 - authenticate with GitHub through a Cloudflare Worker backend
 - list repositories from the authenticated user
 - detect whether a repo has `Pages activo` or `Pages accesible`
 - publish generated HTML into a selected repo under a safe route such as `legal/privacy/...`
+- build a temporary legal suite in the browser and publish several documents in one commit
 - return the final expected GitHub Pages URL
 
 What it does not do yet:
@@ -673,15 +677,18 @@ For `dpa`, the wizard asks specifically about:
 - processing purpose
 - categories of personal data and data subjects
 - instruction channels, confidentiality, and security measures
-- subprocessors and transfer mechanisms
-- incident timing, assistance commitments, and audit rights
-- deletion or return handling at end of service
+- subprocessors, authorization model, notice/objection window, and vendor methodology
+- transfer mechanisms and supplementary safeguards
+- incident timing and assistance commitments
+- deletion or return handling, including backup retention behavior
+- audit rights, audit mechanism, and notice expectations
 
 For `ai`, the wizard asks specifically about:
 
 - what AI systems or features are in scope
 - what use cases they serve
 - whether data is used for evaluation, improvement, or training
+- what specific AI data-use activities occur, such as quality evaluation, safety testing, fine-tuning, broader training, abuse monitoring, or product analytics
 - what data sources and third-party providers are involved
 - retention and opt-out controls
 - whether automated decisions or human review apply
@@ -725,8 +732,8 @@ Current test coverage checks:
 - refund generation covers return windows, exceptions, and refund timing
 - disclaimer generation covers modular warnings for links, reviews, risks, and informational content
 - security generation covers reporting channels, safe harbor, disclosure timing, and optional security-practices summaries
-- DPA generation covers controller-processor roles, subprocessors, transfer mechanisms, incident timing, and end-of-service deletion/return language
-- AI policy generation covers AI use cases, training/improvement disclosures, providers, retention, review paths, and high-level safeguards
+- DPA generation covers controller-processor roles, subprocessors, authorization model, transfer mechanisms, supplementary safeguards, incident timing, audit mechanics, and end-of-service deletion/return language
+- AI policy generation covers AI use cases, training/improvement disclosures, specific AI data-use activities, providers, retention, review paths, and high-level safeguards
 - deletion generation covers request channels, deletion scope, and Meta-connected account guidance
 - validation reports missing required fields
 
