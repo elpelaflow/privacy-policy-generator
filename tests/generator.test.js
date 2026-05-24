@@ -13,6 +13,7 @@ const DisclaimerGenerator = require('../js/disclaimer-generator');
 const SecurityPolicyGenerator = require('../js/security-generator');
 const DataProcessingAgreementGenerator = require('../js/dpa-generator');
 const AiPolicyGenerator = require('../js/ai-policy-generator');
+const EulaGenerator = require('../js/eula-generator');
 const { buildHashedFilename, publishPolicy } = require('../js/publishing');
 const execFileAsync = promisify(execFile);
 
@@ -567,6 +568,83 @@ test('ai policy validation warns when evaluation-only mode is mixed with broader
   assert.equal(validation.ok, true);
   assert.ok(validation.warnings.some((warning) => /evaluation|safety review|evaluación/i.test(warning)));
   assert.ok(validation.warnings.some((warning) => /fine-tuning|training|entrenamiento/i.test(warning)));
+});
+
+function baseEulaInput() {
+  return {
+    documentType: 'eula',
+    business: {
+      name: 'Acme Mobile Labs',
+      type: 'mobile',
+      websiteUrl: 'https://apps.acme.example.com',
+      country: 'United States',
+      address: 'Example Avenue 42, Austin, TX, United States'
+    },
+    contact: {
+      email: 'legal@acme.example.com',
+      phone: '',
+      pageUrl: 'https://apps.acme.example.com/legal/eula'
+    },
+    eula: {
+      productName: 'Acme Notes Pro',
+      softwareType: 'mobile_app',
+      licenseGrant: 'We grant a limited, revocable, non-exclusive, non-transferable license to install and use the app under the applicable plan.',
+      licenseScope: 'per_account',
+      allowsCommercialUse: true,
+      transferable: false,
+      installationLimit: 'Use is limited to the authorized account and associated devices under the active subscription.',
+      reverseEngineeringRestricted: true,
+      modificationRestricted: true,
+      redistributionRestricted: true,
+      updatesProvided: true,
+      supportLevel: 'commercial_support',
+      thirdPartyComponents: true,
+      openSourceNotice: 'The app may include third-party and open-source components subject to their own notices and license terms.',
+      warrantyDisclaimer: 'Except where a separate commercial warranty expressly applies, the app is provided on an "as is" basis.',
+      liabilityLimit: 'To the maximum extent permitted by law, indirect damages, lost data, and service interruptions are excluded.',
+      terminationTriggers: 'The license may terminate for material breach, unauthorized use, or payment failure.',
+      governingLaw: 'Texas law and the courts specified in the commercial terms.'
+    },
+    settings: {
+      language: 'en'
+    }
+  };
+}
+
+test('eula generator includes license and restriction sections', async () => {
+  const generator = new EulaGenerator();
+  const result = await generator.generate(baseEulaInput());
+
+  assert.match(result.markdown, /End User License Agreement \(EULA\)/);
+  assert.match(result.markdown, /License Grant/);
+  assert.match(result.markdown, /Use Restrictions/);
+  assert.match(result.markdown, /Warranty Disclaimer and Limitation of Liability/);
+});
+
+test('eula html includes internal JSON-LD metadata and accessible structure', async () => {
+  const generator = new EulaGenerator();
+  const result = await generator.generate(baseEulaInput());
+
+  assert.match(result.html, /<script type="application\/ld\+json">/);
+  assert.match(result.html, /"@type":"WebPage"/);
+  assert.match(result.html, /<main id="main-content" aria-labelledby="document-title">/);
+  assert.match(result.html, /<meta name="legal-document-type" content="eula">/);
+});
+
+test('eula validation blocks missing product name and warns about support and third-party contradictions', async () => {
+  const generator = new EulaGenerator();
+  const input = baseEulaInput();
+  input.eula.productName = '';
+  input.eula.updatesProvided = false;
+  input.eula.supportLevel = 'commercial_support';
+  input.eula.thirdPartyComponents = false;
+
+  const validation = await generator.validate(input);
+
+  assert.equal(validation.ok, false);
+  assert.ok(validation.errors.some((error) => /product|software|app/i.test(error)));
+  assert.ok(validation.warnings.some((warning) => /updates|soporte|support/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /third-party|open-source|terceros/i.test(warning)));
 });
 
 function baseTermsInput() {

@@ -458,6 +458,62 @@ function buildDocuments() {
       };
     }
   },
+  eula: {
+    label: 'EULA / Licencia de uso',
+    description: 'Licencia de usuario final para software, apps, SDKs o extensiones, con grant, restricciones, updates, soporte y responsabilidad.',
+    basePath: 'eula',
+    generator: () => new globalThis.LegalGenerators.EulaGenerator(),
+    sections: [
+      { title: 'Licenciante', description: 'Identidad del negocio o titular que licencia el software.', fields: commonBusinessFields('saas') },
+      { title: 'Contacto', description: 'Canales de contacto legales o comerciales del licenciante.', fields: commonContactFields() },
+      {
+        title: 'Producto y licencia',
+        description: 'Producto licenciado, tipo de software, grant principal y alcance de uso.',
+        fields: [
+          textField('eula.productName', 'Nombre del software o app', '', '', true),
+          selectField('eula.softwareType', 'Tipo de software', EULA_SOFTWARE_TYPES, 'mobile_app'),
+          textareaField('eula.licenseGrant', 'Redacción de la licencia', 'Se concede una licencia limitada, revocable, no exclusiva y no transferible para usar el software conforme a este acuerdo y al plan o suscripción contratada.'),
+          selectField('eula.licenseScope', 'Alcance de la licencia', EULA_LICENSE_SCOPES, 'per_account'),
+          booleanField('eula.allowsCommercialUse', 'Permitir uso comercial o empresarial', 'Activá esto si el software puede usarse en contextos comerciales dentro del plan o contrato aplicable.', true),
+          booleanField('eula.transferable', 'La licencia puede transferirse', 'No lo actives salvo que realmente aceptes cesión o transferencia del derecho de uso.', false),
+          textField('eula.installationLimit', 'Límite de instalación, cuenta o asientos', 'Una cuenta activa, un dispositivo por usuario o la cantidad de asientos contratada, según el plan aplicable.')
+        ]
+      },
+      {
+        title: 'Restricciones, soporte y terceros',
+        description: 'Restricciones sobre ingeniería inversa, redistribución, actualizaciones, soporte y componentes externos.',
+        fields: [
+          booleanField('eula.reverseEngineeringRestricted', 'Restringir ingeniería inversa', 'Marcá esto si querés prohibir descompilación o derivación de código fuente salvo cuando la ley obligatoria disponga lo contrario.', true),
+          booleanField('eula.modificationRestricted', 'Restringir modificaciones u obras derivadas', 'Marcá esto si querés limitar adaptaciones, forks o cambios al software salvo autorización expresa.', true),
+          booleanField('eula.redistributionRestricted', 'Restringir redistribución o reempaquetado', 'Marcá esto si el usuario no puede revender, redistribuir o republicar el software.', true),
+          booleanField('eula.updatesProvided', 'Se proveen updates o nuevas versiones', 'Desactivá esto sólo si querés dejar claro que no prometés releases futuros ni parches.', true),
+          selectField('eula.supportLevel', 'Nivel de soporte', EULA_SUPPORT_LEVELS, 'commercial_support'),
+          booleanField('eula.thirdPartyComponents', 'Hay componentes de terceros u open source', 'Activá esto si el producto incorpora librerías, SDKs o módulos sujetos a licencias separadas.', true),
+          textareaField('eula.openSourceNotice', 'Nota sobre terceros u open source', 'El software puede incluir componentes de terceros u open source sujetos a sus propias licencias, avisos y condiciones aplicables.')
+        ]
+      },
+      {
+        title: 'Garantías, terminación y ley aplicable',
+        description: 'As-is, responsabilidad, causales de terminación y ley o foro principal.',
+        fields: [
+          textareaField('eula.warrantyDisclaimer', 'Descargo de garantías', 'Salvo garantía comercial expresa, el software se entrega "tal cual" y según disponibilidad, en la máxima medida permitida por la ley aplicable.'),
+          textareaField('eula.liabilityLimit', 'Limitación de responsabilidad', 'En la máxima medida permitida por la ley, no respondemos por daños indirectos, pérdida de datos, lucro cesante o interrupciones derivadas del uso del software, salvo dolo o prohibición legal aplicable.'),
+          textareaField('eula.terminationTriggers', 'Supuestos de terminación o revocación', 'La licencia puede terminarse por incumplimiento material, uso no autorizado, falta de pago o violación de restricciones técnicas o legales del producto.'),
+          textField('eula.governingLaw', 'Ley aplicable o foro principal', 'Según la jurisdicción indicada por el licenciante o el contrato principal aplicable al producto.')
+        ]
+      },
+      outputFields()
+    ],
+    buildInput(values) {
+      return {
+        documentType: 'eula',
+        business: values.business,
+        contact: values.contact,
+        eula: values.eula,
+        settings: values.settings
+      };
+    }
+  },
   dpa: {
     label: 'DPA / Acuerdo de tratamiento de datos',
     description: 'Documento controller-processor para SaaS B2B con instrucciones, seguridad, subprocessors, transferencias y cierre del servicio.',
@@ -1004,6 +1060,23 @@ function createDefaults(type, seed = null) {
       ...common,
       business: { ...common.business, type: 'saas' },
       security: {}
+    }, seed);
+  }
+
+  if (type === 'eula') {
+    return mergeSeed({
+      ...common,
+      business: { ...common.business, type: 'saas' },
+      eula: {
+        softwareType: 'mobile_app',
+        licenseScope: 'per_account',
+        reverseEngineeringRestricted: true,
+        modificationRestricted: true,
+        redistributionRestricted: true,
+        updatesProvided: true,
+        supportLevel: 'commercial_support',
+        thirdPartyComponents: true
+      }
     }, seed);
   }
 
@@ -1606,6 +1679,16 @@ function buildDocumentSpecificSummary(documentType, values) {
     ];
   }
 
+  if (documentType === 'eula') {
+    return [
+      ['Producto licenciado', values.eula?.productName || 'Sin definir'],
+      ['Tipo de software', findOptionLabel(EULA_SOFTWARE_TYPES, values.eula?.softwareType || '') || 'Sin definir'],
+      ['Alcance de licencia', findOptionLabel(EULA_LICENSE_SCOPES, values.eula?.licenseScope || '') || 'Sin definir'],
+      ['Uso comercial', formatBooleanLabel(values.eula?.allowsCommercialUse)],
+      ['Soporte', findOptionLabel(EULA_SUPPORT_LEVELS, values.eula?.supportLevel || '') || 'Sin definir']
+    ];
+  }
+
   return [];
 }
 
@@ -2198,6 +2281,26 @@ const SECURITY_REPORT_REQUIREMENTS = [
   { value: 'Pasos de reproducción o prueba de concepto razonable', label: 'Reproducción o PoC', description: 'Cómo reproducir el hallazgo sin exagerar riesgo.' },
   { value: 'Activos, URLs, endpoints o cuentas involucradas', label: 'Activos afectados', description: 'Qué activos o superficies están involucrados.' },
   { value: 'Información de contacto para seguimiento', label: 'Contacto de seguimiento', description: 'Cómo continuar la coordinación del caso.' }
+];
+const EULA_SOFTWARE_TYPES = [
+  { value: 'desktop', label: 'Software de escritorio', description: 'Aplicación instalable para desktop, workstation o entorno local.' },
+  { value: 'mobile_app', label: 'App móvil', description: 'Aplicación iOS, Android o wrapper móvil equivalente.' },
+  { value: 'web_app', label: 'Web app / SaaS', description: 'Interfaz web, cuenta alojada o software accesible online.' },
+  { value: 'sdk_api', label: 'SDK / API / tooling', description: 'SDK, librería, API o herramientas para desarrolladores.' },
+  { value: 'plugin_extension', label: 'Plugin / extensión', description: 'Extensión, add-on o módulo que complementa otra plataforma.' }
+];
+const EULA_LICENSE_SCOPES = [
+  { value: 'personal_internal', label: 'Uso personal o interno', description: 'Uso personal, individual o interno dentro de una organización.' },
+  { value: 'commercial_b2b', label: 'Uso comercial B2B', description: 'Uso empresarial o comercial conforme al plan contratado.' },
+  { value: 'single_device', label: 'Un dispositivo o instalación', description: 'La licencia queda atada a un dispositivo o instalación específica.' },
+  { value: 'per_account', label: 'Por cuenta o usuario', description: 'La licencia depende de la cuenta o usuario habilitado.' },
+  { value: 'per_seat', label: 'Por asiento o cantidad contratada', description: 'La licencia depende de asientos, seats o cantidad contratada.' }
+];
+const EULA_SUPPORT_LEVELS = [
+  { value: 'none', label: 'Sin soporte comprometido', description: 'No hay obligación de soporte más allá de la disponibilidad general.' },
+  { value: 'best_effort', label: 'Best effort', description: 'Se intenta asistir y mantener el producto sin SLA fuerte.' },
+  { value: 'commercial_support', label: 'Soporte comercial', description: 'Existe soporte sujeto a plan, suscripción o contrato.' },
+  { value: 'contract_defined', label: 'Definido por contrato', description: 'El nivel de soporte se remite a un contrato u order form separado.' }
 ];
 const DPA_COUNTERPARTY_ROLES = [
   { value: 'controller', label: 'Controller / cliente' },

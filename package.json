@@ -1,7 +1,7 @@
 {
   "name": "privacy-policy-generator",
   "version": "2.0.0",
-  "description": "CLI generator for privacy policies, terms, cookie policies, return/refund policies, disclaimers, security policies, and deletion instructions, with interactive wizards, validation, publishing, and tests.",
+  "description": "CLI generator for privacy policies, terms, cookie policies, return/refund policies, disclaimers, security policies, EULAs, DPAs, AI policies, and deletion instructions, with interactive wizards, validation, publishing, and tests.",
   "license": "MIT",
   "type": "commonjs",
   "bin": {
@@ -24,7 +24,9 @@
     "validate:disclaimer": "node ./cli.js validate --document disclaimer --input ./examples/disclaimer-meta-content.json",
     "generate:disclaimer": "node ./cli.js generate --document disclaimer --input ./examples/disclaimer-meta-content.json --format markdown",
     "validate:security": "node ./cli.js validate --document security --input ./examples/security-disclosure.json",
-    "generate:security": "node ./cli.js generate --document security --input ./examples/security-disclosure.json --format markdown"
+    "generate:security": "node ./cli.js generate --document security --input ./examples/security-disclosure.json --format markdown",
+    "validate:eula": "node ./cli.js validate --document eula --input ./examples/eula-mobile-app.json",
+    "generate:eula": "node ./cli.js generate --document eula --input ./examples/eula-mobile-app.json --format markdown"
   },
   "devDependencies": {
     "esbuild": "^0.28.0"

@@ -7,6 +7,7 @@ const DisclaimerGenerator = require('../js/disclaimer-generator');
 const SecurityPolicyGenerator = require('../js/security-generator');
 const DataProcessingAgreementGenerator = require('../js/dpa-generator');
 const AiPolicyGenerator = require('../js/ai-policy-generator');
+const EulaGenerator = require('../js/eula-generator');
 
 globalThis.LegalGenerators = {
   PrivacyPolicyGenerator,
@@ -17,5 +18,6 @@ globalThis.LegalGenerators = {
   DisclaimerGenerator,
   SecurityPolicyGenerator,
   DataProcessingAgreementGenerator,
-  AiPolicyGenerator
+  AiPolicyGenerator,
+  EulaGenerator
 };

@@ -1,12 +1,12 @@
 # Privacy Policy Generator
 
-CLI-first and web-enabled generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, security policies, data processing agreements (DPA), AI transparency / training-data policies, and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, automated tests, and GitHub Pages publishing support.
+CLI-first and web-enabled generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, security policies, end user license agreements (EULA), data processing agreements (DPA), AI transparency / training-data policies, and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, automated tests, and GitHub Pages publishing support.
 
 ## Scope
 
 This repo now supports two delivery modes:
 
-- terminal-first generators for privacy, terms, cookies, return/refund, disclaimers, security-policy, DPA, AI-policy, and deletion-instructions documents
+- terminal-first generators for privacy, terms, cookies, return/refund, disclaimers, security-policy, EULA, DPA, AI-policy, and deletion-instructions documents
 - a client-side static web app that runs fully in the browser and can be deployed to GitHub Pages
 
 ## Features
@@ -16,6 +16,7 @@ This repo now supports two delivery modes:
 - interactive wizard with document selection, guided choices, and manual "Other" notes
 - static browser app with modern UI, live validation, preview, downloads, and GitHub publishing
 - document-specific presets for complex flows such as DPA and AI policy setup
+- EULA generation for software/apps with license grant, restrictions, updates, support, and liability clauses
 - output language selection in Spanish or English
 - optional hashed public URL generation for HTML published through hosting you already have
 - GitHub OAuth publish flow for user-owned GitHub Pages repos

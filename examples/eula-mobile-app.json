@@ -1,0 +1,38 @@
+{
+  "documentType": "eula",
+  "business": {
+    "name": "Acme Mobile Labs",
+    "type": "mobile",
+    "websiteUrl": "https://apps.acme.example.com",
+    "country": "United States",
+    "address": "Example Avenue 42, Austin, TX, United States"
+  },
+  "contact": {
+    "email": "legal@acme.example.com",
+    "phone": "",
+    "pageUrl": "https://apps.acme.example.com/legal/eula"
+  },
+  "eula": {
+    "productName": "Acme Notes Pro",
+    "softwareType": "mobile_app",
+    "licenseGrant": "We grant a limited, revocable, non-exclusive, non-transferable license to install and use the app for personal or internal business purposes under the applicable plan.",
+    "licenseScope": "per_account",
+    "allowsCommercialUse": true,
+    "transferable": false,
+    "installationLimit": "Use is limited to the authorized account and devices reasonably associated with that account, subject to the subscription tier.",
+    "reverseEngineeringRestricted": true,
+    "modificationRestricted": true,
+    "redistributionRestricted": true,
+    "updatesProvided": true,
+    "supportLevel": "commercial_support",
+    "thirdPartyComponents": true,
+    "openSourceNotice": "The app may include third-party and open-source components that remain subject to their own notices and license terms.",
+    "warrantyDisclaimer": "Except where a separate commercial warranty expressly applies, the app is provided on an \"as is\" and \"as available\" basis to the maximum extent permitted by law.",
+    "liabilityLimit": "To the maximum extent permitted by law, we are not liable for indirect damages, loss of data, lost profits, or interruptions arising from the use of the app, except where liability cannot be excluded.",
+    "terminationTriggers": "The license may terminate for material breach, unauthorized use, payment failure, or violation of technical or legal restrictions tied to the app.",
+    "governingLaw": "Texas law and the courts specified in the commercial terms or product notice, unless mandatory local law requires otherwise."
+  },
+  "settings": {
+    "language": "en"
+  }
+}
