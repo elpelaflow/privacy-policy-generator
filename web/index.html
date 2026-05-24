@@ -145,6 +145,7 @@
 
               <div class="download-actions">
                 <button type="button" id="generate-button" class="button button-primary">Generar documento</button>
+                <button type="button" id="add-to-suite" class="button button-secondary button-disabled" disabled>Agregar a suite legal</button>
                 <button type="button" id="download-html" class="button button-secondary">Descargar HTML</button>
                 <button type="button" id="download-markdown" class="button button-secondary">Descargar Markdown</button>
                 <button type="button" id="download-text" class="button button-secondary">Descargar TXT</button>
@@ -164,6 +165,18 @@
                   <button type="button" id="copy-markdown-snippet" class="button button-secondary button-disabled" disabled>Copiar Markdown</button>
                 </div>
                 <pre id="snippet-preview" class="snippet-preview">Publicá un documento para generar snippets listos para copiar.</pre>
+              </div>
+
+              <div id="suite-box" class="snippet-box">
+                <h4>Suite legal</h4>
+                <p class="muted-copy">Guardá varios documentos generados en esta sesión y publicalos juntos en un solo commit.</p>
+                <div class="snippet-actions">
+                  <button type="button" id="publish-suite" class="button button-secondary button-disabled" disabled>Publicar suite legal</button>
+                  <button type="button" id="clear-suite" class="button button-secondary button-disabled" disabled>Vaciar suite</button>
+                </div>
+                <div id="suite-list" class="suite-list">
+                  <p class="muted-copy">Todavía no agregaste documentos a la suite.</p>
+                </div>
               </div>
 
               <div class="preview-stage">

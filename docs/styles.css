@@ -444,6 +444,33 @@ button, input, select, textarea { font: inherit; }
   white-space: pre-wrap;
   word-break: break-word;
 }
+.suite-list {
+  display: grid;
+  gap: 10px;
+}
+.suite-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(7,10,24,0.48);
+}
+.suite-item strong {
+  display: block;
+  margin-bottom: 4px;
+}
+.suite-item small {
+  display: block;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.suite-item .button {
+  min-height: 40px;
+  padding-inline: 14px;
+}
 
 .download-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .download-actions .button-secondary:not(:disabled) {

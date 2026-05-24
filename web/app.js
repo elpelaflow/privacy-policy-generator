@@ -307,7 +307,8 @@ const appState = {
   isDirtySinceGenerate: false,
   formSeed: null,
   advisorRecommendation: null,
-  publishedSnippets: null
+  publishedSnippets: null,
+  suiteItems: []
 };
 
 const formEl = document.getElementById('generator-form');
@@ -325,6 +326,10 @@ const preparedPathEl = document.getElementById('prepared-path');
 const copyHtmlSnippetEl = document.getElementById('copy-html-snippet');
 const copyMarkdownSnippetEl = document.getElementById('copy-markdown-snippet');
 const snippetPreviewEl = document.getElementById('snippet-preview');
+const addToSuiteEl = document.getElementById('add-to-suite');
+const publishSuiteEl = document.getElementById('publish-suite');
+const clearSuiteEl = document.getElementById('clear-suite');
+const suiteListEl = document.getElementById('suite-list');
 const generateButtonEl = document.getElementById('generate-button');
 const downloadHtmlEl = document.getElementById('download-html');
 const downloadMarkdownEl = document.getElementById('download-markdown');
@@ -358,6 +363,9 @@ logoutGitHubEl.addEventListener('click', logoutGitHub);
 publishGitHubPagesEl.addEventListener('click', publishToGitHubPages);
 copyHtmlSnippetEl.addEventListener('click', () => copySnippet('html'));
 copyMarkdownSnippetEl.addEventListener('click', () => copySnippet('markdown'));
+addToSuiteEl.addEventListener('click', addCurrentDocumentToSuite);
+publishSuiteEl.addEventListener('click', publishLegalSuite);
+clearSuiteEl.addEventListener('click', clearSuite);
 githubRepoSelectEl.addEventListener('change', updatePublishControls);
 loadConfigButtonEl.addEventListener('click', () => loadConfigInputEl.click());
 loadConfigInputEl.addEventListener('change', loadExistingConfig);
@@ -381,6 +389,7 @@ function init() {
   setExportState(false);
   setStatus('');
   renderSnippetState();
+  renderSuiteState();
   initGitHubPublish();
 }
 
@@ -501,6 +510,7 @@ function renderForm() {
   setStatus('');
   renderAdvisorRecommendation();
   renderSnippetState();
+  renderSuiteState();
 }
 
 function renderField(field, defaults) {
@@ -977,6 +987,40 @@ ${snippets.markdown}`;
   setSnippetButtons(true);
 }
 
+function renderSuiteState() {
+  if (appState.suiteItems.length === 0) {
+    suiteListEl.innerHTML = '<p class="muted-copy">Todavía no agregaste documentos a la suite.</p>';
+    setSuiteButtons(false, false);
+    return;
+  }
+
+  suiteListEl.innerHTML = appState.suiteItems.map((item) => `
+    <div class="suite-item">
+      <div>
+        <strong>${escapeHtml(item.label)}</strong>
+        <small>${escapeHtml(item.path)}</small>
+        <small>Proyecto: ${escapeHtml(item.businessName)}</small>
+      </div>
+      <button type="button" class="button button-secondary" data-remove-suite="${item.documentType}">Quitar</button>
+    </div>
+  `).join('');
+
+  suiteListEl.querySelectorAll('[data-remove-suite]').forEach((button) => {
+    button.addEventListener('click', () => removeSuiteItem(button.dataset.removeSuite));
+  });
+
+  setSuiteButtons(true, githubState.backendEnabled && Boolean(githubState.session) && Boolean(githubRepoSelectEl.value));
+}
+
+function setSuiteButtons(hasItems, canPublishSuite) {
+  clearSuiteEl.disabled = !hasItems;
+  clearSuiteEl.classList.toggle('button-disabled', !hasItems);
+
+  publishSuiteEl.disabled = !hasItems || !canPublishSuite;
+  publishSuiteEl.classList.toggle('button-disabled', !hasItems || !canPublishSuite);
+  publishSuiteEl.classList.toggle('button-primary', hasItems && canPublishSuite);
+}
+
 function setSnippetButtons(enabled) {
   for (const button of [copyHtmlSnippetEl, copyMarkdownSnippetEl]) {
     button.disabled = !enabled;
@@ -1007,6 +1051,8 @@ function setExportState(enabled) {
     button.disabled = !enabled;
     button.classList.toggle('button-disabled', !enabled);
   }
+  addToSuiteEl.disabled = !enabled;
+  addToSuiteEl.classList.toggle('button-disabled', !enabled);
   updatePublishControls();
 }
 
@@ -1189,6 +1235,7 @@ function updatePublishControls() {
   publishGitHubPagesEl.disabled = !canPublish;
   publishGitHubPagesEl.classList.toggle('button-disabled', !canPublish);
   publishGitHubPagesEl.classList.toggle('button-primary', canPublish);
+  setSuiteButtons(appState.suiteItems.length > 0, githubState.backendEnabled && Boolean(githubState.session) && Boolean(githubRepoSelectEl.value));
 }
 
 function connectGitHub() {
@@ -1253,6 +1300,95 @@ async function publishToGitHubPages() {
   }
 }
 
+function addCurrentDocumentToSuite() {
+  if (!appState.lastGenerated || !appState.lastInput || appState.isDirtySinceGenerate) return;
+
+  const html = appState.lastGenerated.html;
+  const businessName = appState.lastInput.business?.name || 'legal-document';
+  const filenameBase = slugify(businessName);
+  const documentType = appState.documentType;
+  const label = DOCUMENTS[documentType].label;
+
+  shortHash(html).then((hash) => {
+    const filename = `${filenameBase}-${hash}.html`;
+    const path = buildRepoDocumentPath(documentType, filename);
+    const nextItem = {
+      documentType,
+      label,
+      businessName,
+      html,
+      path
+    };
+    appState.suiteItems = [
+      ...appState.suiteItems.filter((item) => item.documentType !== documentType),
+      nextItem
+    ].sort((left, right) => left.label.localeCompare(right.label, 'es'));
+    renderSuiteState();
+    setStatus(`${label} agregado a la suite legal. Podés sumar más documentos o publicarlos juntos.`);
+  }).catch(() => {
+    setStatus('No pude preparar este documento para la suite legal.');
+  });
+}
+
+function removeSuiteItem(documentType) {
+  appState.suiteItems = appState.suiteItems.filter((item) => item.documentType !== documentType);
+  renderSuiteState();
+  setStatus(appState.suiteItems.length > 0 ? 'Documento quitado de la suite legal.' : 'La suite legal quedó vacía.');
+}
+
+function clearSuite() {
+  appState.suiteItems = [];
+  renderSuiteState();
+  setStatus('La suite legal quedó vacía.');
+}
+
+async function publishLegalSuite() {
+  if (!githubState.backendEnabled || !githubState.session || !githubRepoSelectEl.value || appState.suiteItems.length === 0) {
+    return;
+  }
+
+  publishSuiteEl.disabled = true;
+  publishSuiteEl.textContent = 'Publicando suite...';
+
+  try {
+    const repo = githubState.repos.find((item) => item.full_name === githubRepoSelectEl.value);
+    const businessName = appState.suiteItems[0]?.businessName || appState.lastInput?.business?.name || 'legal-suite';
+    const response = await backendFetch('/api/github/publish', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        repo: githubRepoSelectEl.value,
+        branch: repo?.default_branch || 'main',
+        files: appState.suiteItems.map((item) => ({
+          path: item.path,
+          content: item.html
+        })),
+        commitMessage: `Publish legal suite for ${businessName}`
+      })
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.error || 'No se pudo publicar la suite legal.');
+    }
+
+    const publishedUrls = Array.isArray(payload.public_urls) ? payload.public_urls : [];
+    const firstUrl = publishedUrls[0]?.public_url || '';
+    if (firstUrl) {
+      preparedPathEl.textContent = firstUrl;
+      appState.publishedSnippets = buildPublishedSnippets(firstUrl, appState.suiteItems[0]?.label || 'Documento legal');
+      renderSnippetState();
+    }
+    setStatus(`Suite legal publicada en un solo commit. Documentos: ${appState.suiteItems.map((item) => item.label).join(', ')}.`);
+  } catch (error) {
+    setStatus(`Error al publicar la suite legal: ${error.message}`);
+  } finally {
+    publishSuiteEl.textContent = 'Publicar suite legal';
+    updatePublishControls();
+  }
+}
+
 function scheduleLiveValidation() {
   clearTimeout(validationTimer);
   const currentRequestId = ++validationRequestId;
@@ -1294,6 +1430,15 @@ function markDirtySinceGenerate() {
   setPreviewPlaceholder('El formulario cambió desde la última generación. Volvé a generar el documento para actualizar la vista previa y las descargas.');
   renderSnippetState();
   setStatus('La versión generada quedó desactualizada. Volvé a generar el documento para que la vista previa y las descargas reflejen los cambios.');
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 function slugify(value) {
@@ -1360,14 +1505,6 @@ function commonContactFields() {
     textField('contact.phone', 'Teléfono', ''),
     textField('contact.pageUrl', 'Página de privacidad o contacto', '')
   ];
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
 }
 
 const BUSINESS_TYPES = [

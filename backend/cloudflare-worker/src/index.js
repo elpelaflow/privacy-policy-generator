@@ -219,37 +219,92 @@ async function listRepos(request, env, origin) {
 async function publishDocument(request, env, origin) {
   const session = await requireSession(request, env);
   const payload = await request.json();
-  if (!payload.repo || !payload.path || !payload.content) {
-    throw new Error('repo, path and content are required.');
+  if (!payload.repo) {
+    throw new Error('repo is required.');
   }
 
   const repoInfo = await githubApi(`/repos/${payload.repo}`, session.accessToken);
-  let existingSha = null;
-  try {
-    const existing = await githubApi(`/repos/${payload.repo}/contents/${payload.path}?ref=${payload.branch || repoInfo.default_branch}`, session.accessToken);
-    existingSha = existing.sha;
-  } catch {
-    existingSha = null;
-  }
+  const branch = payload.branch || repoInfo.default_branch;
+  const files = normalizePublishFiles(payload);
 
-  await githubApi(`/repos/${payload.repo}/contents/${payload.path}`, session.accessToken, {
-    method: 'PUT',
-    body: JSON.stringify({
-      message: payload.commitMessage || `Publish ${payload.path}`,
-      content: encodeBase64Utf8(payload.content),
-      branch: payload.branch || repoInfo.default_branch,
-      sha: existingSha || undefined
-    })
-  });
+  await createGitCommitForFiles(payload.repo, branch, files, payload.commitMessage || buildDefaultCommitMessage(files), session.accessToken);
 
   const pagesActive = await hasPages(payload.repo, session.accessToken);
-  const publicUrl = buildPublicUrl(repoInfo.owner.login, repoInfo.name, payload.path, repoInfo.homepage);
+  const publicUrls = files.map((file) => ({
+    path: file.path,
+    public_url: buildPublicUrl(repoInfo.owner.login, repoInfo.name, file.path, repoInfo.homepage)
+  }));
 
   return json({
     ok: true,
     pages_active: pagesActive,
-    public_url: publicUrl
+    public_url: publicUrls[0]?.public_url || '',
+    public_urls: publicUrls
   }, origin);
+}
+
+function normalizePublishFiles(payload) {
+  if (Array.isArray(payload.files) && payload.files.length > 0) {
+    const files = payload.files
+      .filter((file) => file?.path && file?.content)
+      .map((file) => ({
+        path: file.path,
+        content: file.content
+      }));
+    if (files.length === 0) {
+      throw new Error('files must include at least one valid path and content pair.');
+    }
+    return files;
+  }
+
+  if (payload.path && payload.content) {
+    return [{
+      path: payload.path,
+      content: payload.content
+    }];
+  }
+
+  throw new Error('path/content or files are required.');
+}
+
+function buildDefaultCommitMessage(files) {
+  if (files.length === 1) {
+    return `Publish ${files[0].path}`;
+  }
+  return `Publish legal suite (${files.length} files)`;
+}
+
+async function createGitCommitForFiles(repo, branch, files, message, token) {
+  const ref = await githubApi(`/repos/${repo}/git/ref/heads/${encodeURIComponent(branch)}`, token);
+  const baseCommit = await githubApi(`/repos/${repo}/git/commits/${ref.object.sha}`, token);
+  const tree = await githubApi(`/repos/${repo}/git/trees`, token, {
+    method: 'POST',
+    body: JSON.stringify({
+      base_tree: baseCommit.tree.sha,
+      tree: files.map((file) => ({
+        path: file.path,
+        mode: '100644',
+        type: 'blob',
+        content: file.content
+      }))
+    })
+  });
+
+  const commit = await githubApi(`/repos/${repo}/git/commits`, token, {
+    method: 'POST',
+    body: JSON.stringify({
+      message,
+      tree: tree.sha,
+      parents: [ref.object.sha]
+    })
+  });
+
+  await githubApi(`/repos/${repo}/git/refs/heads/${encodeURIComponent(branch)}`, token, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      sha: commit.sha
+    })
+  });
 }
 
 async function hasPages(repo, token) {
