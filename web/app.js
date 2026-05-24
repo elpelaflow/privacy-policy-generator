@@ -497,14 +497,14 @@ function renderForm() {
 function renderField(field, defaults) {
   const value = getByPath(defaults, field.name) ?? field.value;
   if (field.type === 'textarea') {
-    return `<div class="field full"><label>${field.label}</label><textarea name="${field.name}" placeholder="${field.placeholder || ''}">${escapeHtml(String(value ?? ''))}</textarea>${hint(field)}</div>`;
+    return `<div class="field full"><label>${renderFieldLabel(field)}</label><textarea name="${field.name}" placeholder="${field.placeholder || ''}">${escapeHtml(String(value ?? ''))}</textarea>${hint(field)}</div>`;
   }
   if (field.type === 'select') {
-    return `<div class="field"><label>${field.label}</label><select name="${field.name}">${field.options.map((option) => `<option value="${option.value}" ${option.value === value ? 'selected' : ''}>${option.label}</option>`).join('')}</select>${hint(field)}</div>`;
+    return `<div class="field"><label>${renderFieldLabel(field)}</label><select name="${field.name}">${field.options.map((option) => `<option value="${option.value}" ${option.value === value ? 'selected' : ''}>${option.label}</option>`).join('')}</select>${hint(field)}</div>`;
   }
   if (field.type === 'checkbox-group') {
     const selected = Array.isArray(value) ? value : [];
-    return `<div class="field full"><label>${field.label}</label><div class="checkbox-group">${field.options.map((option, index) => `
+    return `<div class="field full"><label>${renderFieldLabel(field)}</label><div class="checkbox-group">${field.options.map((option, index) => `
       <label class="checkbox-item">
         <input type="checkbox" name="${field.name}" value="${option.value}" ${selected.includes(option.value) ? 'checked' : ''}>
         <span><strong>${option.label}</strong><small>${option.description}</small></span>
@@ -512,16 +512,20 @@ function renderField(field, defaults) {
     `).join('')}</div>${hint(field)}</div>`;
   }
   if (field.type === 'boolean') {
-    return `<div class="field full"><label>${field.label}</label><label class="checkbox-item">
+    return `<div class="field full"><label>${renderFieldLabel(field)}</label><label class="checkbox-item">
       <input type="checkbox" name="${field.name}" ${value ? 'checked' : ''}>
       <span><strong>${value ? 'Activado' : 'Desactivado por default'}</strong><small>${field.description || ''}</small></span>
     </label></div>`;
   }
-  return `<div class="field ${field.full ? 'full' : ''}"><label>${field.label}</label><input name="${field.name}" value="${escapeHtml(String(value ?? ''))}" placeholder="${field.placeholder || ''}">${hint(field)}</div>`;
+  return `<div class="field ${field.full ? 'full' : ''}"><label>${renderFieldLabel(field)}</label><input name="${field.name}" value="${escapeHtml(String(value ?? ''))}" placeholder="${field.placeholder || ''}">${hint(field)}</div>`;
 }
 
 function hint(field) {
   return field.hint ? `<span class="field-hint">${field.hint}</span>` : '';
+}
+
+function renderFieldLabel(field) {
+  return `${field.label}${field.required ? '<span class="required-mark">*</span>' : ''}`;
 }
 
 function createDefaults(type, seed = null) {
@@ -1270,11 +1274,11 @@ function normalizeLines(value) {
   return String(value || '').split('\n').map((item) => item.trim()).filter(Boolean);
 }
 
-function textField(name, label, value = '', hint = '') { return { type: 'text', name, label, value, hint }; }
-function textareaField(name, label, value = '', hint = '') { return { type: 'textarea', name, label, value, hint }; }
-function selectField(name, label, options, value) { return { type: 'select', name, label, options, value }; }
-function checkboxField(name, label, options, value = []) { return { type: 'checkbox-group', name, label, options, value }; }
-function booleanField(name, label, description, value = false) { return { type: 'boolean', name, label, description, value }; }
+function textField(name, label, value = '', hint = '', required = false) { return { type: 'text', name, label, value, hint, required }; }
+function textareaField(name, label, value = '', hint = '', required = false) { return { type: 'textarea', name, label, value, hint, required }; }
+function selectField(name, label, options, value, required = false) { return { type: 'select', name, label, options, value, required }; }
+function checkboxField(name, label, options, value = [], required = false) { return { type: 'checkbox-group', name, label, options, value, required }; }
+function booleanField(name, label, description, value = false, required = false) { return { type: 'boolean', name, label, description, value, required }; }
 
 function outputFields() {
   return {
@@ -1288,9 +1292,9 @@ function outputFields() {
 
 function commonBusinessFields(defaultType = 'saas') {
   return [
-    textField('business.name', 'Nombre del negocio o proyecto', 'Mi proyecto'),
+    textField('business.name', 'Nombre del negocio o proyecto', 'Mi proyecto', '', true),
     selectField('business.type', 'Tipo de negocio', BUSINESS_TYPES, defaultType),
-    textField('business.websiteUrl', 'URL del sitio o app', ''),
+    textField('business.websiteUrl', 'URL del sitio o app', '', '', true),
     textField('business.country', 'País', 'Argentina'),
     textareaField('business.address', 'Dirección postal', '')
   ];

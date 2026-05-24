@@ -31,6 +31,20 @@ body {
 
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; }
+.github-mark {
+  display: inline-flex;
+  inline-size: 16px;
+  block-size: 16px;
+  flex: 0 0 16px;
+}
+.github-mark svg {
+  inline-size: 100%;
+  block-size: 100%;
+}
+.required-mark {
+  color: var(--accent);
+  margin-left: 4px;
+}
 
 .site-shell { max-width: 1480px; margin: 0 auto; padding: 24px; }
 .topbar {
