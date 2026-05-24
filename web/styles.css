@@ -467,6 +467,21 @@ button, input, select, textarea { font: inherit; }
   color: var(--muted);
   line-height: 1.45;
 }
+.suite-url-label {
+  margin-top: 8px;
+}
+.suite-url {
+  display: block;
+  margin-top: 4px;
+  color: var(--secondary);
+  font-family: var(--mono);
+  line-height: 1.5;
+  word-break: break-all;
+}
+.suite-item-actions {
+  display: grid;
+  gap: 8px;
+}
 .suite-item .button {
   min-height: 40px;
   padding-inline: 14px;

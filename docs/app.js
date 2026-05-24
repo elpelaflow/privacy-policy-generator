@@ -308,7 +308,8 @@ const appState = {
   formSeed: null,
   advisorRecommendation: null,
   publishedSnippets: null,
-  suiteItems: []
+  suiteItems: [],
+  suitePublishedUrls: []
 };
 
 const formEl = document.getElementById('generator-form');
@@ -994,19 +995,35 @@ function renderSuiteState() {
     return;
   }
 
+  const publishedUrlMap = new Map(appState.suitePublishedUrls.map((item) => [item.path, item.publicUrl]));
+
   suiteListEl.innerHTML = appState.suiteItems.map((item) => `
     <div class="suite-item">
       <div>
         <strong>${escapeHtml(item.label)}</strong>
         <small>${escapeHtml(item.path)}</small>
         <small>Proyecto: ${escapeHtml(item.businessName)}</small>
+        ${publishedUrlMap.has(item.path) ? `
+          <small class="suite-url-label">URL publicada</small>
+          <a class="suite-url" href="${escapeHtml(publishedUrlMap.get(item.path))}" target="_blank" rel="noopener">${escapeHtml(publishedUrlMap.get(item.path))}</a>
+        ` : ''}
       </div>
-      <button type="button" class="button button-secondary" data-remove-suite="${item.documentType}">Quitar</button>
+      <div class="suite-item-actions">
+        ${publishedUrlMap.has(item.path) ? `<button type="button" class="button button-secondary" data-copy-suite-url="${item.path}">Copiar URL</button>` : ''}
+        ${publishedUrlMap.has(item.path) ? `<button type="button" class="button button-secondary" data-copy-suite-snippet="${item.path}">Copiar HTML</button>` : ''}
+        <button type="button" class="button button-secondary" data-remove-suite="${item.documentType}">Quitar</button>
+      </div>
     </div>
   `).join('');
 
   suiteListEl.querySelectorAll('[data-remove-suite]').forEach((button) => {
     button.addEventListener('click', () => removeSuiteItem(button.dataset.removeSuite));
+  });
+  suiteListEl.querySelectorAll('[data-copy-suite-url]').forEach((button) => {
+    button.addEventListener('click', () => copySuiteUrl(button.dataset.copySuiteUrl));
+  });
+  suiteListEl.querySelectorAll('[data-copy-suite-snippet]').forEach((button) => {
+    button.addEventListener('click', () => copySuiteSnippet(button.dataset.copySuiteSnippet));
   });
 
   setSuiteButtons(true, githubState.backendEnabled && Boolean(githubState.session) && Boolean(githubRepoSelectEl.value));
@@ -1323,6 +1340,7 @@ function addCurrentDocumentToSuite() {
       ...appState.suiteItems.filter((item) => item.documentType !== documentType),
       nextItem
     ].sort((left, right) => left.label.localeCompare(right.label, 'es'));
+    appState.suitePublishedUrls = [];
     renderSuiteState();
     setStatus(`${label} agregado a la suite legal. Podés sumar más documentos o publicarlos juntos.`);
   }).catch(() => {
@@ -1332,12 +1350,14 @@ function addCurrentDocumentToSuite() {
 
 function removeSuiteItem(documentType) {
   appState.suiteItems = appState.suiteItems.filter((item) => item.documentType !== documentType);
+  appState.suitePublishedUrls = [];
   renderSuiteState();
   setStatus(appState.suiteItems.length > 0 ? 'Documento quitado de la suite legal.' : 'La suite legal quedó vacía.');
 }
 
 function clearSuite() {
   appState.suiteItems = [];
+  appState.suitePublishedUrls = [];
   renderSuiteState();
   setStatus('La suite legal quedó vacía.');
 }
@@ -1374,12 +1394,17 @@ async function publishLegalSuite() {
     }
 
     const publishedUrls = Array.isArray(payload.public_urls) ? payload.public_urls : [];
+    appState.suitePublishedUrls = publishedUrls.map((item) => ({
+      path: item.path,
+      publicUrl: item.public_url
+    }));
     const firstUrl = publishedUrls[0]?.public_url || '';
     if (firstUrl) {
       preparedPathEl.textContent = firstUrl;
       appState.publishedSnippets = buildPublishedSnippets(firstUrl, appState.suiteItems[0]?.label || 'Documento legal');
       renderSnippetState();
     }
+    renderSuiteState();
     setStatus(`Suite legal publicada en un solo commit. Documentos: ${appState.suiteItems.map((item) => item.label).join(', ')}.`);
   } catch (error) {
     setStatus(`Error al publicar la suite legal: ${error.message}`);
@@ -1430,6 +1455,29 @@ function markDirtySinceGenerate() {
   setPreviewPlaceholder('El formulario cambió desde la última generación. Volvé a generar el documento para actualizar la vista previa y las descargas.');
   renderSnippetState();
   setStatus('La versión generada quedó desactualizada. Volvé a generar el documento para que la vista previa y las descargas reflejen los cambios.');
+}
+
+async function copySuiteUrl(path) {
+  const match = appState.suitePublishedUrls.find((item) => item.path === path);
+  if (!match) return;
+  try {
+    await navigator.clipboard.writeText(match.publicUrl);
+    setStatus('URL publicada copiada al portapapeles.');
+  } catch {
+    setStatus('No pude copiar la URL automáticamente.');
+  }
+}
+
+async function copySuiteSnippet(path) {
+  const match = appState.suitePublishedUrls.find((item) => item.path === path);
+  const suiteItem = appState.suiteItems.find((item) => item.path === path);
+  if (!match || !suiteItem) return;
+  try {
+    await navigator.clipboard.writeText(buildPublishedSnippets(match.publicUrl, suiteItem.label).html);
+    setStatus(`Snippet HTML copiado para ${suiteItem.label}.`);
+  } catch {
+    setStatus('No pude copiar el snippet automáticamente.');
+  }
 }
 
 function escapeHtml(value) {
