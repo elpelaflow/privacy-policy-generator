@@ -188,6 +188,8 @@ test('privacy html includes internal JSON-LD metadata for page and organization'
   assert.match(result.html, /"@type":"Organization"/);
   assert.match(result.html, /"url":"https:\/\/acme\.test"/);
   assert.match(result.html, /"email":"privacy@acme\.test"/);
+  assert.match(result.html, /<main id="main-content" aria-labelledby="document-title">/);
+  assert.match(result.html, /<time datetime="[^"]+">/);
 });
 
 test('hashed filename is deterministic for the same html content', async () => {
@@ -296,6 +298,7 @@ test('security html includes internal JSON-LD metadata', async () => {
 
   assert.match(result.html, /<script type="application\/ld\+json">/);
   assert.match(result.html, /"@type":"WebPage"/);
+  assert.match(result.html, /<main id="main-content" aria-labelledby="document-title">/);
 });
 
 test('security validation requires a real reporting channel', async () => {
@@ -400,6 +403,7 @@ test('terms html includes internal JSON-LD metadata', async () => {
 
   assert.match(result.html, /<script type="application\/ld\+json">/);
   assert.match(result.html, /"@type":"Organization"/);
+  assert.match(result.html, /<time datetime="[^"]+">/);
 });
 
 test('terms validation blocks missing website and forum', async () => {
@@ -525,6 +529,7 @@ test('deletion html includes internal JSON-LD metadata', async () => {
 
   assert.match(result.html, /<script type="application\/ld\+json">/);
   assert.match(result.html, /"@type":"WebPage"/);
+  assert.match(result.html, /<main id="main-content" aria-labelledby="document-title">/);
 });
 
 test('deletion validation blocks missing request contact', async () => {
@@ -591,6 +596,7 @@ test('cookies html includes internal JSON-LD metadata', async () => {
 
   assert.match(result.html, /<script type="application\/ld\+json">/);
   assert.match(result.html, /"@type":"Organization"/);
+  assert.match(result.html, /<time datetime="[^"]+">/);
 });
 
 test('cookies validation blocks missing website and warns on missing management details', async () => {
@@ -684,6 +690,7 @@ test('refund html includes internal JSON-LD metadata', async () => {
 
   assert.match(result.html, /<script type="application\/ld\+json">/);
   assert.match(result.html, /"@type":"WebPage"/);
+  assert.match(result.html, /<main id="main-content" aria-labelledby="document-title">/);
 });
 
 test('refund validation blocks missing website and warns on missing process details', async () => {
@@ -770,6 +777,7 @@ test('disclaimer html includes internal JSON-LD metadata', async () => {
 
   assert.match(result.html, /<script type="application\/ld\+json">/);
   assert.match(result.html, /"@type":"Organization"/);
+  assert.match(result.html, /<time datetime="[^"]+">/);
 });
 
 test('disclaimer validation blocks missing website and warns on review methodology gaps', async () => {

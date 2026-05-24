@@ -290,11 +290,16 @@ class DisclaimerGenerator {
       '  <meta name="viewport" content="width=device-width, initial-scale=1">',
       `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
       `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd(structuredData)}</script>` : ''}`,
+      '  <style>:root{color-scheme:light;}body{font-family:Arial,sans-serif;line-height:1.7;color:#1f2937;background:#fff;max-width:900px;margin:0 auto;padding:24px;}main{display:block;}header{margin-bottom:28px;}h1,h2,h3{line-height:1.25;color:#111827;}h2{margin-top:32px;}a{color:#0f62fe;}a:focus-visible{outline:3px solid #0f62fe;outline-offset:2px;}</style>',
       '</head>',
       '<body>',
-      `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
-      `  <p><strong>${escape(this.text('Effective date', 'Fecha de vigencia'))}:</strong> ${escape(document.effectiveDate)}</p>`,
+      '  <main id="main-content" aria-labelledby="document-title">',
+      '    <header>',
+      `      <h1 id="document-title">${escape(document.title)} - ${escape(document.businessName)}</h1>`,
+      `      <p><strong>${escape(this.text('Effective date', 'Fecha de vigencia'))}:</strong> <time datetime="${escape(document.effectiveDate)}">${escape(document.effectiveDate)}</time></p>`,
+      '    </header>',
       body,
+      '  </main>',
       '</body>',
       '</html>'
     ].join('\n');

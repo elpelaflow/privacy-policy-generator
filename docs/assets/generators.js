@@ -517,27 +517,42 @@
   <title>${escapeHtml(labels.title)} - ${escapeHtml(policy.businessName)}</title>
   ${structuredData ? `<script type="application/ld+json">${serializeJsonLd(structuredData)}<\/script>` : ""}
   <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #222; max-width: 900px; margin: 0 auto; padding: 24px; }
-    h1, h2, h3 { line-height: 1.2; }
+    :root { color-scheme: light; }
+    body { font-family: Arial, sans-serif; line-height: 1.7; color: #1f2937; background: #ffffff; max-width: 900px; margin: 0 auto; padding: 24px; }
+    main { display: block; }
+    header { margin-bottom: 28px; }
+    h1, h2, h3 { line-height: 1.25; color: #111827; }
+    h1 { margin-bottom: 12px; }
+    h2 { margin-top: 32px; margin-bottom: 12px; }
+    h3 { margin-top: 20px; margin-bottom: 10px; }
+    p, li { font-size: 1rem; }
     ul { padding-left: 24px; }
+    a { color: #0f62fe; }
+    a:focus-visible { outline: 3px solid #0f62fe; outline-offset: 2px; }
   </style>
 </head>
 <body>
-  <h1>${escapeHtml(labels.title)} - ${escapeHtml(policy.businessName)}</h1>
-  <p><em>${escapeHtml(labels.effectiveDate)}: ${escapeHtml(policy.effectiveDate)}</em></p>
-  ${this.renderPolicyHtml(policy)}
+  <main id="main-content" aria-labelledby="document-title">
+    <header>
+      <h1 id="document-title">${escapeHtml(labels.title)} - ${escapeHtml(policy.businessName)}</h1>
+      <p><em>${escapeHtml(labels.effectiveDate)}: <time datetime="${escapeHtml(policy.effectiveDate)}">${escapeHtml(policy.effectiveDate)}</time></em></p>
+    </header>
+    ${this.renderPolicyHtml(policy)}
+  </main>
 </body></html>`;
           return html;
         }
         renderPolicyHtml(policy) {
           let html = "";
           policy.sections.forEach((section, sectionIndex) => {
-            html += `<section><h2>${escapeHtml(`${sectionIndex + 1}. ${section.title}`)}</h2>`;
+            const sectionId = `section-${sectionIndex + 1}`;
+            html += `<section aria-labelledby="${sectionId}"><h2 id="${sectionId}">${escapeHtml(`${sectionIndex + 1}. ${section.title}`)}</h2>`;
             for (const paragraph of section.paragraphs) {
               html += paragraphToHtml(paragraph);
             }
             section.subsections.forEach((subsection, subsectionIndex) => {
-              html += `<h3>${escapeHtml(`${sectionIndex + 1}.${subsectionIndex + 1} ${subsection.title}`)}</h3>`;
+              const subsectionId = `section-${sectionIndex + 1}-${subsectionIndex + 1}`;
+              html += `<h3 id="${subsectionId}">${escapeHtml(`${sectionIndex + 1}.${subsectionIndex + 1} ${subsection.title}`)}</h3>`;
               for (const paragraph of subsection.paragraphs) {
                 html += paragraphToHtml(paragraph);
               }
@@ -1096,11 +1111,16 @@ ${subsections}
             '  <meta name="viewport" content="width=device-width, initial-scale=1">',
             `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
             `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd2(structuredData)}<\/script>` : ""}`,
+            "  <style>:root{color-scheme:light;}body{font-family:Arial,sans-serif;line-height:1.7;color:#1f2937;background:#fff;max-width:900px;margin:0 auto;padding:24px;}main{display:block;}header{margin-bottom:28px;}h1,h2,h3{line-height:1.25;color:#111827;}h2{margin-top:32px;}h3{margin-top:20px;}ul{padding-left:24px;}a{color:#0f62fe;}a:focus-visible{outline:3px solid #0f62fe;outline-offset:2px;}</style>",
             "</head>",
             "<body>",
-            `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
-            `  <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> ${escape(document.effectiveDate)}</p>`,
+            '  <main id="main-content" aria-labelledby="document-title">',
+            "    <header>",
+            `      <h1 id="document-title">${escape(document.title)} - ${escape(document.businessName)}</h1>`,
+            `      <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> <time datetime="${escape(document.effectiveDate)}">${escape(document.effectiveDate)}</time></p>`,
+            "    </header>",
             body,
+            "  </main>",
             "</body>",
             "</html>"
           ].join("\n");
@@ -1458,11 +1478,16 @@ ${paragraphs}
             '  <meta name="viewport" content="width=device-width, initial-scale=1">',
             `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
             `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd2(structuredData)}<\/script>` : ""}`,
+            "  <style>:root{color-scheme:light;}body{font-family:Arial,sans-serif;line-height:1.7;color:#1f2937;background:#fff;max-width:900px;margin:0 auto;padding:24px;}main{display:block;}header{margin-bottom:28px;}h1,h2,h3{line-height:1.25;color:#111827;}h2{margin-top:32px;}ul{padding-left:24px;}a{color:#0f62fe;}a:focus-visible{outline:3px solid #0f62fe;outline-offset:2px;}</style>",
             "</head>",
             "<body>",
-            `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
-            `  <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> ${escape(document.effectiveDate)}</p>`,
+            '  <main id="main-content" aria-labelledby="document-title">',
+            "    <header>",
+            `      <h1 id="document-title">${escape(document.title)} - ${escape(document.businessName)}</h1>`,
+            `      <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> <time datetime="${escape(document.effectiveDate)}">${escape(document.effectiveDate)}</time></p>`,
+            "    </header>",
             body,
+            "  </main>",
             "</body>",
             "</html>"
           ].join("\n");
@@ -1867,11 +1892,16 @@ ${paragraphs}
             '  <meta name="viewport" content="width=device-width, initial-scale=1">',
             `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
             `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd2(structuredData)}<\/script>` : ""}`,
+            "  <style>:root{color-scheme:light;}body{font-family:Arial,sans-serif;line-height:1.7;color:#1f2937;background:#fff;max-width:900px;margin:0 auto;padding:24px;}main{display:block;}header{margin-bottom:28px;}h1,h2,h3{line-height:1.25;color:#111827;}h2{margin-top:32px;}ul{padding-left:24px;}a{color:#0f62fe;}a:focus-visible{outline:3px solid #0f62fe;outline-offset:2px;}</style>",
             "</head>",
             "<body>",
-            `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
-            `  <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> ${escape(document.effectiveDate)}</p>`,
+            '  <main id="main-content" aria-labelledby="document-title">',
+            "    <header>",
+            `      <h1 id="document-title">${escape(document.title)} - ${escape(document.businessName)}</h1>`,
+            `      <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> <time datetime="${escape(document.effectiveDate)}">${escape(document.effectiveDate)}</time></p>`,
+            "    </header>",
             body,
+            "  </main>",
             "</body>",
             "</html>"
           ].join("\n");
@@ -2277,11 +2307,16 @@ ${paragraphs}
             '  <meta name="viewport" content="width=device-width, initial-scale=1">',
             `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
             `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd2(structuredData)}<\/script>` : ""}`,
+            "  <style>:root{color-scheme:light;}body{font-family:Arial,sans-serif;line-height:1.7;color:#1f2937;background:#fff;max-width:900px;margin:0 auto;padding:24px;}main{display:block;}header{margin-bottom:28px;}h1,h2,h3{line-height:1.25;color:#111827;}h2{margin-top:32px;}ul{padding-left:24px;}a{color:#0f62fe;}a:focus-visible{outline:3px solid #0f62fe;outline-offset:2px;}</style>",
             "</head>",
             "<body>",
-            `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
-            `  <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> ${escape(document.effectiveDate)}</p>`,
+            '  <main id="main-content" aria-labelledby="document-title">',
+            "    <header>",
+            `      <h1 id="document-title">${escape(document.title)} - ${escape(document.businessName)}</h1>`,
+            `      <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> <time datetime="${escape(document.effectiveDate)}">${escape(document.effectiveDate)}</time></p>`,
+            "    </header>",
             body,
+            "  </main>",
             "</body>",
             "</html>"
           ].join("\n");
@@ -2626,11 +2661,16 @@ ${paragraphs}
             '  <meta name="viewport" content="width=device-width, initial-scale=1">',
             `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
             `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd2(structuredData)}<\/script>` : ""}`,
+            "  <style>:root{color-scheme:light;}body{font-family:Arial,sans-serif;line-height:1.7;color:#1f2937;background:#fff;max-width:900px;margin:0 auto;padding:24px;}main{display:block;}header{margin-bottom:28px;}h1,h2,h3{line-height:1.25;color:#111827;}h2{margin-top:32px;}a{color:#0f62fe;}a:focus-visible{outline:3px solid #0f62fe;outline-offset:2px;}</style>",
             "</head>",
             "<body>",
-            `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
-            `  <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> ${escape(document.effectiveDate)}</p>`,
+            '  <main id="main-content" aria-labelledby="document-title">',
+            "    <header>",
+            `      <h1 id="document-title">${escape(document.title)} - ${escape(document.businessName)}</h1>`,
+            `      <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> <time datetime="${escape(document.effectiveDate)}">${escape(document.effectiveDate)}</time></p>`,
+            "    </header>",
             body,
+            "  </main>",
             "</body>",
             "</html>"
           ].join("\n");
@@ -3038,11 +3078,16 @@ ${paragraphs}
             `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
             `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd2(structuredData)}<\/script>` : ""}`,
             '  <meta name="legal-document-type" content="security">',
+            "  <style>:root{color-scheme:light;}body{font-family:Arial,sans-serif;line-height:1.7;color:#1f2937;background:#fff;max-width:900px;margin:0 auto;padding:24px;}main{display:block;}header{margin-bottom:28px;}h1,h2,h3{line-height:1.25;color:#111827;}h2{margin-top:32px;}ul{padding-left:24px;}a{color:#0f62fe;}a:focus-visible{outline:3px solid #0f62fe;outline-offset:2px;}</style>",
             "</head>",
             "<body>",
-            `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
-            `  <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> ${escape(document.effectiveDate)}</p>`,
+            '  <main id="main-content" aria-labelledby="document-title">',
+            "    <header>",
+            `      <h1 id="document-title">${escape(document.title)} - ${escape(document.businessName)}</h1>`,
+            `      <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> <time datetime="${escape(document.effectiveDate)}">${escape(document.effectiveDate)}</time></p>`,
+            "    </header>",
             body,
+            "  </main>",
             "</body>",
             "</html>"
           ].join("\n");

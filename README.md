@@ -20,6 +20,7 @@ This repo now supports two delivery modes:
 - GitHub OAuth publish flow for user-owned GitHub Pages repos
 - safe publish paths under `legal/<document-type>/...` to avoid touching a user's site root
 - generated legal-document HTML can embed internal `JSON-LD` metadata to describe the page and responsible organization
+- generated legal-document HTML now follows a stronger semantic structure with landmarks and machine-readable dates
 - validation errors and draft warnings
 - explainable `decisionLog` output
 - HTML, Markdown, and plain text generation
@@ -58,6 +59,22 @@ Important clarification:
 - it is meant to improve semantic machine-readable description of the page and the responsible entity
 - it does **not** guarantee special Google rich results or official legal recognition by itself
 - treat it as a structured-data enhancement, not as a compliance or SEO magic switch
+
+## Accessibility Note
+
+Generated HTML documents now use a more accessible baseline structure across all supported document types, including:
+
+- explicit document language
+- a main content landmark
+- clearer heading hierarchy
+- machine-readable dates with `<time datetime="...">`
+- readable default typography and contrast
+
+Important clarification:
+
+- this is an accessibility-oriented improvement, not a formal WCAG certification
+- it improves the generated documents for screen readers and semantic parsing
+- legal or contractual accessibility obligations may still require independent auditing in your specific jurisdiction or product context
 
 ## GitHub Publish v1
 
