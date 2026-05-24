@@ -80,6 +80,28 @@ button, input, select, textarea { font: inherit; }
   color: #0b1020;
   background: linear-gradient(135deg, var(--secondary), #8cf9ff);
 }
+.github-link-button,
+.button-github {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: linear-gradient(135deg, #24292f, #11161c);
+  color: #f6f8fa;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+.github-link-button:hover,
+.button-github:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.24);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 16px 32px rgba(0, 0, 0, 0.34);
+}
+.button-danger {
+  border-color: rgba(255, 120, 120, 0.32);
+  background: linear-gradient(135deg, rgba(180, 35, 54, 0.95), rgba(103, 18, 29, 0.98));
+  color: #fff1f1;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 28px rgba(103, 18, 29, 0.28);
+}
+.button-danger:hover:not(:disabled) {
+  border-color: rgba(255, 160, 160, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 16px 32px rgba(103, 18, 29, 0.36);
+}
 .button:disabled {
   opacity: .38;
   cursor: not-allowed;
