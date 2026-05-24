@@ -897,7 +897,7 @@ function applyDocumentPreset(presetValue) {
   appState.formSeed = deepMerge(currentValues, preset.patch);
   renderForm();
   scheduleLiveValidation();
-  setStatus(`Preset aplicado sobre ${DOCUMENTS[appState.documentType].label}: ${preset.label}. Revisá los campos y ajustá lo que no refleje tu operación real.`);
+  setStatus(`Preset aplicado sobre ${DOCUMENTS[appState.documentType].label}: ${preset.label}. Revisá los campos y ajustá lo que no refleje tu operación real.`, 'success');
 }
 
 function renderField(field, defaults) {
@@ -1074,9 +1074,9 @@ async function loadExistingConfig(event) {
     renderPresetPanel();
     renderForm();
     scheduleLiveValidation();
-    setStatus(`Configuración cargada para ${DOCUMENTS[documentType].label}. Revisá los campos y regenerá cuando quieras.`);
+    setStatus(`Configuración cargada para ${DOCUMENTS[documentType].label}. Revisá los campos y regenerá cuando quieras.`, 'success');
   } catch (error) {
-    setStatus(`No pude cargar la configuración: ${error.message}`);
+    setStatus(`No pude cargar la configuración: ${error.message}`, 'error');
   }
 }
 
@@ -1177,7 +1177,7 @@ function applyJurisdictionRecommendation() {
   appState.formSeed = deepMerge(currentValues, patch);
   renderForm();
   scheduleLiveValidation();
-  setStatus(`Sugerencia aplicada sobre ${DOCUMENTS[appState.documentType].label}. Revisá los campos y ajustá lo que no refleje tu operación real.`);
+  setStatus(`Sugerencia aplicada sobre ${DOCUMENTS[appState.documentType].label}. Revisá los campos y ajustá lo que no refleje tu operación real.`, 'success');
 }
 
 function buildRecommendationPatch(documentType, recommendation) {
@@ -1263,7 +1263,7 @@ async function generateDocument() {
     appState.lastGenerated = result;
     appState.isDirtySinceGenerate = false;
     setExportState(true);
-    setStatus('Documento generado correctamente. Si cambiás el formulario, vas a tener que regenerarlo para actualizar vista previa y descargas.');
+    setStatus('Documento generado correctamente. Si cambiás el formulario, vas a tener que regenerarlo para actualizar vista previa y descargas.', 'success');
     updatePublishControls();
     refreshPreview();
   } catch (error) {
@@ -1285,10 +1285,32 @@ function renderValidation(validation) {
     return;
   }
 
+  const highPriorityWarnings = warnings.filter((item) => isHighPriorityWarning(item));
+  const contextualWarnings = warnings.filter((item) => !isHighPriorityWarning(item));
+
   validationEl.className = 'validation-box is-visible';
   validationEl.innerHTML = `
-    ${errors.length ? `<div class="errors"><strong>Ajustes obligatorios</strong><ul>${errors.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
-    ${warnings.length ? `<div class="warnings"><strong>Advertencias de revisión</strong><ul>${warnings.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
+    ${errors.length ? `
+      <div class="validation-group validation-errors">
+        <strong>Ajustes obligatorios (${errors.length})</strong>
+        <p class="validation-copy">Corregí estos puntos antes de generar o publicar una versión confiable.</p>
+        <ul>${errors.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
+      </div>
+    ` : ''}
+    ${highPriorityWarnings.length ? `
+      <div class="validation-group validation-warnings">
+        <strong>Revisión prioritaria (${highPriorityWarnings.length})</strong>
+        <p class="validation-copy">No bloquea la generación, pero conviene revisarlo porque puede cambiar el alcance legal o contractual del documento.</p>
+        <ul>${highPriorityWarnings.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
+      </div>
+    ` : ''}
+    ${contextualWarnings.length ? `
+      <div class="validation-group validation-notes">
+        <strong>Notas de contexto (${contextualWarnings.length})</strong>
+        <p class="validation-copy">Son aclaraciones útiles para pulir el texto final según tu operación real.</p>
+        <ul>${contextualWarnings.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
+      </div>
+    ` : ''}
   `;
   if (errors.length === 0 && warnings.length === 0 && !appState.isDirtySinceGenerate) {
     setStatus('');
@@ -1370,14 +1392,14 @@ function setPreviewPlaceholder(message) {
   previewCodeEl.textContent = message;
 }
 
-function setStatus(message) {
+function setStatus(message, tone = 'info') {
   if (!message) {
     statusEl.className = 'status-banner';
     statusEl.textContent = '';
     return;
   }
 
-  statusEl.className = 'status-banner is-visible';
+  statusEl.className = `status-banner is-visible tone-${tone}`;
   statusEl.textContent = message;
 }
 
@@ -1470,9 +1492,9 @@ async function copySnippet(type) {
   const value = type === 'html' ? appState.publishedSnippets.html : appState.publishedSnippets.markdown;
   try {
     await navigator.clipboard.writeText(value);
-    setStatus(`Snippet ${type === 'html' ? 'HTML' : 'Markdown'} copiado al portapapeles.`);
+    setStatus(`Snippet ${type === 'html' ? 'HTML' : 'Markdown'} copiado al portapapeles.`, 'success');
   } catch {
-    setStatus('No pude copiar el snippet automáticamente. Podés copiarlo manualmente desde la caja de snippets.');
+    setStatus('No pude copiar el snippet automáticamente. Podés copiarlo manualmente desde la caja de snippets.', 'warning');
   }
 }
 
@@ -1497,6 +1519,7 @@ function renderSummary() {
     ['Sitio', values.business?.websiteUrl || 'Sin URL'],
     ['Contacto', values.contact?.email || values.contact?.pageUrl || 'Sin contacto']
   ];
+  const documentSpecificItems = buildDocumentSpecificSummary(appState.documentType, values);
 
   const valuesHtml = items.map(([label, value]) => `
     <div class="summary-item">
@@ -1505,11 +1528,85 @@ function renderSummary() {
     </div>
   `).join('');
 
+  const documentSpecificHtml = documentSpecificItems.length ? `
+    <div class="summary-copy">Este resumen destaca las decisiones más sensibles del documento actual antes de generar o publicar.</div>
+    <div class="summary-grid summary-grid-extended">
+      ${documentSpecificItems.map(([label, value]) => `
+        <div class="summary-item">
+          <strong>${escapeHtml(label)}</strong>
+          <span>${escapeHtml(String(value))}</span>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
   summaryEl.className = 'summary-box is-visible';
   summaryEl.innerHTML = `
     <h4>Resumen actual</h4>
     <div class="summary-grid">${valuesHtml}</div>
+    ${documentSpecificHtml}
   `;
+}
+
+function isHighPriorityWarning(message) {
+  const text = String(message || '').toLowerCase();
+  return [
+    'contradic',
+    'training',
+    'entrenamiento',
+    'fine-tuning',
+    'transfer',
+    'scc',
+    'subprocessor',
+    'joint controller',
+    'revisión humana',
+    'review humana',
+    'opt-out',
+    'datos personales',
+    'backups',
+    'auditor'
+  ].some((token) => text.includes(token));
+}
+
+function findOptionLabel(options, value) {
+  return options.find((option) => option.value === value)?.label || value;
+}
+
+function findOptionLabels(options, values) {
+  if (!Array.isArray(values) || values.length === 0) return [];
+  return values.map((value) => findOptionLabel(options, value)).filter(Boolean);
+}
+
+function formatBooleanLabel(value, truthy = 'Sí', falsy = 'No') {
+  return value ? truthy : falsy;
+}
+
+function joinSummaryValues(values) {
+  return values.length ? values.join(', ') : 'Sin definir';
+}
+
+function buildDocumentSpecificSummary(documentType, values) {
+  if (documentType === 'ai') {
+    return [
+      ['Uso de datos IA', findOptionLabel(AI_TRAINING_DATA_USE, values.ai?.trainingDataUse || '') || 'Sin definir'],
+      ['Actividades sobre datos', joinSummaryValues(findOptionLabels(AI_MODEL_IMPROVEMENT_USES, values.ai?.modelImprovementUses))],
+      ['Proveedores externos', joinSummaryValues(findOptionLabels(AI_THIRD_PARTY_PROVIDERS, values.ai?.thirdPartyProviders))],
+      ['IA visible al usuario', formatBooleanLabel(values.ai?.userFacingAi)],
+      ['Revisión humana', formatBooleanLabel(values.ai?.humanReviewAvailable)]
+    ];
+  }
+
+  if (documentType === 'dpa') {
+    return [
+      ['Rol de la contraparte', findOptionLabel(DPA_COUNTERPARTY_ROLES, values.dpa?.counterpartyRole || '') || 'Sin definir'],
+      ['Scope regulatorio', joinSummaryValues(findOptionLabels(DPA_REGULATORY_SCOPE, values.dpa?.regulatoryScope))],
+      ['Subprocessors', formatBooleanLabel(values.dpa?.subprocessorsUsed)],
+      ['Transferencias internacionales', formatBooleanLabel(values.dpa?.internationalTransfers)],
+      ['Mecánica de auditoría', findOptionLabel(DPA_AUDIT_MECHANISMS, values.dpa?.auditMechanism || '') || 'Sin definir']
+    ];
+  }
+
+  return [];
 }
 
 async function initGitHubPublish() {
@@ -1721,9 +1818,9 @@ async function publishToGitHubPages() {
     preparedPathEl.textContent = payload.public_url || preparedPathEl.textContent;
     appState.publishedSnippets = buildPublishedSnippets(payload.public_url, DOCUMENTS[appState.documentType].label);
     renderSnippetState();
-    setStatus(`Documento publicado. URL final: ${payload.public_url}`);
+    setStatus(`Documento publicado. URL final: ${payload.public_url}`, 'success');
   } catch (error) {
-    setStatus(`Error al publicar en GitHub Pages: ${error.message}`);
+    setStatus(`Error al publicar en GitHub Pages: ${error.message}`, 'error');
   } finally {
     publishGitHubPagesEl.textContent = 'Publicar en mi GitHub Pages';
     updatePublishControls();
@@ -1755,9 +1852,9 @@ function addCurrentDocumentToSuite() {
     ].sort((left, right) => left.label.localeCompare(right.label, 'es'));
     appState.suitePublishedUrls = [];
     renderSuiteState();
-    setStatus(`${label} agregado a la suite legal. Podés sumar más documentos o publicarlos juntos.`);
+    setStatus(`${label} agregado a la suite legal. Podés sumar más documentos o publicarlos juntos.`, 'success');
   }).catch(() => {
-    setStatus('No pude preparar este documento para la suite legal.');
+    setStatus('No pude preparar este documento para la suite legal.', 'error');
   });
 }
 
@@ -1765,14 +1862,14 @@ function removeSuiteItem(documentType) {
   appState.suiteItems = appState.suiteItems.filter((item) => item.documentType !== documentType);
   appState.suitePublishedUrls = [];
   renderSuiteState();
-  setStatus(appState.suiteItems.length > 0 ? 'Documento quitado de la suite legal.' : 'La suite legal quedó vacía.');
+  setStatus(appState.suiteItems.length > 0 ? 'Documento quitado de la suite legal.' : 'La suite legal quedó vacía.', 'info');
 }
 
 function clearSuite() {
   appState.suiteItems = [];
   appState.suitePublishedUrls = [];
   renderSuiteState();
-  setStatus('La suite legal quedó vacía.');
+  setStatus('La suite legal quedó vacía.', 'info');
 }
 
 async function publishLegalSuite() {
@@ -1818,9 +1915,9 @@ async function publishLegalSuite() {
       renderSnippetState();
     }
     renderSuiteState();
-    setStatus(`Suite legal publicada en un solo commit. Documentos: ${appState.suiteItems.map((item) => item.label).join(', ')}.`);
+    setStatus(`Suite legal publicada en un solo commit. Documentos: ${appState.suiteItems.map((item) => item.label).join(', ')}.`, 'success');
   } catch (error) {
-    setStatus(`Error al publicar la suite legal: ${error.message}`);
+    setStatus(`Error al publicar la suite legal: ${error.message}`, 'error');
   } finally {
     publishSuiteEl.textContent = 'Publicar suite legal';
     updatePublishControls();
@@ -1867,7 +1964,7 @@ function markDirtySinceGenerate() {
   setExportState(false);
   setPreviewPlaceholder('El formulario cambió desde la última generación. Volvé a generar el documento para actualizar la vista previa y las descargas.');
   renderSnippetState();
-  setStatus('La versión generada quedó desactualizada. Volvé a generar el documento para que la vista previa y las descargas reflejen los cambios.');
+  setStatus('La versión generada quedó desactualizada. Volvé a generar el documento para que la vista previa y las descargas reflejen los cambios.', 'warning');
 }
 
 async function copySuiteUrl(path) {
@@ -1875,9 +1972,9 @@ async function copySuiteUrl(path) {
   if (!match) return;
   try {
     await navigator.clipboard.writeText(match.publicUrl);
-    setStatus('URL publicada copiada al portapapeles.');
+    setStatus('URL publicada copiada al portapapeles.', 'success');
   } catch {
-    setStatus('No pude copiar la URL automáticamente.');
+    setStatus('No pude copiar la URL automáticamente.', 'warning');
   }
 }
 
@@ -1887,9 +1984,9 @@ async function copySuiteSnippet(path) {
   if (!match || !suiteItem) return;
   try {
     await navigator.clipboard.writeText(buildPublishedSnippets(match.publicUrl, suiteItem.label).html);
-    setStatus(`Snippet HTML copiado para ${suiteItem.label}.`);
+    setStatus(`Snippet HTML copiado para ${suiteItem.label}.`, 'success');
   } catch {
-    setStatus('No pude copiar el snippet automáticamente.');
+    setStatus('No pude copiar el snippet automáticamente.', 'warning');
   }
 }
 
@@ -1899,9 +1996,9 @@ async function copySuiteMarkdown(path) {
   if (!match || !suiteItem) return;
   try {
     await navigator.clipboard.writeText(buildPublishedSnippets(match.publicUrl, suiteItem.label).markdown);
-    setStatus(`Snippet Markdown copiado para ${suiteItem.label}.`);
+    setStatus(`Snippet Markdown copiado para ${suiteItem.label}.`, 'success');
   } catch {
-    setStatus('No pude copiar el snippet automáticamente.');
+    setStatus('No pude copiar el snippet automáticamente.', 'warning');
   }
 }
 
