@@ -1011,6 +1011,7 @@ function renderSuiteState() {
       <div class="suite-item-actions">
         ${publishedUrlMap.has(item.path) ? `<button type="button" class="button button-secondary" data-copy-suite-url="${item.path}">Copiar URL</button>` : ''}
         ${publishedUrlMap.has(item.path) ? `<button type="button" class="button button-secondary" data-copy-suite-snippet="${item.path}">Copiar HTML</button>` : ''}
+        ${publishedUrlMap.has(item.path) ? `<button type="button" class="button button-secondary" data-copy-suite-markdown="${item.path}">Copiar Markdown</button>` : ''}
         <button type="button" class="button button-secondary" data-remove-suite="${item.documentType}">Quitar</button>
       </div>
     </div>
@@ -1024,6 +1025,9 @@ function renderSuiteState() {
   });
   suiteListEl.querySelectorAll('[data-copy-suite-snippet]').forEach((button) => {
     button.addEventListener('click', () => copySuiteSnippet(button.dataset.copySuiteSnippet));
+  });
+  suiteListEl.querySelectorAll('[data-copy-suite-markdown]').forEach((button) => {
+    button.addEventListener('click', () => copySuiteMarkdown(button.dataset.copySuiteMarkdown));
   });
 
   setSuiteButtons(true, githubState.backendEnabled && Boolean(githubState.session) && Boolean(githubRepoSelectEl.value));
@@ -1475,6 +1479,18 @@ async function copySuiteSnippet(path) {
   try {
     await navigator.clipboard.writeText(buildPublishedSnippets(match.publicUrl, suiteItem.label).html);
     setStatus(`Snippet HTML copiado para ${suiteItem.label}.`);
+  } catch {
+    setStatus('No pude copiar el snippet automáticamente.');
+  }
+}
+
+async function copySuiteMarkdown(path) {
+  const match = appState.suitePublishedUrls.find((item) => item.path === path);
+  const suiteItem = appState.suiteItems.find((item) => item.path === path);
+  if (!match || !suiteItem) return;
+  try {
+    await navigator.clipboard.writeText(buildPublishedSnippets(match.publicUrl, suiteItem.label).markdown);
+    setStatus(`Snippet Markdown copiado para ${suiteItem.label}.`);
   } catch {
     setStatus('No pude copiar el snippet automáticamente.');
   }
