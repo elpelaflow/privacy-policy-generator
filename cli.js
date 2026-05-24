@@ -10,6 +10,7 @@ const DataDeletionGenerator = require('./js/deletion-generator');
 const CookiesPolicyGenerator = require('./js/cookies-generator');
 const ReturnRefundPolicyGenerator = require('./js/refund-generator');
 const DisclaimerGenerator = require('./js/disclaimer-generator');
+const SecurityPolicyGenerator = require('./js/security-generator');
 const { publishPolicy } = require('./js/publishing');
 
 const DOCUMENT_OPTIONS = [
@@ -18,7 +19,8 @@ const DOCUMENT_OPTIONS = [
   { value: 'deletion', label: 'Eliminación de datos', description: 'Genera una página pública con instrucciones para solicitar eliminación de datos.' },
   { value: 'cookies', label: 'Política de cookies', description: 'Genera una política específica de cookies, consentimiento y tecnologías similares.' },
   { value: 'refund', label: 'Devoluciones y reembolsos', description: 'Genera una política de devoluciones, cambios y reembolsos para compartir como URL pública.' },
-  { value: 'disclaimer', label: 'Disclaimer / descargo', description: 'Genera descargos de responsabilidad modulares para contenido, enlaces, reseñas, salud, fitness y uso del sitio.' }
+  { value: 'disclaimer', label: 'Disclaimer / descargo', description: 'Genera descargos de responsabilidad modulares para contenido, enlaces, reseñas, salud, fitness y uso del sitio.' },
+  { value: 'security', label: 'Política de seguridad', description: 'Genera una política de seguridad y divulgación responsable para recibir reportes de vulnerabilidades.' }
 ];
 
 const BUSINESS_TYPE_OPTIONS = [
@@ -186,6 +188,34 @@ const REFUND_RETURN_SHIPPING_OPTIONS = [
   { value: 'customer', label: 'Cliente', description: 'El cliente normalmente asume el costo de la devolución.' },
   { value: 'merchant', label: 'Negocio', description: 'El negocio normalmente asume el costo cuando aprueba la devolución.' },
   { value: 'case_by_case', label: 'Caso por caso', description: 'Depende del motivo, el estado del producto y la ley aplicable.' }
+];
+
+const SECURITY_REPORT_CHANNEL_OPTIONS = [
+  { value: 'email', label: 'Sólo email', description: 'Los reportes llegan únicamente por correo electrónico.' },
+  { value: 'form', label: 'Sólo formulario o página', description: 'Los reportes llegan desde una URL o página pública.' },
+  { value: 'both', label: 'Email y página', description: 'Ofrecés ambos canales para recibir reportes.' }
+];
+
+const SECURITY_SCOPE_OPTIONS = [
+  { value: 'web_application', label: 'Aplicación web', description: 'Frontend, panel, flujos web y páginas públicas.' },
+  { value: 'api', label: 'API / endpoints', description: 'APIs, webhooks o endpoints para desarrolladores.' },
+  { value: 'mobile_app', label: 'App móvil', description: 'Aplicaciones iOS, Android o wrappers móviles.' },
+  { value: 'infrastructure', label: 'Infraestructura', description: 'Hosting, redes, storage y componentes de soporte.' },
+  { value: 'integrations', label: 'Integraciones con terceros', description: 'Servicios conectados, apps externas y flujos de integración.' },
+  { value: 'content', label: 'Contenido / assets', description: 'Documentación, archivos estáticos o contenido sensible para seguridad.' }
+];
+
+const SECURITY_DISCLOSURE_OPTIONS = [
+  { value: 'coordinated', label: 'Coordinated disclosure', description: 'Pedís evitar disclosure público hasta revisar y mitigar razonablemente.' },
+  { value: 'researcher_choice', label: 'Acuerdo caso por caso', description: 'La divulgación pública se conversa según el caso y la severidad.' },
+  { value: 'silent_fix', label: 'Fix antes de disclosure', description: 'Preferís corregir primero y no siempre publicar advisories individuales.' }
+];
+
+const SECURITY_REPORT_REQUIREMENT_OPTIONS = [
+  { value: 'Descripción clara del hallazgo y del impacto esperado', label: 'Descripción e impacto', description: 'Qué pasa y por qué importa.' },
+  { value: 'Pasos de reproducción o prueba de concepto razonable', label: 'Reproducción o PoC', description: 'Cómo reproducir el hallazgo sin exagerar riesgo.' },
+  { value: 'Activos, URLs, endpoints o cuentas involucradas', label: 'Activos afectados', description: 'Qué activos o superficies están involucrados.' },
+  { value: 'Información de contacto para seguimiento', label: 'Contacto de seguimiento', description: 'Cómo continuar la coordinación del caso.' }
 ];
 
 const DISCLAIMER_OPTIONS = [
@@ -531,6 +561,9 @@ function defaultBaseUrlForDocument(documentType) {
   if (documentType === 'disclaimer') {
     return 'https://example.com/disclaimer';
   }
+  if (documentType === 'security') {
+    return 'https://example.com/security';
+  }
   return DEFAULT_PUBLIC_BASE_URL;
 }
 
@@ -550,14 +583,17 @@ function defaultPublishDirForDocument(documentType) {
   if (documentType === 'disclaimer') {
     return './public/disclaimer';
   }
+  if (documentType === 'security') {
+    return './public/security';
+  }
   return DEFAULT_PUBLISH_DIR;
 }
 
 function resolveDocumentType(options, input) {
-  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer'].includes(options.document)) {
+  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer', 'security'].includes(options.document)) {
     return options.document;
   }
-  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer'].includes(input?.documentType)) {
+  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer', 'security'].includes(input?.documentType)) {
     return input.documentType;
   }
   if (input?.terms) {
@@ -574,6 +610,9 @@ function resolveDocumentType(options, input) {
   }
   if (input?.disclaimer) {
     return 'disclaimer';
+  }
+  if (input?.security) {
+    return 'security';
   }
   return 'privacy';
 }
@@ -668,6 +707,7 @@ function documentOutputSuffix(documentType) {
   if (documentType === 'cookies') return 'cookies-policy';
   if (documentType === 'refund') return 'return-refund-policy';
   if (documentType === 'disclaimer') return 'disclaimer';
+  if (documentType === 'security') return 'security-policy';
   return 'privacy-policy';
 }
 
@@ -917,6 +957,30 @@ function buildDisclaimerInputFromState(state) {
     },
     disclaimer: {
       ...state.disclaimer
+    },
+    settings: {
+      language: state.output.language
+    }
+  };
+}
+
+function buildSecurityInputFromState(state) {
+  return {
+    documentType: 'security',
+    business: {
+      name: state.business.name,
+      type: state.business.type,
+      websiteUrl: state.business.websiteUrl,
+      country: state.business.country,
+      address: state.business.address
+    },
+    contact: {
+      email: state.contact.email,
+      phone: state.contact.phone,
+      pageUrl: state.contact.pageUrl
+    },
+    security: {
+      ...state.security
     },
     settings: {
       language: state.output.language
@@ -2649,6 +2713,337 @@ async function runDisclaimerWizard(generator) {
   }
 }
 
+
+async function collectSecuritySection(rl, state) {
+  await runQuestions([
+    async () => {
+      const choice = await promptSingleChoice(rl, 'Cómo querés recibir reportes de seguridad', SECURITY_REPORT_CHANNEL_OPTIONS, { allowOther: false });
+      if (choice === BACK) return BACK;
+      state.security.reportChannel = choice.value;
+    },
+    async () => {
+      if (!['email', 'both'].includes(state.security.reportChannel)) return;
+      const hostname = String(state.business.websiteUrl || '').replace(/^https?:\/\//, '').replace(/\/.*/, '');
+      const value = await promptText(rl, 'Email para reportes de seguridad', {
+        allowEmpty: true,
+        defaultValue: state.security.reportEmail || state.contact.email || (hostname ? `security@${hostname}` : '')
+      });
+      if (value === BACK) return BACK;
+      state.security.reportEmail = value;
+    },
+    async () => {
+      if (!['form', 'both'].includes(state.security.reportChannel)) return;
+      const value = await promptText(rl, 'URL pública para reportar vulnerabilidades', {
+        allowEmpty: true,
+        defaultValue: state.security.reportUrl || state.contact.pageUrl || state.business.websiteUrl
+      });
+      if (value === BACK) return BACK;
+      state.security.reportUrl = value;
+    },
+    async () => {
+      const choice = await promptMultiChoice(rl, 'Qué superficies querés cubrir en la política', SECURITY_SCOPE_OPTIONS, { allowNone: false, allowOther: false });
+      if (choice === BACK) return BACK;
+      state.security.scope = choice.values;
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Incluir safe harbor o buena fe',
+        'Marcá sí si querés aclarar que la investigación responsable y de buena fe será tratada como autorizada dentro del alcance de la política.',
+        state.security.safeHarborOffered
+      );
+      if (value === BACK) return BACK;
+      state.security.safeHarborOffered = value;
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Permitir pruebas automatizadas de bajo volumen',
+        'Marcá sí sólo si aceptás scans o requests automatizados que no degraden el servicio.',
+        state.security.automatedTestingAllowed
+      );
+      if (value === BACK) return BACK;
+      state.security.automatedTestingAllowed = value;
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Permitir DoS o load testing coordinado',
+        'Marcá sí únicamente si querés contemplar pruebas de carga o denegación de servicio con aprobación previa.',
+        state.security.denialOfServiceTestingAllowed
+      );
+      if (value === BACK) return BACK;
+      state.security.denialOfServiceTestingAllowed = value;
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Permitir ingeniería social coordinada',
+        'Marcá sí únicamente si querés contemplar phishing o ingeniería social con aprobación previa.',
+        state.security.socialEngineeringAllowed
+      );
+      if (value === BACK) return BACK;
+      state.security.socialEngineeringAllowed = value;
+    },
+    async () => {
+      const value = await promptMultiChoice(rl, 'Qué debería incluir un reporte válido', SECURITY_REPORT_REQUIREMENT_OPTIONS, { allowNone: false, allowOther: true });
+      if (value === BACK) return BACK;
+      state.security.reportRequirements = value.values.concat(value.manualNotes);
+    },
+    async () => {
+      const value = await promptText(rl, 'Tiempo estimado para acusar recibo', {
+        allowEmpty: true,
+        defaultValue: state.security.acknowledgementTime || '3 días hábiles'
+      });
+      if (value === BACK) return BACK;
+      state.security.acknowledgementTime = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Tiempo estimado para compartir actualizaciones', {
+        allowEmpty: true,
+        defaultValue: state.security.statusUpdateTime || '10 días hábiles'
+      });
+      if (value === BACK) return BACK;
+      state.security.statusUpdateTime = value;
+    },
+    async () => {
+      const choice = await promptSingleChoice(rl, 'Cómo preferís manejar el disclosure público', SECURITY_DISCLOSURE_OPTIONS, { allowOther: false });
+      if (choice === BACK) return BACK;
+      state.security.disclosurePreference = choice.value;
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Ofrecés bug bounty o recompensas',
+        'Marcá sí si existe un proceso de recompensa, reconocimiento o bounty para algunos reportes.',
+        state.security.bugBountyOffered
+      );
+      if (value === BACK) return BACK;
+      state.security.bugBountyOffered = value;
+    },
+    async () => {
+      if (!state.security.bugBountyOffered) return;
+      const value = await promptText(rl, 'Condiciones o nota breve sobre bounty/reconocimiento', {
+        allowEmpty: true,
+        defaultValue: state.security.bugBountyNotes
+      });
+      if (value === BACK) return BACK;
+      state.security.bugBountyNotes = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Nota breve sobre remediación o coordinación', {
+        allowEmpty: true,
+        defaultValue: state.security.remediationGuidance || 'Priorizamos los reportes según severidad, impacto y complejidad, y podemos pedir tiempo razonable para investigar y mitigar antes de cualquier disclosure público.'
+      });
+      if (value === BACK) return BACK;
+      state.security.remediationGuidance = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Resumen opcional de prácticas de seguridad', {
+        allowEmpty: true,
+        defaultValue: state.security.securityPracticesSummary || 'Aplicamos controles de acceso, registros operativos, revisión de dependencias y medidas razonables de hardening sobre infraestructura y aplicaciones expuestas.'
+      });
+      if (value === BACK) return BACK;
+      state.security.securityPracticesSummary = value;
+    }
+  ]);
+}
+
+function printSecuritySummary(state, validation) {
+  stdout.write(`
+${bold(magenta('Resumen antes de generar'))}
+`);
+  stdout.write(`- Documento: Política de seguridad
+`);
+  stdout.write(`- Negocio: ${state.business.name || '(sin definir)'}
+`);
+  stdout.write(`- Sitio: ${state.business.websiteUrl || '(sin definir)'}
+`);
+  stdout.write(`- Canal de reporte: ${optionLabel(SECURITY_REPORT_CHANNEL_OPTIONS, state.security.reportChannel || '(sin definir)')}
+`);
+  stdout.write(`- Email de seguridad: ${state.security.reportEmail || '(sin definir)'}
+`);
+  stdout.write(`- URL de reporte: ${state.security.reportUrl || '(sin definir)'}
+`);
+  stdout.write(`- Alcance cubierto: ${state.security.scope.length > 0 ? state.security.scope.map((value) => optionLabel(SECURITY_SCOPE_OPTIONS, value)).join(', ') : '(sin definir)'}
+`);
+  stdout.write(`- Safe harbor: ${state.security.safeHarborOffered ? 'sí' : 'no'}
+`);
+  stdout.write(`- Acuse de recibo: ${state.security.acknowledgementTime || '(sin definir)'}
+`);
+  stdout.write(`- Actualizaciones: ${state.security.statusUpdateTime || '(sin definir)'}
+`);
+  stdout.write(`- Disclosure: ${optionLabel(SECURITY_DISCLOSURE_OPTIONS, state.security.disclosurePreference || '(sin definir)')}
+`);
+  stdout.write(`- Bug bounty: ${state.security.bugBountyOffered ? 'sí' : 'no'}
+`);
+  stdout.write(`- Idioma de salida: ${optionLabel(OUTPUT_LANGUAGE_OPTIONS, state.output.language || 'es')}
+`);
+  stdout.write(`- Formato: ${optionLabel(OUTPUT_FORMAT_OPTIONS, state.output.format || 'markdown')}
+`);
+  stdout.write(`- URL pública hasheada: ${state.output.publishHashedUrl ? state.output.baseUrl : 'no'}
+`);
+  if (state.output.publishHashedUrl) stdout.write(`- Directorio publicable: ${state.output.publishDir}
+`);
+  stdout.write(`- Guardar a archivo: ${state.output.writeToFile ? state.output.outputPath : 'no'}
+`);
+  stdout.write(`- Guardar input JSON: ${state.output.saveInput ? state.output.inputPath : 'no'}
+`);
+  if (validation.warnings.length > 0) {
+    stdout.write(`
+${bold(yellow('Advertencias de revisión:'))}
+`);
+    validation.warnings.forEach((warning) => stdout.write(`- ${warning}
+`));
+  }
+}
+
+async function promptSecurityReviewAction(rl) {
+  stdout.write(`
+${bold(cyan('Qué querés hacer ahora'))}
+`);
+  stdout.write(`  ${yellow('1')}. ${bold('Generar política de seguridad')}
+`);
+  stdout.write(`  ${yellow('2')}. ${bold('Editar negocio')}
+`);
+  stdout.write(`  ${yellow('3')}. ${bold('Editar contacto')}
+`);
+  stdout.write(`  ${yellow('4')}. ${bold('Editar política de seguridad')}
+`);
+  stdout.write(`  ${yellow('5')}. ${bold('Editar formato y guardado')}
+`);
+  stdout.write(`  ${yellow('6')}. ${bold('Cancelar')}
+`);
+  while (true) {
+    const answer = (await rl.question(`${green('Elegí un número')}: `)).trim();
+    const choice = Number.parseInt(answer, 10);
+    if (choice >= 1 && choice <= 6) return choice;
+    stdout.write(`${red('Opción inválida. Probá de nuevo.')}
+`);
+  }
+}
+
+async function runSecurityWizard(generator) {
+  const rl = readline.createInterface({ input: stdin, output: stdout });
+  const state = {
+    documentType: 'security',
+    business: { name: '', type: 'saas', websiteUrl: '', country: 'Argentina', address: '' },
+    contact: { email: '', phone: '', pageUrl: '' },
+    security: {
+      reportChannel: 'both',
+      reportEmail: '',
+      reportUrl: '',
+      scope: ['web_application', 'api'],
+      safeHarborOffered: true,
+      automatedTestingAllowed: false,
+      denialOfServiceTestingAllowed: false,
+      socialEngineeringAllowed: false,
+      acknowledgementTime: '3 días hábiles',
+      statusUpdateTime: '10 días hábiles',
+      disclosurePreference: 'coordinated',
+      bugBountyOffered: false,
+      bugBountyNotes: '',
+      reportRequirements: [
+        'Descripción clara del hallazgo y del impacto esperado',
+        'Pasos de reproducción o prueba de concepto razonable',
+        'Activos, URLs, endpoints o cuentas involucradas',
+        'Información de contacto para seguimiento'
+      ],
+      remediationGuidance: 'Priorizamos los reportes según severidad, impacto y complejidad, y podemos pedir tiempo razonable para investigar y mitigar antes de cualquier disclosure público.',
+      securityPracticesSummary: 'Aplicamos controles de acceso, registros operativos, revisión de dependencias y medidas razonables de hardening sobre infraestructura y aplicaciones expuestas.',
+      notes: []
+    },
+    output: { language: 'es', format: 'markdown', publishHashedUrl: false, baseUrl: defaultBaseUrlForDocument('security'), publishDir: defaultPublishDirForDocument('security'), writeToFile: false, outputPath: '', saveInput: true, inputPath: '', importPath: '' },
+    manualDisclosures: []
+  };
+
+  try {
+    stdout.write(`${bold(cyan('Asistente interactivo de política de seguridad'))}
+`);
+    stdout.write(`${dim('Te voy a ayudar a generar una política pública para divulgación responsable y reportes de vulnerabilidades.')}
+`);
+    await collectBusinessSection(rl, state);
+    await collectContactSection(rl, state);
+    await collectSecuritySection(rl, state);
+    await collectOutputSection(rl, state);
+
+    while (true) {
+      const input = buildSecurityInputFromState(state);
+      const validation = await generator.validate(input);
+      if (!validation.ok) {
+        stdout.write(`
+${bold(red('Todavía faltan datos obligatorios:'))}
+`);
+        validation.errors.forEach((error) => stdout.write(`- ${error}
+`));
+      }
+      printSecuritySummary(state, validation);
+      const action = await promptSecurityReviewAction(rl);
+      if (action === 2) { await collectBusinessSection(rl, state); continue; }
+      if (action === 3) { await collectContactSection(rl, state); continue; }
+      if (action === 4) { await collectSecuritySection(rl, state); continue; }
+      if (action === 5) { await collectOutputSection(rl, state); continue; }
+      if (action === 6) { stdout.write(`${yellow('Wizard cancelado.')}
+`); return; }
+      if (!validation.ok) {
+        stdout.write(`${red('No puedo generar hasta que corrijas los datos faltantes.')}
+`);
+        continue;
+      }
+
+      if (state.output.saveInput) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.inputPath || `${slugify(state.business.name)}-security-policy-input.json`), `${JSON.stringify(input, null, 2)}
+`, 'utf8');
+        stdout.write(`
+${green(`Guardé el input en ${state.output.inputPath || `${slugify(state.business.name)}-security-policy-input.json`}`)}
+`);
+      }
+
+      const result = await generator.generate(input);
+      const output = result[state.output.format];
+      let published = null;
+
+      if (state.output.publishHashedUrl) {
+        published = await publishGeneratedPolicy(input, result, {
+          publishDir: state.output.publishDir || defaultPublishDirForDocument('security'),
+          baseUrl: state.output.baseUrl || defaultBaseUrlForDocument('security')
+        });
+      }
+
+      if (state.output.writeToFile) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.outputPath), output, 'utf8');
+        stdout.write(`${green(`Guardé la política de seguridad en ${state.output.outputPath}`)}
+`);
+      } else {
+        stdout.write(`
+${output}
+`);
+      }
+
+      if (published) {
+        stdout.write(`
+${bold(green('URL pública generada:'))} ${published.publicUrl}
+`);
+        stdout.write(`${green('Archivo HTML publicado:')} ${published.filePath}
+`);
+        stdout.write(`${green('Manifest:')} ${published.manifestPath}
+`);
+      }
+
+      if (result.warnings.length > 0) {
+        stdout.write(`
+${bold(yellow('Advertencias de revisión:'))}
+`);
+        result.warnings.forEach((warning) => stdout.write(`- ${warning}
+`));
+      }
+      return;
+    }
+  } finally {
+    rl.close();
+  }
+}
+
 async function promptDeletionReviewAction(rl) {
   stdout.write(`\n${bold(cyan('Qué querés hacer ahora'))}\n`);
   stdout.write(`  ${yellow('1')}. ${bold('Generar instrucciones de eliminación')}\n`);
@@ -3031,10 +3426,10 @@ function usage() {
   return [
     'Usage:',
     '  privacy-policy wizard',
-    '  privacy-policy generate --document privacy|terms|deletion|cookies|refund|disclaimer --input <file.json> [--format html|markdown|text] [--output file]',
-    '  privacy-policy publish --document privacy|terms|deletion|cookies|refund|disclaimer --input <file.json> --base-url <url> [--publish-dir <dir>]',
-    '  privacy-policy validate --document privacy|terms|deletion|cookies|refund|disclaimer --input <file.json>',
-    '  privacy-policy explain --document privacy|terms|deletion|cookies|refund|disclaimer --input <file.json>',
+    '  privacy-policy generate --document privacy|terms|deletion|cookies|refund|disclaimer|security --input <file.json> [--format html|markdown|text] [--output file]',
+    '  privacy-policy publish --document privacy|terms|deletion|cookies|refund|disclaimer|security --input <file.json> --base-url <url> [--publish-dir <dir>]',
+    '  privacy-policy validate --document privacy|terms|deletion|cookies|refund|disclaimer|security --input <file.json>',
+    '  privacy-policy explain --document privacy|terms|deletion|cookies|refund|disclaimer|security --input <file.json>',
     '',
     'If you run `privacy-policy` with no command, the interactive wizard starts automatically.'
   ].join('\n');
@@ -3048,6 +3443,7 @@ async function main() {
   const cookiesGenerator = new CookiesPolicyGenerator();
   const refundGenerator = new ReturnRefundPolicyGenerator();
   const disclaimerGenerator = new DisclaimerGenerator();
+  const securityGenerator = new SecurityPolicyGenerator();
 
   if (!command || command === 'wizard') {
     const rl = readline.createInterface({ input: stdin, output: stdout });
@@ -3065,6 +3461,8 @@ async function main() {
         await runRefundWizard(refundGenerator);
       } else if (documentType === 'disclaimer') {
         await runDisclaimerWizard(disclaimerGenerator);
+      } else if (documentType === 'security') {
+        await runSecurityWizard(securityGenerator);
       } else {
         await runWizard(privacyGenerator);
       }
@@ -3090,6 +3488,8 @@ async function main() {
           ? refundGenerator
           : documentType === 'disclaimer'
             ? disclaimerGenerator
+            : documentType === 'security'
+              ? securityGenerator
         : privacyGenerator;
 
   if (command === 'validate') {

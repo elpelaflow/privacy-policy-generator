@@ -2404,6 +2404,375 @@ ${paragraphs}
     }
   });
 
+  // js/security-generator.js
+  var require_security_generator = __commonJS({
+    "js/security-generator.js"(exports2, module2) {
+      var SecurityPolicyGenerator = class {
+        async validate(input) {
+          const normalized = this.normalizeInput(input);
+          return {
+            ok: normalized.errors.length === 0,
+            errors: normalized.errors,
+            warnings: normalized.warnings,
+            normalizedInput: normalized.data
+          };
+        }
+        async explain(input) {
+          const result = await this.buildDocument(input);
+          return {
+            validation: {
+              ok: result.errors.length === 0,
+              errors: result.errors,
+              warnings: result.warnings
+            },
+            decisionLog: result.decisionLog,
+            includedSections: result.document.sections.map((section) => section.title)
+          };
+        }
+        async generate(input) {
+          const result = await this.buildDocument(input);
+          if (result.errors.length > 0) {
+            throw new Error(result.errors.join(" | "));
+          }
+          return {
+            html: this.formatAsHTML(result.document),
+            markdown: this.formatAsMarkdown(result.document),
+            text: this.formatAsText(result.document),
+            warnings: result.warnings,
+            decisionLog: result.decisionLog
+          };
+        }
+        async buildDocument(input) {
+          const normalized = this.normalizeInput(input);
+          const language = normalized.data.settings.language || "es";
+          this.currentLanguage = language;
+          const document = {
+            businessName: normalized.data.business.name,
+            effectiveDate: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
+            warnings: normalized.warnings,
+            language,
+            title: language === "es" ? "Pol\xEDtica de Seguridad" : "Security Policy",
+            sections: []
+          };
+          const decisionLog = [];
+          if (normalized.errors.length === 0) {
+            const sections = this.buildSections(normalized.data);
+            document.sections = sections.filter((section) => {
+              const included = section.paragraphs.length > 0 || section.subsections.length > 0;
+              decisionLog.push({
+                sectionId: section.id,
+                title: section.title,
+                included,
+                reason: included ? "section generated" : "section omitted"
+              });
+              return included;
+            });
+          }
+          return {
+            errors: normalized.errors,
+            warnings: normalized.warnings,
+            decisionLog,
+            document
+          };
+        }
+        normalizeInput(input) {
+          const data = {
+            business: {
+              name: this.stringValue(input.business?.name),
+              type: this.stringValue(input.business?.type),
+              websiteUrl: this.stringValue(input.business?.websiteUrl),
+              country: this.stringValue(input.business?.country),
+              address: this.stringValue(input.business?.address)
+            },
+            contact: {
+              email: this.stringValue(input.contact?.email),
+              phone: this.stringValue(input.contact?.phone),
+              pageUrl: this.stringValue(input.contact?.pageUrl)
+            },
+            security: {
+              reportChannel: this.stringValue(input.security?.reportChannel, "email"),
+              reportEmail: this.stringValue(input.security?.reportEmail || input.contact?.email),
+              reportUrl: this.stringValue(input.security?.reportUrl || input.contact?.pageUrl),
+              scope: this.arrayValue(input.security?.scope),
+              safeHarborOffered: this.booleanValue(input.security?.safeHarborOffered, true),
+              automatedTestingAllowed: this.booleanValue(input.security?.automatedTestingAllowed, false),
+              denialOfServiceTestingAllowed: this.booleanValue(input.security?.denialOfServiceTestingAllowed, false),
+              socialEngineeringAllowed: this.booleanValue(input.security?.socialEngineeringAllowed, false),
+              acknowledgementTime: this.stringValue(input.security?.acknowledgementTime),
+              statusUpdateTime: this.stringValue(input.security?.statusUpdateTime),
+              disclosurePreference: this.stringValue(input.security?.disclosurePreference, "coordinated"),
+              bugBountyOffered: this.booleanValue(input.security?.bugBountyOffered, false),
+              bugBountyNotes: this.stringValue(input.security?.bugBountyNotes),
+              reportRequirements: this.arrayValue(input.security?.reportRequirements),
+              remediationGuidance: this.stringValue(input.security?.remediationGuidance),
+              securityPracticesSummary: this.stringValue(input.security?.securityPracticesSummary),
+              notes: this.arrayValue(input.security?.notes)
+            },
+            settings: {
+              language: this.stringValue(input.settings?.language, "es")
+            }
+          };
+          const messages = data.settings.language === "es" ? {
+            missingBusinessName: "El nombre del negocio es obligatorio.",
+            missingWebsite: "La URL del sitio o aplicaci\xF3n es obligatoria.",
+            missingReportContact: "Debe indicar al menos un canal real para recibir reportes de seguridad.",
+            missingScope: "Conviene indicar el alcance de la pol\xEDtica de seguridad o divulgaci\xF3n de vulnerabilidades.",
+            missingAcknowledgement: "Conviene indicar en cu\xE1nto tiempo se acusar\xE1 recibo de un reporte v\xE1lido.",
+            missingStatusUpdate: "Conviene indicar cada cu\xE1nto se compartir\xE1n actualizaciones sobre el estado del reporte.",
+            missingRequirements: "Conviene indicar qu\xE9 informaci\xF3n debe incluir un reporte de seguridad para facilitar el triage.",
+            safeHarborWarning: "Conviene incluir una cl\xE1usula de buena fe o safe harbor para reportes responsables.",
+            bountyNeedsNotes: "Si ofrec\xE9s bug bounty, conviene aclarar condiciones, elegibilidad o c\xF3mo se comunica."
+          } : {
+            missingBusinessName: "Business name is required.",
+            missingWebsite: "Website or app URL is required.",
+            missingReportContact: "You must provide at least one real channel for receiving security reports.",
+            missingScope: "You should specify the scope of the security or vulnerability disclosure policy.",
+            missingAcknowledgement: "You should state how quickly you acknowledge a valid report.",
+            missingStatusUpdate: "You should state how often you share status updates about a report.",
+            missingRequirements: "You should explain what information a security report should include to help triage.",
+            safeHarborWarning: "You should include a good-faith or safe-harbor clause for responsible reporting.",
+            bountyNeedsNotes: "If you offer a bug bounty, you should explain conditions, eligibility, or how that process is communicated."
+          };
+          const errors = [];
+          const warnings = [];
+          if (!data.business.name) errors.push(messages.missingBusinessName);
+          if (!data.business.websiteUrl) errors.push(messages.missingWebsite);
+          const usesEmail = ["email", "both"].includes(data.security.reportChannel);
+          const usesUrl = ["form", "both"].includes(data.security.reportChannel);
+          if (usesEmail && !data.security.reportEmail || usesUrl && !data.security.reportUrl) {
+            errors.push(messages.missingReportContact);
+          }
+          if (data.security.scope.length === 0) warnings.push(messages.missingScope);
+          if (!data.security.acknowledgementTime) warnings.push(messages.missingAcknowledgement);
+          if (!data.security.statusUpdateTime) warnings.push(messages.missingStatusUpdate);
+          if (data.security.reportRequirements.length === 0) warnings.push(messages.missingRequirements);
+          if (!data.security.safeHarborOffered) warnings.push(messages.safeHarborWarning);
+          if (data.security.bugBountyOffered && !data.security.bugBountyNotes) warnings.push(messages.bountyNeedsNotes);
+          return { data, errors, warnings };
+        }
+        buildSections(data) {
+          const sections = [
+            this.section("overview", this.text("Overview", "Resumen"), [
+              this.interpolate(this.text(
+                "{business_name} publishes this security policy to explain how security researchers, users, and third parties may responsibly report vulnerabilities affecting {website}.",
+                "{business_name} publica esta pol\xEDtica de seguridad para explicar c\xF3mo investigadores, usuarios y terceros pueden reportar vulnerabilidades de forma responsable respecto de {website}."
+              ), data)
+            ]),
+            this.section("reporting", this.text("How to Report a Vulnerability", "C\xF3mo Reportar una Vulnerabilidad"), [
+              this.reportingText(data)
+            ]),
+            this.section("scope", this.text("Scope", "Alcance"), [
+              this.scopeText(data)
+            ]),
+            this.section("testing", this.text("Testing Rules and Expectations", "Reglas y Expectativas de Prueba"), [
+              this.testingRulesText(data)
+            ]),
+            this.section("response", this.text("Acknowledgement and Response Times", "Tiempos de Acuse y Respuesta"), [
+              this.responseTimesText(data)
+            ]),
+            this.section("disclosure", this.text("Disclosure, Remediation, and Recognition", "Divulgaci\xF3n, Remediaci\xF3n y Reconocimiento"), [
+              this.disclosureText(data)
+            ])
+          ];
+          if (data.security.securityPracticesSummary) {
+            sections.push(this.section("practices", this.text("Security Practices Summary", "Resumen de Pr\xE1cticas de Seguridad"), [
+              data.security.securityPracticesSummary
+            ]));
+          }
+          sections.push(this.section("contact", this.text("Contact Information", "Informaci\xF3n de Contacto"), [
+            this.contactText(data)
+          ]));
+          return sections;
+        }
+        section(id, title, paragraphs, subsections = []) {
+          return {
+            id,
+            title,
+            paragraphs: paragraphs.filter(Boolean),
+            subsections: subsections.filter((item) => item.paragraphs.some(Boolean))
+          };
+        }
+        text(en, es) {
+          return this.currentLanguage === "es" ? es : en;
+        }
+        interpolate(text, data) {
+          return String(text || "").replaceAll("{business_name}", data.business.name || "").replaceAll("{website}", data.business.websiteUrl || "");
+        }
+        reportingText(data) {
+          const parts = [];
+          if (data.security.reportEmail) {
+            parts.push(this.text(
+              `Please report suspected vulnerabilities by email to ${data.security.reportEmail}.`,
+              `Por favor report\xE1 vulnerabilidades sospechadas por email a ${data.security.reportEmail}.`
+            ));
+          }
+          if (data.security.reportUrl) {
+            parts.push(this.text(
+              `Reports may also be submitted through ${data.security.reportUrl}.`,
+              `Los reportes tambi\xE9n pueden presentarse a trav\xE9s de ${data.security.reportUrl}.`
+            ));
+          }
+          if (data.security.reportRequirements.length > 0) {
+            parts.push(`${this.text("To help us triage quickly, include:", "Para facilitar el triage, inclu\xED:")}
+${this.listLines(data.security.reportRequirements)}`);
+          }
+          return parts.join(" ");
+        }
+        scopeText(data) {
+          if (data.security.scope.length === 0) {
+            return this.text(
+              "This policy applies to security issues that may affect the public service, supporting infrastructure, and related user-facing components operated by the business.",
+              "Esta pol\xEDtica aplica a problemas de seguridad que puedan afectar al servicio p\xFAblico, la infraestructura de soporte y los componentes relacionados operados por el negocio."
+            );
+          }
+          return `${this.text("This policy is intended for the following assets or surfaces:", "Esta pol\xEDtica est\xE1 pensada para los siguientes activos o superficies:")}
+${this.listLines(data.security.scope.map((value) => this.scopeLabel(value)))}`;
+        }
+        testingRulesText(data) {
+          const lines = [
+            this.text(
+              "Please act in good faith, avoid privacy violations, service disruption, data destruction, or any action that could harm users or systems.",
+              "Actu\xE1 de buena fe y evit\xE1 violaciones de privacidad, interrupciones del servicio, destrucci\xF3n de datos o cualquier acci\xF3n que pueda da\xF1ar a usuarios o sistemas."
+            ),
+            data.security.safeHarborOffered ? this.text(
+              "When you follow this policy in good faith, we intend to treat your research as authorized and will not pursue action solely for testing conducted within this policy\u2019s scope.",
+              "Cuando sigas esta pol\xEDtica de buena fe, nuestra intenci\xF3n es tratar tu investigaci\xF3n como autorizada y no impulsar acciones \xFAnicamente por pruebas realizadas dentro del alcance de esta pol\xEDtica."
+            ) : "",
+            this.text(
+              `Automated testing is ${data.security.automatedTestingAllowed ? "allowed when it remains low-volume and does not degrade service" : "not allowed unless we give prior written permission"}.`,
+              `Las pruebas automatizadas ${data.security.automatedTestingAllowed ? "est\xE1n permitidas siempre que sean de bajo volumen y no degraden el servicio" : "no est\xE1n permitidas salvo autorizaci\xF3n previa y por escrito"}.`
+            ),
+            this.text(
+              `Denial-of-service or load testing is ${data.security.denialOfServiceTestingAllowed ? "allowed only in a coordinated manner and with prior approval" : "not allowed under this policy"}.`,
+              `Las pruebas de denegaci\xF3n de servicio o carga ${data.security.denialOfServiceTestingAllowed ? "s\xF3lo est\xE1n permitidas de forma coordinada y con aprobaci\xF3n previa" : "no est\xE1n permitidas bajo esta pol\xEDtica"}.`
+            ),
+            this.text(
+              `Social engineering, phishing, or physical attacks are ${data.security.socialEngineeringAllowed ? "only allowed if explicitly coordinated and approved in advance" : "not allowed under this policy"}.`,
+              `La ingenier\xEDa social, el phishing o los ataques f\xEDsicos ${data.security.socialEngineeringAllowed ? "s\xF3lo est\xE1n permitidos si fueron coordinados y aprobados expl\xEDcitamente de antemano" : "no est\xE1n permitidos bajo esta pol\xEDtica"}.`
+            )
+          ].filter(Boolean);
+          return lines.join(" ");
+        }
+        responseTimesText(data) {
+          const parts = [];
+          if (data.security.acknowledgementTime) {
+            parts.push(this.text(
+              `We aim to acknowledge valid reports within ${data.security.acknowledgementTime}.`,
+              `Buscamos acusar recibo de reportes v\xE1lidos dentro de ${data.security.acknowledgementTime}.`
+            ));
+          }
+          if (data.security.statusUpdateTime) {
+            parts.push(this.text(
+              `We aim to provide meaningful status updates within ${data.security.statusUpdateTime}, depending on severity and complexity.`,
+              `Buscamos compartir actualizaciones relevantes dentro de ${data.security.statusUpdateTime}, seg\xFAn gravedad y complejidad.`
+            ));
+          }
+          if (data.security.remediationGuidance) {
+            parts.push(data.security.remediationGuidance);
+          }
+          return parts.join(" ");
+        }
+        disclosureText(data) {
+          const preference = data.security.disclosurePreference === "silent_fix" ? this.text(
+            "We prefer to remediate issues before any public disclosure and may choose not to publish individual advisories for every issue.",
+            "Preferimos remediar los problemas antes de cualquier divulgaci\xF3n p\xFAblica y podemos optar por no publicar avisos individuales para cada caso."
+          ) : data.security.disclosurePreference === "researcher_choice" ? this.text(
+            "We expect coordinated communication, but final public disclosure timing may be discussed case by case with the reporting party.",
+            "Esperamos una comunicaci\xF3n coordinada, pero el momento de la divulgaci\xF3n p\xFAblica puede acordarse caso por caso con la persona reportante."
+          ) : this.text(
+            "We prefer coordinated disclosure and ask reporters to avoid public disclosure until we have had a reasonable opportunity to investigate and mitigate the issue.",
+            "Preferimos la divulgaci\xF3n coordinada y pedimos que se evite la divulgaci\xF3n p\xFAblica hasta que tengamos una oportunidad razonable de investigar y mitigar el problema."
+          );
+          const bounty = data.security.bugBountyOffered ? ` ${data.security.bugBountyNotes || this.text("A bug bounty or reward process may exist, but eligibility, amount, and payment terms are determined case by case.", "Puede existir un proceso de bug bounty o recompensas, pero la elegibilidad, el monto y las condiciones de pago se determinan caso por caso.")}` : ` ${this.text("This policy does not by itself guarantee payment, compensation, or public recognition for every report.", "Esta pol\xEDtica no garantiza por s\xED sola pago, compensaci\xF3n ni reconocimiento p\xFAblico para cada reporte.")}`;
+          return `${preference}${bounty}`;
+        }
+        contactText(data) {
+          const parts = [];
+          if (data.security.reportEmail) parts.push(this.text(`Primary security email: ${data.security.reportEmail}.`, `Email principal de seguridad: ${data.security.reportEmail}.`));
+          if (data.security.reportUrl) parts.push(this.text(`Security reporting page: ${data.security.reportUrl}.`, `P\xE1gina para reportes de seguridad: ${data.security.reportUrl}.`));
+          if (data.contact.phone) parts.push(this.text(`Phone: ${data.contact.phone}.`, `Tel\xE9fono: ${data.contact.phone}.`));
+          if (data.business.address) parts.push(this.text(`Postal address: ${data.business.address}.`, `Direcci\xF3n postal: ${data.business.address}.`));
+          return parts.join(" ");
+        }
+        listLines(items) {
+          return items.map((item) => `- ${item}`).join("\n");
+        }
+        scopeLabel(value) {
+          const labels = {
+            web_application: this.text("web application", "aplicaci\xF3n web"),
+            api: this.text("API or developer endpoints", "API o endpoints para desarrolladores"),
+            mobile_app: this.text("mobile app", "aplicaci\xF3n m\xF3vil"),
+            infrastructure: this.text("infrastructure or hosting components", "infraestructura o componentes de hosting"),
+            integrations: this.text("third-party integrations and connected services", "integraciones con terceros y servicios conectados"),
+            content: this.text("security-sensitive content, docs, or static assets", "contenido sensible para seguridad, documentaci\xF3n o assets est\xE1ticos")
+          };
+          return labels[value] || value;
+        }
+        formatAsMarkdown(document) {
+          const lines = [
+            `# ${document.title} - ${document.businessName}`,
+            "",
+            `${this.text("Effective date", "Fecha de vigencia")}: ${document.effectiveDate}`,
+            ""
+          ];
+          for (const section of document.sections) {
+            lines.push(`## ${section.title}`, "");
+            for (const paragraph of section.paragraphs) {
+              lines.push(paragraph, "");
+            }
+          }
+          return lines.join("\n").trim();
+        }
+        formatAsText(document) {
+          return this.formatAsMarkdown(document).replace(/^#{1,3}\s+/gm, "");
+        }
+        formatAsHTML(document) {
+          const escape = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+          const body = document.sections.map((section) => {
+            const paragraphs = section.paragraphs.map((paragraph) => `<p>${escape(paragraph).replaceAll("\n", "<br>")}</p>`).join("\n");
+            return `<section>
+<h2>${escape(section.title)}</h2>
+${paragraphs}
+</section>`;
+          }).join("\n");
+          return [
+            "<!doctype html>",
+            `<html lang="${document.language}">`,
+            "<head>",
+            '  <meta charset="utf-8">',
+            '  <meta name="viewport" content="width=device-width, initial-scale=1">',
+            `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
+            '  <meta name="legal-document-type" content="security">',
+            "</head>",
+            "<body>",
+            `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
+            `  <p><strong>${escape(this.text("Effective date", "Fecha de vigencia"))}:</strong> ${escape(document.effectiveDate)}</p>`,
+            body,
+            "</body>",
+            "</html>"
+          ].join("\n");
+        }
+        stringValue(value, fallback = "") {
+          if (typeof value !== "string") return fallback;
+          const normalized = value.trim();
+          if (!normalized || [">", "no hay", "n/a", "na", "none", "null"].includes(normalized.toLowerCase())) {
+            return fallback;
+          }
+          return normalized;
+        }
+        arrayValue(value) {
+          return Array.isArray(value) ? value.filter(Boolean) : [];
+        }
+        booleanValue(value, fallback = false) {
+          if (typeof value === "boolean") return value;
+          if (value == null) return fallback;
+          return Boolean(value);
+        }
+      };
+      module2.exports = SecurityPolicyGenerator;
+    }
+  });
+
   // web/browser-entry.js
   var require_browser_entry = __commonJS({
     "web/browser-entry.js"() {
@@ -2413,13 +2782,15 @@ ${paragraphs}
       var CookiesPolicyGenerator = require_cookies_generator();
       var ReturnRefundPolicyGenerator = require_refund_generator();
       var DisclaimerGenerator = require_disclaimer_generator();
+      var SecurityPolicyGenerator = require_security_generator();
       globalThis.LegalGenerators = {
         PrivacyPolicyGenerator: PrivacyPolicyGenerator2,
         TermsGenerator,
         DataDeletionGenerator,
         CookiesPolicyGenerator,
         ReturnRefundPolicyGenerator,
-        DisclaimerGenerator
+        DisclaimerGenerator,
+        SecurityPolicyGenerator
       };
     }
   });

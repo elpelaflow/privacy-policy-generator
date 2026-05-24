@@ -1,0 +1,47 @@
+{
+  "documentType": "security",
+  "business": {
+    "name": "Acme Cloud",
+    "type": "saas",
+    "websiteUrl": "https://acme.example.com",
+    "country": "Argentina",
+    "address": "Calle Falsa 123, Ciudad Autónoma de Buenos Aires"
+  },
+  "contact": {
+    "email": "security@acme.example.com",
+    "phone": "",
+    "pageUrl": "https://acme.example.com/security"
+  },
+  "security": {
+    "reportChannel": "both",
+    "reportEmail": "security@acme.example.com",
+    "reportUrl": "https://acme.example.com/security-report",
+    "scope": [
+      "web_application",
+      "api",
+      "infrastructure",
+      "integrations"
+    ],
+    "safeHarborOffered": true,
+    "automatedTestingAllowed": true,
+    "denialOfServiceTestingAllowed": false,
+    "socialEngineeringAllowed": false,
+    "acknowledgementTime": "3 días hábiles",
+    "statusUpdateTime": "10 días hábiles",
+    "disclosurePreference": "coordinated",
+    "bugBountyOffered": false,
+    "bugBountyNotes": "",
+    "reportRequirements": [
+      "Descripción clara del hallazgo y del impacto esperado",
+      "Pasos de reproducción o prueba de concepto razonable",
+      "Activos, URLs, endpoints o cuentas involucradas",
+      "Información de contacto para seguimiento"
+    ],
+    "remediationGuidance": "Priorizamos los reportes según severidad, riesgo para usuarios y complejidad técnica. Podemos pedir tiempo razonable para investigar, mitigar y validar la corrección antes de cualquier divulgación pública.",
+    "securityPracticesSummary": "Aplicamos controles de acceso por roles, rotación de credenciales, registros operativos, revisión de dependencias y medidas de hardening razonables en infraestructura y aplicaciones expuestas.",
+    "notes": []
+  },
+  "settings": {
+    "language": "es"
+  }
+}

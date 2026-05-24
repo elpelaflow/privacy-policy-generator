@@ -10,6 +10,7 @@ const DataDeletionGenerator = require('../js/deletion-generator');
 const CookiesPolicyGenerator = require('../js/cookies-generator');
 const ReturnRefundPolicyGenerator = require('../js/refund-generator');
 const DisclaimerGenerator = require('../js/disclaimer-generator');
+const SecurityPolicyGenerator = require('../js/security-generator');
 const { buildHashedFilename, publishPolicy } = require('../js/publishing');
 const execFileAsync = promisify(execFile);
 
@@ -222,6 +223,89 @@ test('publish command returns final public URL without full policy body', async 
   assert.doesNotMatch(stdout, /Privacy Policy - Acme Cloud/);
 });
 
+
+function baseSecurityInput() {
+  return {
+    documentType: 'security',
+    business: {
+      name: 'Acme Secure',
+      type: 'saas',
+      websiteUrl: 'https://secure.acme.test',
+      country: 'Argentina',
+      address: 'Calle 123, CABA, Argentina'
+    },
+    contact: {
+      email: 'security@acme.test',
+      phone: '',
+      pageUrl: 'https://secure.acme.test/security'
+    },
+    security: {
+      reportChannel: 'both',
+      reportEmail: 'security@acme.test',
+      reportUrl: 'https://secure.acme.test/report',
+      scope: ['web_application', 'api', 'integrations'],
+      safeHarborOffered: true,
+      automatedTestingAllowed: true,
+      denialOfServiceTestingAllowed: false,
+      socialEngineeringAllowed: false,
+      acknowledgementTime: '3 días hábiles',
+      statusUpdateTime: '10 días hábiles',
+      disclosurePreference: 'coordinated',
+      bugBountyOffered: false,
+      reportRequirements: [
+        'Descripción del hallazgo',
+        'Pasos de reproducción',
+        'Datos de contacto para seguimiento'
+      ],
+      remediationGuidance: 'Priorizamos el reporte según severidad y riesgo.',
+      securityPracticesSummary: 'Aplicamos controles de acceso, logs y medidas razonables de hardening.'
+    },
+    settings: {
+      language: 'es'
+    }
+  };
+}
+
+test('security policy includes disclosure and reporting sections', async () => {
+  const generator = new SecurityPolicyGenerator();
+  const result = await generator.generate(baseSecurityInput());
+
+  assert.match(result.markdown, /Política de Seguridad/);
+  assert.match(result.markdown, /Cómo Reportar una Vulnerabilidad/);
+  assert.match(result.markdown, /Divulgación, Remediación y Reconocimiento/);
+});
+
+test('security validation requires a real reporting channel', async () => {
+  const generator = new SecurityPolicyGenerator();
+  const input = baseSecurityInput();
+  input.security.reportChannel = 'email';
+  input.security.reportEmail = '';
+  input.security.reportUrl = '';
+  input.contact.email = '';
+  input.contact.pageUrl = '';
+
+  const validation = await generator.validate(input);
+
+  assert.equal(validation.ok, false);
+  assert.ok(validation.errors.some((error) => /canal real|real channel/i.test(error)));
+});
+
+test('security validation warns when safe harbor and expectations are too vague', async () => {
+  const generator = new SecurityPolicyGenerator();
+  const input = baseSecurityInput();
+  input.security.safeHarborOffered = false;
+  input.security.reportRequirements = [];
+  input.security.acknowledgementTime = '';
+  input.security.statusUpdateTime = '';
+
+  const validation = await generator.validate(input);
+
+  assert.equal(validation.ok, true);
+  assert.ok(validation.warnings.some((warning) => /safe harbor|buena fe/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /triage|inclu/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /acusar|acknowledge/i.test(warning)));
+});
+
 function baseTermsInput() {
   return {
     documentType: 'terms',
@@ -368,19 +452,19 @@ function baseDeletionInput() {
     documentType: 'deletion',
     business: {
       name: 'AutoAds CLI Operator',
-      websiteUrl: 'https://dev-flow.duckdns.org/',
+      websiteUrl: 'https://autopost.example.com/',
       country: 'Argentina',
       address: 'Adolfo Alsina 3135, B1849, Buenos Aires, Argentina'
     },
     contact: {
-      email: 'thechief@dev-flow.duckdns.org',
+      email: 'legal@autopost.example.com',
       phone: '+5491123317940',
-      pageUrl: 'https://dev-flow.duckdns.org/'
+      pageUrl: 'https://autopost.example.com/'
     },
     deletion: {
       requestChannel: 'both',
-      requestEmail: 'thechief@dev-flow.duckdns.org',
-      requestUrl: 'https://dev-flow.duckdns.org/',
+      requestEmail: 'legal@autopost.example.com',
+      requestUrl: 'https://autopost.example.com/',
       identityRequirements: ['Email de la cuenta o del usuario solicitante'],
       deletionScope: ['Datos de perfil o cuenta asociados al usuario'],
       retentionExceptions: ['Registros necesarios para cumplir obligaciones legales o regulatorias'],
@@ -424,14 +508,14 @@ function baseCookiesInput() {
     business: {
       name: 'AutoPost CLI Operator',
       type: 'saas',
-      websiteUrl: 'https://dev-flow.duckdns.org/',
+      websiteUrl: 'https://autopost.example.com/',
       country: 'Argentina',
       address: 'Adolfo Alsina 3135, B1849, Buenos Aires, Argentina'
     },
     contact: {
-      email: 'thechief@dev-flow.duckdns.org',
+      email: 'legal@autopost.example.com',
       phone: '+5491123317940',
-      pageUrl: 'https://dev-flow.duckdns.org/privacy'
+      pageUrl: 'https://autopost.example.com/privacy'
     },
     operations: {
       primaryJurisdiction: 'ar',
@@ -441,7 +525,7 @@ function baseCookiesInput() {
       categories: ['necessary', 'analytics', 'advertising'],
       thirdParties: ['analytics', 'advertising', 'social'],
       consentMode: 'banner',
-      managementUrl: 'https://dev-flow.duckdns.org/privacy',
+      managementUrl: 'https://autopost.example.com/privacy',
       browserControls: 'Puede bloquear o eliminar cookies desde la configuración del navegador.',
       retentionPolicy: 'Algunas cookies son de sesión y otras persisten más tiempo según su finalidad.'
     },
@@ -508,14 +592,14 @@ function baseRefundInput() {
     business: {
       name: 'AutoPost CLI Operator',
       type: 'ecommerce',
-      websiteUrl: 'https://dev-flow.duckdns.org/',
+      websiteUrl: 'https://autopost.example.com/',
       country: 'Argentina',
       address: 'Adolfo Alsina 3135, B1849, Buenos Aires, Argentina'
     },
     contact: {
-      email: 'thechief@dev-flow.duckdns.org',
+      email: 'legal@autopost.example.com',
       phone: '+5491123317940',
-      pageUrl: 'https://dev-flow.duckdns.org/contacto'
+      pageUrl: 'https://autopost.example.com/contacto'
     },
     refund: {
       offeringType: 'physical_goods',
@@ -526,7 +610,7 @@ function baseRefundInput() {
       refundMethod: 'el mismo medio de pago original',
       refundProcessingTime: '10 días hábiles',
       returnShippingResponsibility: 'case_by_case',
-      returnRequestChannel: 'thechief@dev-flow.duckdns.org',
+      returnRequestChannel: 'legal@autopost.example.com',
       nonReturnableItems: ['Productos personalizados o hechos a medida'],
       digitalGoodsFinal: false,
       damagedItemsProcess: 'Si el producto llega dañado, incorrecto o con fallas, pedimos fotos y datos del pedido.'
@@ -594,14 +678,14 @@ function baseDisclaimerInput() {
     documentType: 'disclaimer',
     business: {
       name: 'AutoPost CLI Operator',
-      websiteUrl: 'https://dev-flow.duckdns.org/',
+      websiteUrl: 'https://autopost.example.com/',
       country: 'Argentina',
       address: 'Adolfo Alsina 3135, B1849, Buenos Aires, Argentina'
     },
     contact: {
-      email: 'thechief@dev-flow.duckdns.org',
+      email: 'legal@autopost.example.com',
       phone: '+5491123317940',
-      pageUrl: 'https://dev-flow.duckdns.org/contacto'
+      pageUrl: 'https://autopost.example.com/contacto'
     },
     disclaimer: {
       categories: ['errors_omissions', 'external_links', 'own_risk', 'product_reviews'],

@@ -1,12 +1,12 @@
 # Privacy Policy Generator
 
-CLI-first and web-enabled generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, automated tests, and GitHub Pages publishing support.
+CLI-first and web-enabled generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, security policies, and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, automated tests, and GitHub Pages publishing support.
 
 ## Scope
 
 This repo now supports two delivery modes:
 
-- terminal-first generators for privacy, terms, cookies, return/refund, disclaimers, and deletion-instructions documents
+- terminal-first generators for privacy, terms, cookies, return/refund, disclaimers, security-policy, and deletion-instructions documents
 - a client-side static web app that runs fully in the browser and can be deployed to GitHub Pages
 
 ## Features
@@ -236,6 +236,7 @@ but not as a full GitHub publish app.
 - `cookies`: cookie policy generator
 - `refund`: return and refund policy generator
 - `disclaimer`: modular disclaimer generator
+- `security`: security policy and responsible disclosure generator
 
 ## Supported Inputs
 
@@ -351,6 +352,12 @@ Validate disclaimer:
 privacy-policy validate --document disclaimer --input ./examples/disclaimer-meta-content.json
 ```
 
+Validate security policy:
+
+```bash
+privacy-policy validate --document security --input ./examples/security-disclosure.json
+```
+
 Explain which sections were included:
 
 ```bash
@@ -387,6 +394,12 @@ Generate disclaimer in Markdown:
 privacy-policy generate --document disclaimer --input ./examples/disclaimer-meta-content.json --format markdown
 ```
 
+Generate security policy in Markdown:
+
+```bash
+privacy-policy generate --document security --input ./examples/security-disclosure.json --format markdown
+```
+
 Publish directly and return the final public URL:
 
 ```bash
@@ -407,6 +420,7 @@ If you omit `--publish-dir`, the CLI defaults to generic local directories such 
 ./public/cookies
 ./public/refunds
 ./public/disclaimer
+./public/security
 ```
 
 Generate Markdown:
@@ -480,6 +494,16 @@ privacy-policy publish \
   --publish-dir ./public/disclaimer
 ```
 
+Generate and publish security policy:
+
+```bash
+privacy-policy publish \
+  --document security \
+  --input ./examples/security-disclosure.json \
+  --base-url https://example.com/security \
+  --publish-dir ./public/security
+```
+
 ## Input Format
 
 ```json
@@ -515,7 +539,7 @@ privacy-policy publish \
 You can still use JSON files directly, but the intended terminal workflow is now:
 
 1. run `privacy-policy`
-2. choose whether you want `privacy`, `terms`, `cookies`, `refund`, `disclaimer`, or `deletion`
+2. choose whether you want `privacy`, `terms`, `cookies`, `refund`, `disclaimer`, `security`, or `deletion`
 3. answer the wizard questions
 4. choose output language and output format
 5. optionally save both the generated document and the JSON input
@@ -554,6 +578,16 @@ For `disclaimer`, the wizard asks specifically about:
 - review methodology or affiliate disclosure
 - use-at-your-own-risk wording
 
+For `security`, the wizard asks specifically about:
+
+- security reporting channels
+- disclosure scope and covered assets
+- safe harbor and good-faith language
+- what testing is allowed or prohibited
+- acknowledgement and status-update timing
+- coordinated disclosure and bug bounty notes
+- optional summary of security practices
+
 For `terms`, the wizard opens separate sections for:
 
 - service description
@@ -591,6 +625,7 @@ Current test coverage checks:
 - terms generation covers payment, refund, and dispute sections
 - refund generation covers return windows, exceptions, and refund timing
 - disclaimer generation covers modular warnings for links, reviews, risks, and informational content
+- security generation covers reporting channels, safe harbor, disclosure timing, and optional security-practices summaries
 - deletion generation covers request channels, deletion scope, and Meta-connected account guidance
 - validation reports missing required fields
 
@@ -608,12 +643,14 @@ examples/deletion-ar-meta.json
 examples/cookies-ar-meta.json
 examples/refund-ar-ecommerce.json
 examples/disclaimer-meta-content.json
+examples/security-disclosure.json
 js/generator.js
 js/terms-generator.js
 js/deletion-generator.js
 js/cookies-generator.js
 js/refund-generator.js
 js/disclaimer-generator.js
+js/security-generator.js
 tests/generator.test.js
 package.json
 ```

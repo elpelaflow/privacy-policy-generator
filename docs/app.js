@@ -218,6 +218,48 @@ function buildDocuments() {
       };
     }
   },
+  security: {
+    label: 'Política de seguridad',
+    description: 'Disclosure responsable, safe harbor, alcance técnico, tiempos de respuesta y prácticas mínimas de seguridad.',
+    basePath: 'security',
+    generator: () => new globalThis.LegalGenerators.SecurityPolicyGenerator(),
+    sections: [
+      { title: 'Negocio', description: 'Identidad del negocio y activo principal.', fields: commonBusinessFields('saas') },
+      { title: 'Contacto', description: 'Canales para recibir reportes de seguridad.', fields: commonContactFields() },
+      {
+        title: 'Disclosure y seguridad',
+        description: 'Canales de reporte, alcance, reglas de testing, tiempos de respuesta y bounty opcional.',
+        fields: [
+          selectField('security.reportChannel', 'Canal de reporte', SECURITY_REPORT_CHANNELS, 'both'),
+          textField('security.reportEmail', 'Email de seguridad', ''),
+          textField('security.reportUrl', 'URL de reporte o formulario', ''),
+          checkboxField('security.scope', 'Alcance', SECURITY_SCOPE, ['web_application', 'api']),
+          booleanField('security.safeHarborOffered', 'Incluir safe harbor o buena fe', 'Aclara que la investigación responsable y dentro del alcance será tratada como autorizada.', true),
+          booleanField('security.automatedTestingAllowed', 'Permitir pruebas automatizadas de bajo volumen', 'Marcá esto sólo si aceptás escaneos o requests automatizados que no degraden el servicio.', false),
+          booleanField('security.denialOfServiceTestingAllowed', 'Permitir pruebas coordinadas de carga o DoS', 'No lo actives salvo que realmente quieras admitirlo con coordinación previa.', false),
+          booleanField('security.socialEngineeringAllowed', 'Permitir ingeniería social coordinada', 'No lo actives salvo que aceptes phishing o pruebas similares aprobadas de antemano.', false),
+          checkboxField('security.reportRequirements', 'Qué debe incluir el reporte', SECURITY_REPORT_REQUIREMENTS, ['Descripción clara del hallazgo y del impacto esperado', 'Pasos de reproducción o prueba de concepto razonable', 'Activos, URLs, endpoints o cuentas involucradas', 'Información de contacto para seguimiento']),
+          textField('security.acknowledgementTime', 'Tiempo para acusar recibo', '3 días hábiles'),
+          textField('security.statusUpdateTime', 'Tiempo para compartir actualizaciones', '10 días hábiles'),
+          selectField('security.disclosurePreference', 'Preferencia de disclosure', SECURITY_DISCLOSURE, 'coordinated'),
+          booleanField('security.bugBountyOffered', 'Ofrecés bug bounty o recompensas', 'Activá esto si existe recompensa, bounty o reconocimiento para algunos reportes.', false),
+          textareaField('security.bugBountyNotes', 'Nota sobre bounty o reconocimiento', ''),
+          textareaField('security.remediationGuidance', 'Nota sobre remediación o coordinación', 'Priorizamos los reportes según severidad, impacto y complejidad, y podemos pedir tiempo razonable para investigar y mitigar antes de cualquier disclosure público.'),
+          textareaField('security.securityPracticesSummary', 'Resumen opcional de prácticas de seguridad', 'Aplicamos controles de acceso, registros operativos, revisión de dependencias y medidas razonables de hardening sobre infraestructura y aplicaciones expuestas.')
+        ]
+      },
+      outputFields()
+    ],
+    buildInput(values) {
+      return {
+        documentType: 'security',
+        business: values.business,
+        contact: values.contact,
+        security: values.security,
+        settings: values.settings
+      };
+    }
+  },
   deletion: {
     label: 'Instrucciones de eliminación de datos',
     description: 'Canal de eliminación, alcance, excepciones de retención y guía para cuentas conectadas con Meta.',
@@ -487,6 +529,14 @@ function createDefaults(type) {
       ...common,
       business: { ...common.business, type: 'saas' },
       disclaimer: {}
+    };
+  }
+
+  if (type === 'security') {
+    return {
+      ...common,
+      business: { ...common.business, type: 'saas' },
+      security: {}
     };
   }
 
@@ -1097,6 +1147,30 @@ const COOKIE_CONSENT = [
   { value: 'banner', label: 'Banner / preferences center' },
   { value: 'implied', label: 'Implied by continued use' },
   { value: 'essential_only', label: 'Essential only' }
+];
+const SECURITY_REPORT_CHANNELS = [
+  { value: 'email', label: 'Email' },
+  { value: 'form', label: 'Formulario / página' },
+  { value: 'both', label: 'Email y página' }
+];
+const SECURITY_SCOPE = [
+  { value: 'web_application', label: 'Aplicación web', description: 'Frontend, panel y páginas públicas.' },
+  { value: 'api', label: 'API / endpoints', description: 'APIs, webhooks o endpoints para desarrolladores.' },
+  { value: 'mobile_app', label: 'App móvil', description: 'Aplicaciones iOS, Android o wrappers móviles.' },
+  { value: 'infrastructure', label: 'Infraestructura', description: 'Hosting, redes, storage y componentes de soporte.' },
+  { value: 'integrations', label: 'Integraciones', description: 'Servicios conectados y terceros integrados.' },
+  { value: 'content', label: 'Contenido / assets', description: 'Documentación, archivos estáticos o contenido sensible para seguridad.' }
+];
+const SECURITY_DISCLOSURE = [
+  { value: 'coordinated', label: 'Disclosure coordinado' },
+  { value: 'researcher_choice', label: 'Caso por caso' },
+  { value: 'silent_fix', label: 'Corregir antes de divulgar' }
+];
+const SECURITY_REPORT_REQUIREMENTS = [
+  { value: 'Descripción clara del hallazgo y del impacto esperado', label: 'Descripción e impacto', description: 'Qué pasa y por qué importa.' },
+  { value: 'Pasos de reproducción o prueba de concepto razonable', label: 'Reproducción o PoC', description: 'Cómo reproducir el hallazgo sin exagerar riesgo.' },
+  { value: 'Activos, URLs, endpoints o cuentas involucradas', label: 'Activos afectados', description: 'Qué activos o superficies están involucrados.' },
+  { value: 'Información de contacto para seguimiento', label: 'Contacto de seguimiento', description: 'Cómo continuar la coordinación del caso.' }
 ];
 const DISCLAIMER_TYPES = [
   { value: 'medical', label: 'Medical information', description: 'Health or medical content.' },
