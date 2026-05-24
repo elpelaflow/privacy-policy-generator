@@ -46,6 +46,7 @@ class DataDeletionGenerator {
       warnings: normalized.warnings,
       language,
       title: language === 'es' ? 'Instrucciones para Eliminación de Datos' : 'Data Deletion Instructions',
+      metadata: this.buildHtmlMetadata(normalized.data),
       sections: []
     };
     const decisionLog = [];
@@ -291,6 +292,7 @@ class DataDeletionGenerator {
       .replaceAll('&', '&amp;')
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;');
+    const structuredData = this.buildStructuredData(document);
     const body = document.sections.map((section) => {
       const paragraphs = section.paragraphs.map((paragraph) => this.paragraphToHtml(paragraph, escape)).join('\n');
       return `<section>\n<h2>${escape(section.title)}</h2>\n${paragraphs}\n</section>`;
@@ -303,6 +305,7 @@ class DataDeletionGenerator {
       '  <meta charset="utf-8">',
       '  <meta name="viewport" content="width=device-width, initial-scale=1">',
       `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
+      `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd(structuredData)}</script>` : ''}`,
       '</head>',
       '<body>',
       `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
@@ -337,6 +340,60 @@ class DataDeletionGenerator {
   arrayValue(value) {
     return Array.isArray(value) ? value.filter(Boolean) : [];
   }
+
+  buildHtmlMetadata(data) {
+    return {
+      websiteUrl: this.stringValue(data.business?.websiteUrl),
+      country: this.stringValue(data.business?.country),
+      contactEmail: this.stringValue(data.contact?.email || data.deletion?.requestEmail),
+      contactPageUrl: this.stringValue(data.contact?.pageUrl || data.deletion?.requestUrl)
+    };
+  }
+
+  buildStructuredData(document) {
+    return buildStructuredDataDocument(document);
+  }
+}
+
+function buildStructuredDataDocument(document) {
+  const metadata = document.metadata || {};
+  const canonicalUrl = metadata.websiteUrl || metadata.contactPageUrl;
+  if (!canonicalUrl) return null;
+
+  const organization = {
+    '@type': 'Organization',
+    name: document.businessName
+  };
+  if (metadata.websiteUrl) organization.url = metadata.websiteUrl;
+  if (metadata.contactEmail) organization.email = metadata.contactEmail;
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        name: `${document.title} - ${document.businessName}`,
+        url: canonicalUrl,
+        inLanguage: document.language === 'es' ? 'es' : 'en',
+        dateModified: document.effectiveDate,
+        lastReviewed: document.effectiveDate,
+        about: {
+          '@type': 'Thing',
+          name: document.title
+        },
+        publisher: organization,
+        accountablePerson: organization
+      },
+      organization
+    ]
+  };
+}
+
+function serializeJsonLd(value) {
+  return JSON.stringify(value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
 }
 
 module.exports = DataDeletionGenerator;

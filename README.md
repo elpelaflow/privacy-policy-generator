@@ -19,7 +19,7 @@ This repo now supports two delivery modes:
 - optional hashed public URL generation for HTML published through hosting you already have
 - GitHub OAuth publish flow for user-owned GitHub Pages repos
 - safe publish paths under `legal/<document-type>/...` to avoid touching a user's site root
-- privacy-policy HTML now embeds internal `JSON-LD` metadata to describe the page and responsible organization
+- generated legal-document HTML can embed internal `JSON-LD` metadata to describe the page and responsible organization
 - validation errors and draft warnings
 - explainable `decisionLog` output
 - HTML, Markdown, and plain text generation
@@ -50,7 +50,7 @@ What it does not do yet:
 
 ## Structured Data Note
 
-The generated privacy-policy HTML can now include embedded `JSON-LD` metadata using Schema.org types such as `WebPage` and `Organization`.
+Generated legal-document HTML can include embedded `JSON-LD` metadata using Schema.org types such as `WebPage` and `Organization`.
 
 Important clarification:
 

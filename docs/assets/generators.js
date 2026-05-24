@@ -658,6 +658,7 @@
             warnings: normalized.warnings,
             language,
             title: language === "es" ? "T\xE9rminos y Condiciones" : "Terms and Conditions",
+            metadata: this.buildHtmlMetadata(normalized.data),
             sections: []
           };
           const decisionLog = [];
@@ -1073,6 +1074,7 @@
         }
         formatAsHTML(document) {
           const escape = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+          const structuredData = this.buildStructuredData(document);
           const body = document.sections.map((section) => {
             const paragraphs = section.paragraphs.map((paragraph) => this.paragraphToHtml(paragraph, escape)).join("\n");
             const subsections = section.subsections.map((subsection) => {
@@ -1093,6 +1095,7 @@ ${subsections}
             '  <meta charset="utf-8">',
             '  <meta name="viewport" content="width=device-width, initial-scale=1">',
             `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
+            `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd2(structuredData)}<\/script>` : ""}`,
             "</head>",
             "<body>",
             `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
@@ -1118,6 +1121,17 @@ ${subsections}
         isArgentina(data) {
           return data.operations.primaryJurisdiction === "ar" || String(data.business.country || "").toLowerCase().includes("argentina");
         }
+        buildHtmlMetadata(data) {
+          return {
+            websiteUrl: this.stringValue(data.business?.websiteUrl),
+            country: this.stringValue(data.business?.country),
+            contactEmail: this.stringValue(data.contact?.email),
+            contactPageUrl: this.stringValue(data.contact?.pageUrl)
+          };
+        }
+        buildStructuredData(document) {
+          return buildStructuredDataDocument(document);
+        }
         paragraphToHtml(paragraph, escape) {
           if (paragraph.startsWith("- ")) {
             const items = paragraph.split("\n").filter((line) => line.startsWith("- ")).map((line) => `<li>${escape(line.slice(2))}</li>`).join("");
@@ -1126,6 +1140,40 @@ ${subsections}
           return `<p>${escape(paragraph).replaceAll("\n", "<br>")}</p>`;
         }
       };
+      function buildStructuredDataDocument(document) {
+        const metadata = document.metadata || {};
+        const canonicalUrl = metadata.websiteUrl || metadata.contactPageUrl;
+        if (!canonicalUrl) return null;
+        const organization = {
+          "@type": "Organization",
+          name: document.businessName
+        };
+        if (metadata.websiteUrl) organization.url = metadata.websiteUrl;
+        if (metadata.contactEmail) organization.email = metadata.contactEmail;
+        return {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              name: `${document.title} - ${document.businessName}`,
+              url: canonicalUrl,
+              inLanguage: document.language === "es" ? "es" : "en",
+              dateModified: document.effectiveDate,
+              lastReviewed: document.effectiveDate,
+              about: {
+                "@type": "Thing",
+                name: document.title
+              },
+              publisher: organization,
+              accountablePerson: organization
+            },
+            organization
+          ]
+        };
+      }
+      function serializeJsonLd2(value) {
+        return JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
+      }
       module2.exports = TermsGenerator;
     }
   });
@@ -1178,6 +1226,7 @@ ${subsections}
             warnings: normalized.warnings,
             language,
             title: language === "es" ? "Instrucciones para Eliminaci\xF3n de Datos" : "Data Deletion Instructions",
+            metadata: this.buildHtmlMetadata(normalized.data),
             sections: []
           };
           const decisionLog = [];
@@ -1393,6 +1442,7 @@ ${this.listLines(data.deletion.retentionExceptions)}`;
         }
         formatAsHTML(document) {
           const escape = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+          const structuredData = this.buildStructuredData(document);
           const body = document.sections.map((section) => {
             const paragraphs = section.paragraphs.map((paragraph) => this.paragraphToHtml(paragraph, escape)).join("\n");
             return `<section>
@@ -1407,6 +1457,7 @@ ${paragraphs}
             '  <meta charset="utf-8">',
             '  <meta name="viewport" content="width=device-width, initial-scale=1">',
             `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
+            `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd2(structuredData)}<\/script>` : ""}`,
             "</head>",
             "<body>",
             `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
@@ -1434,7 +1485,52 @@ ${paragraphs}
         arrayValue(value) {
           return Array.isArray(value) ? value.filter(Boolean) : [];
         }
+        buildHtmlMetadata(data) {
+          return {
+            websiteUrl: this.stringValue(data.business?.websiteUrl),
+            country: this.stringValue(data.business?.country),
+            contactEmail: this.stringValue(data.contact?.email || data.deletion?.requestEmail),
+            contactPageUrl: this.stringValue(data.contact?.pageUrl || data.deletion?.requestUrl)
+          };
+        }
+        buildStructuredData(document) {
+          return buildStructuredDataDocument(document);
+        }
       };
+      function buildStructuredDataDocument(document) {
+        const metadata = document.metadata || {};
+        const canonicalUrl = metadata.websiteUrl || metadata.contactPageUrl;
+        if (!canonicalUrl) return null;
+        const organization = {
+          "@type": "Organization",
+          name: document.businessName
+        };
+        if (metadata.websiteUrl) organization.url = metadata.websiteUrl;
+        if (metadata.contactEmail) organization.email = metadata.contactEmail;
+        return {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              name: `${document.title} - ${document.businessName}`,
+              url: canonicalUrl,
+              inLanguage: document.language === "es" ? "es" : "en",
+              dateModified: document.effectiveDate,
+              lastReviewed: document.effectiveDate,
+              about: {
+                "@type": "Thing",
+                name: document.title
+              },
+              publisher: organization,
+              accountablePerson: organization
+            },
+            organization
+          ]
+        };
+      }
+      function serializeJsonLd2(value) {
+        return JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
+      }
       module2.exports = DataDeletionGenerator;
     }
   });
@@ -1487,6 +1583,7 @@ ${paragraphs}
             warnings: normalized.warnings,
             language,
             title: language === "es" ? "Pol\xEDtica de Cookies" : "Cookie Policy",
+            metadata: this.buildHtmlMetadata(normalized.data),
             sections: []
           };
           const decisionLog = [];
@@ -1754,6 +1851,7 @@ ${this.listLines(labels)}`;
         }
         formatAsHTML(document) {
           const escape = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+          const structuredData = this.buildStructuredData(document);
           const body = document.sections.map((section) => {
             const paragraphs = section.paragraphs.map((paragraph) => this.paragraphToHtml(paragraph, escape)).join("\n");
             return `<section>
@@ -1768,6 +1866,7 @@ ${paragraphs}
             '  <meta charset="utf-8">',
             '  <meta name="viewport" content="width=device-width, initial-scale=1">',
             `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
+            `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd2(structuredData)}<\/script>` : ""}`,
             "</head>",
             "<body>",
             `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
@@ -1798,7 +1897,52 @@ ${paragraphs}
         isArgentina(data) {
           return data.operations.primaryJurisdiction === "ar" || String(data.business.country || "").toLowerCase().includes("argentina");
         }
+        buildHtmlMetadata(data) {
+          return {
+            websiteUrl: this.stringValue(data.business?.websiteUrl),
+            country: this.stringValue(data.business?.country),
+            contactEmail: this.stringValue(data.contact?.email),
+            contactPageUrl: this.stringValue(data.contact?.pageUrl || data.cookies?.managementUrl)
+          };
+        }
+        buildStructuredData(document) {
+          return buildStructuredDataDocument(document);
+        }
       };
+      function buildStructuredDataDocument(document) {
+        const metadata = document.metadata || {};
+        const canonicalUrl = metadata.websiteUrl || metadata.contactPageUrl;
+        if (!canonicalUrl) return null;
+        const organization = {
+          "@type": "Organization",
+          name: document.businessName
+        };
+        if (metadata.websiteUrl) organization.url = metadata.websiteUrl;
+        if (metadata.contactEmail) organization.email = metadata.contactEmail;
+        return {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              name: `${document.title} - ${document.businessName}`,
+              url: canonicalUrl,
+              inLanguage: document.language === "es" ? "es" : "en",
+              dateModified: document.effectiveDate,
+              lastReviewed: document.effectiveDate,
+              about: {
+                "@type": "Thing",
+                name: document.title
+              },
+              publisher: organization,
+              accountablePerson: organization
+            },
+            organization
+          ]
+        };
+      }
+      function serializeJsonLd2(value) {
+        return JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
+      }
       module2.exports = CookiesPolicyGenerator;
     }
   });
@@ -1851,6 +1995,7 @@ ${paragraphs}
             warnings: normalized.warnings,
             language,
             title: language === "es" ? "Pol\xEDtica de Devoluciones y Reembolsos" : "Return & Refund Policy",
+            metadata: this.buildHtmlMetadata(normalized.data),
             sections: []
           };
           const decisionLog = [];
@@ -2116,6 +2261,7 @@ ${this.listLines(data.refund.nonReturnableItems)}`;
         }
         formatAsHTML(document) {
           const escape = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+          const structuredData = this.buildStructuredData(document);
           const body = document.sections.map((section) => {
             const paragraphs = section.paragraphs.map((paragraph) => this.paragraphToHtml(paragraph, escape)).join("\n");
             return `<section>
@@ -2130,6 +2276,7 @@ ${paragraphs}
             '  <meta charset="utf-8">',
             '  <meta name="viewport" content="width=device-width, initial-scale=1">',
             `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
+            `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd2(structuredData)}<\/script>` : ""}`,
             "</head>",
             "<body>",
             `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
@@ -2163,7 +2310,52 @@ ${paragraphs}
         isArgentina(data) {
           return String(data.business.country || "").toLowerCase().includes("argentina");
         }
+        buildHtmlMetadata(data) {
+          return {
+            websiteUrl: this.stringValue(data.business?.websiteUrl),
+            country: this.stringValue(data.business?.country),
+            contactEmail: this.stringValue(data.contact?.email),
+            contactPageUrl: this.stringValue(data.contact?.pageUrl)
+          };
+        }
+        buildStructuredData(document) {
+          return buildStructuredDataDocument(document);
+        }
       };
+      function buildStructuredDataDocument(document) {
+        const metadata = document.metadata || {};
+        const canonicalUrl = metadata.websiteUrl || metadata.contactPageUrl;
+        if (!canonicalUrl) return null;
+        const organization = {
+          "@type": "Organization",
+          name: document.businessName
+        };
+        if (metadata.websiteUrl) organization.url = metadata.websiteUrl;
+        if (metadata.contactEmail) organization.email = metadata.contactEmail;
+        return {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              name: `${document.title} - ${document.businessName}`,
+              url: canonicalUrl,
+              inLanguage: document.language === "es" ? "es" : "en",
+              dateModified: document.effectiveDate,
+              lastReviewed: document.effectiveDate,
+              about: {
+                "@type": "Thing",
+                name: document.title
+              },
+              publisher: organization,
+              accountablePerson: organization
+            },
+            organization
+          ]
+        };
+      }
+      function serializeJsonLd2(value) {
+        return JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
+      }
       module2.exports = ReturnRefundPolicyGenerator;
     }
   });
@@ -2216,6 +2408,7 @@ ${paragraphs}
             warnings: normalized.warnings,
             language,
             title: language === "es" ? "Descargo de Responsabilidad" : "Disclaimer",
+            metadata: this.buildHtmlMetadata(normalized.data),
             sections: []
           };
           const decisionLog = [];
@@ -2417,6 +2610,7 @@ ${paragraphs}
         }
         formatAsHTML(document) {
           const escape = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+          const structuredData = this.buildStructuredData(document);
           const body = document.sections.map((section) => {
             const paragraphs = section.paragraphs.map((paragraph) => `<p>${escape(paragraph).replaceAll("\n", "<br>")}</p>`).join("\n");
             return `<section>
@@ -2431,6 +2625,7 @@ ${paragraphs}
             '  <meta charset="utf-8">',
             '  <meta name="viewport" content="width=device-width, initial-scale=1">',
             `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
+            `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd2(structuredData)}<\/script>` : ""}`,
             "</head>",
             "<body>",
             `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
@@ -2451,7 +2646,52 @@ ${paragraphs}
         arrayValue(value) {
           return Array.isArray(value) ? value.filter(Boolean) : [];
         }
+        buildHtmlMetadata(data) {
+          return {
+            websiteUrl: this.stringValue(data.business?.websiteUrl),
+            country: this.stringValue(data.business?.country),
+            contactEmail: this.stringValue(data.contact?.email),
+            contactPageUrl: this.stringValue(data.contact?.pageUrl)
+          };
+        }
+        buildStructuredData(document) {
+          return buildStructuredDataDocument(document);
+        }
       };
+      function buildStructuredDataDocument(document) {
+        const metadata = document.metadata || {};
+        const canonicalUrl = metadata.websiteUrl || metadata.contactPageUrl;
+        if (!canonicalUrl) return null;
+        const organization = {
+          "@type": "Organization",
+          name: document.businessName
+        };
+        if (metadata.websiteUrl) organization.url = metadata.websiteUrl;
+        if (metadata.contactEmail) organization.email = metadata.contactEmail;
+        return {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              name: `${document.title} - ${document.businessName}`,
+              url: canonicalUrl,
+              inLanguage: document.language === "es" ? "es" : "en",
+              dateModified: document.effectiveDate,
+              lastReviewed: document.effectiveDate,
+              about: {
+                "@type": "Thing",
+                name: document.title
+              },
+              publisher: organization,
+              accountablePerson: organization
+            },
+            organization
+          ]
+        };
+      }
+      function serializeJsonLd2(value) {
+        return JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
+      }
       module2.exports = DisclaimerGenerator;
     }
   });
@@ -2504,6 +2744,7 @@ ${paragraphs}
             warnings: normalized.warnings,
             language,
             title: language === "es" ? "Pol\xEDtica de Seguridad" : "Security Policy",
+            metadata: this.buildHtmlMetadata(normalized.data),
             sections: []
           };
           const decisionLog = [];
@@ -2780,6 +3021,7 @@ ${this.listLines(data.security.scope.map((value) => this.scopeLabel(value)))}`;
         }
         formatAsHTML(document) {
           const escape = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+          const structuredData = this.buildStructuredData(document);
           const body = document.sections.map((section) => {
             const paragraphs = section.paragraphs.map((paragraph) => `<p>${escape(paragraph).replaceAll("\n", "<br>")}</p>`).join("\n");
             return `<section>
@@ -2794,6 +3036,7 @@ ${paragraphs}
             '  <meta charset="utf-8">',
             '  <meta name="viewport" content="width=device-width, initial-scale=1">',
             `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
+            `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd2(structuredData)}<\/script>` : ""}`,
             '  <meta name="legal-document-type" content="security">',
             "</head>",
             "<body>",
@@ -2820,7 +3063,52 @@ ${paragraphs}
           if (value == null) return fallback;
           return Boolean(value);
         }
+        buildHtmlMetadata(data) {
+          return {
+            websiteUrl: this.stringValue(data.business?.websiteUrl),
+            country: this.stringValue(data.business?.country),
+            contactEmail: this.stringValue(data.security?.reportEmail || data.contact?.email),
+            contactPageUrl: this.stringValue(data.security?.reportUrl || data.contact?.pageUrl)
+          };
+        }
+        buildStructuredData(document) {
+          return buildStructuredDataDocument(document);
+        }
       };
+      function buildStructuredDataDocument(document) {
+        const metadata = document.metadata || {};
+        const canonicalUrl = metadata.websiteUrl || metadata.contactPageUrl;
+        if (!canonicalUrl) return null;
+        const organization = {
+          "@type": "Organization",
+          name: document.businessName
+        };
+        if (metadata.websiteUrl) organization.url = metadata.websiteUrl;
+        if (metadata.contactEmail) organization.email = metadata.contactEmail;
+        return {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              name: `${document.title} - ${document.businessName}`,
+              url: canonicalUrl,
+              inLanguage: document.language === "es" ? "es" : "en",
+              dateModified: document.effectiveDate,
+              lastReviewed: document.effectiveDate,
+              about: {
+                "@type": "Thing",
+                name: document.title
+              },
+              publisher: organization,
+              accountablePerson: organization
+            },
+            organization
+          ]
+        };
+      }
+      function serializeJsonLd2(value) {
+        return JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
+      }
       module2.exports = SecurityPolicyGenerator;
     }
   });

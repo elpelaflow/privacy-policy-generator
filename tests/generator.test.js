@@ -290,6 +290,14 @@ test('security policy includes disclosure and reporting sections', async () => {
   assert.match(result.markdown, /Divulgación, Remediación y Reconocimiento/);
 });
 
+test('security html includes internal JSON-LD metadata', async () => {
+  const generator = new SecurityPolicyGenerator();
+  const result = await generator.generate(baseSecurityInput());
+
+  assert.match(result.html, /<script type="application\/ld\+json">/);
+  assert.match(result.html, /"@type":"WebPage"/);
+});
+
 test('security validation requires a real reporting channel', async () => {
   const generator = new SecurityPolicyGenerator();
   const input = baseSecurityInput();
@@ -384,6 +392,14 @@ test('terms generator creates spanish ecommerce terms with payment and dispute s
   assert.match(result.markdown, /Tribunales competentes de la Ciudad de Buenos Aires/);
   assert.match(result.markdown, /Reembolsos, Cambios y Devoluciones/);
   assert.match(result.markdown, /Aviso de Consumo en Argentina|defensa del consumidor|derecho de arrepentimiento/i);
+});
+
+test('terms html includes internal JSON-LD metadata', async () => {
+  const generator = new TermsGenerator();
+  const result = await generator.generate(baseTermsInput());
+
+  assert.match(result.html, /<script type="application\/ld\+json">/);
+  assert.match(result.html, /"@type":"Organization"/);
 });
 
 test('terms validation blocks missing website and forum', async () => {
@@ -503,6 +519,14 @@ test('deletion generator creates a deletion instructions document with meta sect
   assert.match(result.markdown, /Meta \/ Facebook/);
 });
 
+test('deletion html includes internal JSON-LD metadata', async () => {
+  const generator = new DataDeletionGenerator();
+  const result = await generator.generate(baseDeletionInput());
+
+  assert.match(result.html, /<script type="application\/ld\+json">/);
+  assert.match(result.html, /"@type":"WebPage"/);
+});
+
 test('deletion validation blocks missing request contact', async () => {
   const generator = new DataDeletionGenerator();
   const input = baseDeletionInput();
@@ -559,6 +583,14 @@ test('cookies generator creates a cookie policy with categories and controls sec
   assert.match(result.markdown, /Consentimiento y Controles de Cookies/);
   assert.match(result.markdown, /publicidad/i);
   assert.match(result.markdown, /Aviso de Cookies para Argentina|estrictamente necesarias/i);
+});
+
+test('cookies html includes internal JSON-LD metadata', async () => {
+  const generator = new CookiesPolicyGenerator();
+  const result = await generator.generate(baseCookiesInput());
+
+  assert.match(result.html, /<script type="application\/ld\+json">/);
+  assert.match(result.html, /"@type":"Organization"/);
 });
 
 test('cookies validation blocks missing website and warns on missing management details', async () => {
@@ -646,6 +678,14 @@ test('refund generator creates a spanish return and refund policy with timing an
   assert.match(result.markdown, /derecho de arrepentimiento|venta a distancia|Consumo y Venta a Distancia/i);
 });
 
+test('refund html includes internal JSON-LD metadata', async () => {
+  const generator = new ReturnRefundPolicyGenerator();
+  const result = await generator.generate(baseRefundInput());
+
+  assert.match(result.html, /<script type="application\/ld\+json">/);
+  assert.match(result.html, /"@type":"WebPage"/);
+});
+
 test('refund validation blocks missing website and warns on missing process details', async () => {
   const generator = new ReturnRefundPolicyGenerator();
   const input = baseRefundInput();
@@ -722,6 +762,14 @@ test('disclaimer generator creates modular disclaimer sections', async () => {
   assert.match(result.markdown, /Descargo de Responsabilidad/);
   assert.match(result.markdown, /Errores y Omisiones|enlaces externos|Uso bajo tu Propio Riesgo/i);
   assert.match(result.markdown, /reseñas/i);
+});
+
+test('disclaimer html includes internal JSON-LD metadata', async () => {
+  const generator = new DisclaimerGenerator();
+  const result = await generator.generate(baseDisclaimerInput());
+
+  assert.match(result.html, /<script type="application\/ld\+json">/);
+  assert.match(result.html, /"@type":"Organization"/);
 });
 
 test('disclaimer validation blocks missing website and warns on review methodology gaps', async () => {

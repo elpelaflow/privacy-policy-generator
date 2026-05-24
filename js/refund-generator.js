@@ -46,6 +46,7 @@ class ReturnRefundPolicyGenerator {
       warnings: normalized.warnings,
       language,
       title: language === 'es' ? 'Política de Devoluciones y Reembolsos' : 'Return & Refund Policy',
+      metadata: this.buildHtmlMetadata(normalized.data),
       sections: []
     };
     const decisionLog = [];
@@ -352,6 +353,7 @@ class ReturnRefundPolicyGenerator {
       .replaceAll('&', '&amp;')
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;');
+    const structuredData = this.buildStructuredData(document);
     const body = document.sections.map((section) => {
       const paragraphs = section.paragraphs.map((paragraph) => this.paragraphToHtml(paragraph, escape)).join('\n');
       return `<section>\n<h2>${escape(section.title)}</h2>\n${paragraphs}\n</section>`;
@@ -364,6 +366,7 @@ class ReturnRefundPolicyGenerator {
       '  <meta charset="utf-8">',
       '  <meta name="viewport" content="width=device-width, initial-scale=1">',
       `  <title>${escape(document.title)} - ${escape(document.businessName)}</title>`,
+      `  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd(structuredData)}</script>` : ''}`,
       '</head>',
       '<body>',
       `  <h1>${escape(document.title)} - ${escape(document.businessName)}</h1>`,
@@ -406,6 +409,60 @@ class ReturnRefundPolicyGenerator {
   isArgentina(data) {
     return String(data.business.country || '').toLowerCase().includes('argentina');
   }
+
+  buildHtmlMetadata(data) {
+    return {
+      websiteUrl: this.stringValue(data.business?.websiteUrl),
+      country: this.stringValue(data.business?.country),
+      contactEmail: this.stringValue(data.contact?.email),
+      contactPageUrl: this.stringValue(data.contact?.pageUrl)
+    };
+  }
+
+  buildStructuredData(document) {
+    return buildStructuredDataDocument(document);
+  }
+}
+
+function buildStructuredDataDocument(document) {
+  const metadata = document.metadata || {};
+  const canonicalUrl = metadata.websiteUrl || metadata.contactPageUrl;
+  if (!canonicalUrl) return null;
+
+  const organization = {
+    '@type': 'Organization',
+    name: document.businessName
+  };
+  if (metadata.websiteUrl) organization.url = metadata.websiteUrl;
+  if (metadata.contactEmail) organization.email = metadata.contactEmail;
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        name: `${document.title} - ${document.businessName}`,
+        url: canonicalUrl,
+        inLanguage: document.language === 'es' ? 'es' : 'en',
+        dateModified: document.effectiveDate,
+        lastReviewed: document.effectiveDate,
+        about: {
+          '@type': 'Thing',
+          name: document.title
+        },
+        publisher: organization,
+        accountablePerson: organization
+      },
+      organization
+    ]
+  };
+}
+
+function serializeJsonLd(value) {
+  return JSON.stringify(value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
 }
 
 module.exports = ReturnRefundPolicyGenerator;
