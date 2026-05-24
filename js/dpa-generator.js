@@ -132,7 +132,12 @@ class DataProcessingAgreementGenerator {
           transfersNeedMechanism: 'Si hay transferencias internacionales, conviene aclarar el mecanismo contractual o legal utilizado.',
           sccNeedsTransferMechanism: 'Si marcás que puede requerirse SCC, conviene indicar el mecanismo de transferencias o el proceso contractual asociado.',
           missingIncidentTiming: 'Conviene indicar en cuánto tiempo se notifican incidentes o brechas relevantes.',
-          missingAuditRights: 'Conviene aclarar cómo se ejercen derechos de auditoría o acceso a información sobre el tratamiento.'
+          missingAuditRights: 'Conviene aclarar cómo se ejercen derechos de auditoría o acceso a información sobre el tratamiento.',
+          contradictionSubprocessorMethodWithoutSubprocessors: 'Completaste una metodología de subprocessors, pero también marcaste que no usás subencargados. Revisá cuál de las dos cosas refleja tu operación real.',
+          contradictionTransferMechanismWithoutTransfers: 'Indicás un mecanismo de transferencias, pero también marcaste que no hay transferencias internacionales. Revisá si realmente existe acceso, hosting o soporte transfronterizo.',
+          contradictionSccWithoutTransfers: 'Marcaste que podrían requerirse SCC o cláusulas equivalentes, pero también marcaste que no hay transferencias internacionales. Conviene revisar si el flujo realmente involucra transferencias o si esa cláusula sobra.',
+          contradictionSccWithoutEuUkScope: 'Marcaste SCC o cláusulas equivalentes, pero no señalaste alcance regulatorio UE/UK. Conviene confirmar si el cliente, los datos o el marco contractual igualmente exigen esas salvaguardas.',
+          contradictionJointControllerTemplate: 'Marcaste que la contraparte actúa como joint controller, pero esta plantilla está orientada principalmente a relaciones controller-processor. Conviene revisión legal específica si realmente hay corresponsabilidad.'
         }
       : {
           missingBusinessName: 'Business or provider name is required.',
@@ -149,7 +154,12 @@ class DataProcessingAgreementGenerator {
           transfersNeedMechanism: 'If international transfers occur, you should explain the contractual or legal transfer mechanism used.',
           sccNeedsTransferMechanism: 'If you flag SCC as potentially required, you should describe the transfer mechanism or related contractual process.',
           missingIncidentTiming: 'You should state how quickly relevant incidents or breaches will be notified.',
-          missingAuditRights: 'You should explain how audit or information rights are exercised under the agreement.'
+          missingAuditRights: 'You should explain how audit or information rights are exercised under the agreement.',
+          contradictionSubprocessorMethodWithoutSubprocessors: 'You filled in a subprocessor methodology, but also marked that no subprocessors are used. Review which statement reflects the real operating model.',
+          contradictionTransferMechanismWithoutTransfers: 'You provided a transfer mechanism, but also marked that no international transfers occur. Review whether cross-border hosting, access, or support actually exists.',
+          contradictionSccWithoutTransfers: 'You flagged SCC or equivalent clauses, but also marked that no international transfers occur. Review whether the flow really involves transfers or whether that clause is unnecessary.',
+          contradictionSccWithoutEuUkScope: 'You flagged SCC or equivalent clauses, but did not mark EU/UK regulatory scope. Confirm whether the customer, data, or contract still requires those safeguards.',
+          contradictionJointControllerTemplate: 'You marked the counterparty as a joint controller, but this template is mainly oriented to controller-processor relationships. Legal review is recommended if joint controllership is real.'
         };
 
     const errors = [];
@@ -170,6 +180,11 @@ class DataProcessingAgreementGenerator {
     if (data.dpa.euSccRequired && !data.dpa.transferMechanism) warnings.push(messages.sccNeedsTransferMechanism);
     if (!data.dpa.breachNotificationTime) warnings.push(messages.missingIncidentTiming);
     if (!data.dpa.auditRights) warnings.push(messages.missingAuditRights);
+    if (!data.dpa.subprocessorsUsed && data.dpa.subprocessorMethodology) warnings.push(messages.contradictionSubprocessorMethodWithoutSubprocessors);
+    if (!data.dpa.internationalTransfers && data.dpa.transferMechanism) warnings.push(messages.contradictionTransferMechanismWithoutTransfers);
+    if (!data.dpa.internationalTransfers && data.dpa.euSccRequired) warnings.push(messages.contradictionSccWithoutTransfers);
+    if (data.dpa.euSccRequired && !data.dpa.regulatoryScope.some((value) => ['eu', 'uk'].includes(value))) warnings.push(messages.contradictionSccWithoutEuUkScope);
+    if (data.dpa.counterpartyRole === 'joint_controller') warnings.push(messages.contradictionJointControllerTemplate);
 
     return { data, errors, warnings };
   }

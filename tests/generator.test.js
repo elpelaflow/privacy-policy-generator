@@ -420,6 +420,23 @@ test('dpa validation requires service description and warns about missing transf
   assert.ok(validation.warnings.some((warning) => /subprocessor/i.test(warning)));
 });
 
+test('dpa validation warns about contradictory transfer and role combinations', async () => {
+  const generator = new DataProcessingAgreementGenerator();
+  const input = baseDpaInput();
+  input.dpa.counterpartyRole = 'joint_controller';
+  input.dpa.regulatoryScope = ['ar'];
+  input.dpa.subprocessorsUsed = false;
+  input.dpa.internationalTransfers = false;
+
+  const validation = await generator.validate(input);
+
+  assert.equal(validation.ok, true);
+  assert.ok(validation.warnings.some((warning) => /joint controller|corresponsabilidad/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /subprocessor/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /scc|cláusulas equivalentes/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /international transfers|transferencias internacionales/i.test(warning)));
+});
+
 function baseAiInput() {
   return {
     documentType: 'ai',
@@ -505,6 +522,28 @@ test('ai policy validation warns about review channel only when automated decisi
 
   assert.equal(validation.ok, true);
   assert.ok(validation.warnings.some((warning) => /review|support|revisión/i.test(warning)));
+});
+
+test('ai policy validation warns about contradictory data-use combinations', async () => {
+  const generator = new AiPolicyGenerator();
+  const input = baseAiInput();
+  input.ai.trainingDataUse = 'no_training';
+  input.ai.modelImprovementUses = ['quality_evaluation'];
+  input.ai.optOutAvailable = false;
+  input.ai.optOutMethod = 'Support ticket.';
+  input.ai.userFacingAi = false;
+  input.ai.generatedContentLabeling = true;
+  input.ai.humanReviewAvailable = false;
+  input.ai.personalDataInTraining = false;
+  input.ai.appealChannel = 'privacy@acme.example.com';
+
+  const validation = await generator.validate(input);
+
+  assert.equal(validation.ok, true);
+  assert.ok(validation.warnings.some((warning) => /no training|no usás datos/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /opt-out/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /visible|usuarios|customers/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /human review|revisión humana/i.test(warning)));
 });
 
 function baseTermsInput() {

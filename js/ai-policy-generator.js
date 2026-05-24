@@ -127,7 +127,13 @@ class AiPolicyGenerator {
           missingAppealChannel: 'Si hay decisiones automatizadas o revisión humana, conviene indicar un canal para pedir revisión o soporte.',
           missingSensitiveRestrictions: 'Conviene explicar cómo tratás datos sensibles, restringidos o de alto riesgo en flujos de IA.',
           missingSecurityControls: 'Conviene resumir controles de seguridad y minimización sobre prompts, outputs y datos vinculados a IA.',
-          noHumanReviewWarning: 'Si la IA puede influir decisiones relevantes, conviene aclarar si existe revisión humana o mecanismos de escalamiento.'
+          noHumanReviewWarning: 'Si la IA puede influir decisiones relevantes, conviene aclarar si existe revisión humana o mecanismos de escalamiento.',
+          contradictionNoTrainingWithImprovement: 'Marcaste que no usás datos para entrenamiento o mejora, pero también seleccionaste usos concretos de improvement/evaluation. Revisá esa combinación.',
+          contradictionOptOutWithoutEligibleUse: 'Configuraste un opt-out para entrenamiento o mejora, pero el uso de datos elegido no sugiere un flujo claro de entrenamiento/mejora que requiera ese control.',
+          contradictionOptOutMethodWithoutOptOut: 'Completaste un método de opt-out, pero también marcaste que no existe ese control. Revisá cuál de las dos cosas refleja tu flujo real.',
+          contradictionHiddenAiLabeling: 'Indicás etiquetado de contenido generado por IA, pero también marcaste que la IA no es visible para usuarios o clientes. Revisá si ambas afirmaciones reflejan realmente tu producto.',
+          contradictionNoHumanReviewWithAppeal: 'Declaraste un canal de revisión o apelación, pero también marcaste que no existe revisión humana. Revisá si querés permitir escalamiento humano o ajustar ese canal.',
+          contradictionPersonalDataDeniedWithOperationalSources: 'Marcaste que no intervienen datos personales, pero también indicás fuentes como inputs de usuarios, logs o feedback que normalmente pueden contenerlos. Conviene aclarar si se excluyen, anonimizan o aíslan antes de esos usos.'
         }
       : {
           missingBusinessName: 'Business name is required.',
@@ -142,7 +148,13 @@ class AiPolicyGenerator {
           missingAppealChannel: 'If automated decisions or human review are involved, you should provide a channel for review or support requests.',
           missingSensitiveRestrictions: 'You should explain how sensitive, restricted, or high-risk data is handled in AI workflows.',
           missingSecurityControls: 'You should summarize security and minimization controls for prompts, outputs, and AI-related data.',
-          noHumanReviewWarning: 'If AI can influence meaningful decisions, you should clarify whether human review or escalation mechanisms exist.'
+          noHumanReviewWarning: 'If AI can influence meaningful decisions, you should clarify whether human review or escalation mechanisms exist.',
+          contradictionNoTrainingWithImprovement: 'You marked data use as no training/improvement, but also selected concrete improvement or evaluation uses. Review that combination.',
+          contradictionOptOutWithoutEligibleUse: 'You configured an opt-out for training or improvement, but the selected data-use mode does not clearly suggest a training/improvement flow that would require that control.',
+          contradictionOptOutMethodWithoutOptOut: 'You filled in an opt-out method, but also marked that no such control exists. Review which of those statements reflects the real workflow.',
+          contradictionHiddenAiLabeling: 'You marked AI-generated content labeling, but also said AI is not visible to users or customers. Review whether both statements match the product.',
+          contradictionNoHumanReviewWithAppeal: 'You declared a review or appeal channel, but also marked that no human review is available. Review whether you want human escalation or different wording.',
+          contradictionPersonalDataDeniedWithOperationalSources: 'You marked that no personal data is involved, but also selected sources such as user inputs, service logs, or feedback that often contain it. Clarify whether those data are excluded, anonymized, or isolated before those uses.'
         };
 
     const errors = [];
@@ -161,6 +173,18 @@ class AiPolicyGenerator {
     if (!data.ai.sensitiveDataRestrictions) warnings.push(messages.missingSensitiveRestrictions);
     if (!data.ai.securityControls) warnings.push(messages.missingSecurityControls);
     if (data.ai.automatedDecisionMaking && !data.ai.humanReviewAvailable) warnings.push(messages.noHumanReviewWarning);
+    if (data.ai.trainingDataUse === 'no_training' && data.ai.modelImprovementUses.length > 0) warnings.push(messages.contradictionNoTrainingWithImprovement);
+    if (data.ai.optOutAvailable && ['no_training', 'evaluation_only'].includes(data.ai.trainingDataUse)) warnings.push(messages.contradictionOptOutWithoutEligibleUse);
+    if (!data.ai.optOutAvailable && data.ai.optOutMethod) warnings.push(messages.contradictionOptOutMethodWithoutOptOut);
+    if (!data.ai.userFacingAi && data.ai.generatedContentLabeling) warnings.push(messages.contradictionHiddenAiLabeling);
+    if (!data.ai.humanReviewAvailable && data.ai.appealChannel) warnings.push(messages.contradictionNoHumanReviewWithAppeal);
+    if (
+      !data.ai.personalDataInTraining
+      && ['model_training', 'service_improvement'].includes(data.ai.trainingDataUse)
+      && data.ai.dataSources.some((value) => ['customer_inputs', 'service_logs', 'feedback_signals'].includes(value))
+    ) {
+      warnings.push(messages.contradictionPersonalDataDeniedWithOperationalSources);
+    }
 
     return { data, errors, warnings };
   }

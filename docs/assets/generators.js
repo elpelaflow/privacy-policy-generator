@@ -3287,7 +3287,12 @@ ${paragraphs}
             transfersNeedMechanism: "Si hay transferencias internacionales, conviene aclarar el mecanismo contractual o legal utilizado.",
             sccNeedsTransferMechanism: "Si marc\xE1s que puede requerirse SCC, conviene indicar el mecanismo de transferencias o el proceso contractual asociado.",
             missingIncidentTiming: "Conviene indicar en cu\xE1nto tiempo se notifican incidentes o brechas relevantes.",
-            missingAuditRights: "Conviene aclarar c\xF3mo se ejercen derechos de auditor\xEDa o acceso a informaci\xF3n sobre el tratamiento."
+            missingAuditRights: "Conviene aclarar c\xF3mo se ejercen derechos de auditor\xEDa o acceso a informaci\xF3n sobre el tratamiento.",
+            contradictionSubprocessorMethodWithoutSubprocessors: "Completaste una metodolog\xEDa de subprocessors, pero tambi\xE9n marcaste que no us\xE1s subencargados. Revis\xE1 cu\xE1l de las dos cosas refleja tu operaci\xF3n real.",
+            contradictionTransferMechanismWithoutTransfers: "Indic\xE1s un mecanismo de transferencias, pero tambi\xE9n marcaste que no hay transferencias internacionales. Revis\xE1 si realmente existe acceso, hosting o soporte transfronterizo.",
+            contradictionSccWithoutTransfers: "Marcaste que podr\xEDan requerirse SCC o cl\xE1usulas equivalentes, pero tambi\xE9n marcaste que no hay transferencias internacionales. Conviene revisar si el flujo realmente involucra transferencias o si esa cl\xE1usula sobra.",
+            contradictionSccWithoutEuUkScope: "Marcaste SCC o cl\xE1usulas equivalentes, pero no se\xF1alaste alcance regulatorio UE/UK. Conviene confirmar si el cliente, los datos o el marco contractual igualmente exigen esas salvaguardas.",
+            contradictionJointControllerTemplate: "Marcaste que la contraparte act\xFAa como joint controller, pero esta plantilla est\xE1 orientada principalmente a relaciones controller-processor. Conviene revisi\xF3n legal espec\xEDfica si realmente hay corresponsabilidad."
           } : {
             missingBusinessName: "Business or provider name is required.",
             missingWebsite: "Primary service URL is required.",
@@ -3303,7 +3308,12 @@ ${paragraphs}
             transfersNeedMechanism: "If international transfers occur, you should explain the contractual or legal transfer mechanism used.",
             sccNeedsTransferMechanism: "If you flag SCC as potentially required, you should describe the transfer mechanism or related contractual process.",
             missingIncidentTiming: "You should state how quickly relevant incidents or breaches will be notified.",
-            missingAuditRights: "You should explain how audit or information rights are exercised under the agreement."
+            missingAuditRights: "You should explain how audit or information rights are exercised under the agreement.",
+            contradictionSubprocessorMethodWithoutSubprocessors: "You filled in a subprocessor methodology, but also marked that no subprocessors are used. Review which statement reflects the real operating model.",
+            contradictionTransferMechanismWithoutTransfers: "You provided a transfer mechanism, but also marked that no international transfers occur. Review whether cross-border hosting, access, or support actually exists.",
+            contradictionSccWithoutTransfers: "You flagged SCC or equivalent clauses, but also marked that no international transfers occur. Review whether the flow really involves transfers or whether that clause is unnecessary.",
+            contradictionSccWithoutEuUkScope: "You flagged SCC or equivalent clauses, but did not mark EU/UK regulatory scope. Confirm whether the customer, data, or contract still requires those safeguards.",
+            contradictionJointControllerTemplate: "You marked the counterparty as a joint controller, but this template is mainly oriented to controller-processor relationships. Legal review is recommended if joint controllership is real."
           };
           const errors = [];
           const warnings = [];
@@ -3322,6 +3332,11 @@ ${paragraphs}
           if (data.dpa.euSccRequired && !data.dpa.transferMechanism) warnings.push(messages.sccNeedsTransferMechanism);
           if (!data.dpa.breachNotificationTime) warnings.push(messages.missingIncidentTiming);
           if (!data.dpa.auditRights) warnings.push(messages.missingAuditRights);
+          if (!data.dpa.subprocessorsUsed && data.dpa.subprocessorMethodology) warnings.push(messages.contradictionSubprocessorMethodWithoutSubprocessors);
+          if (!data.dpa.internationalTransfers && data.dpa.transferMechanism) warnings.push(messages.contradictionTransferMechanismWithoutTransfers);
+          if (!data.dpa.internationalTransfers && data.dpa.euSccRequired) warnings.push(messages.contradictionSccWithoutTransfers);
+          if (data.dpa.euSccRequired && !data.dpa.regulatoryScope.some((value) => ["eu", "uk"].includes(value))) warnings.push(messages.contradictionSccWithoutEuUkScope);
+          if (data.dpa.counterpartyRole === "joint_controller") warnings.push(messages.contradictionJointControllerTemplate);
           return { data, errors, warnings };
         }
         buildSections(data) {
@@ -3786,7 +3801,13 @@ ${paragraphs}
             missingAppealChannel: "Si hay decisiones automatizadas o revisi\xF3n humana, conviene indicar un canal para pedir revisi\xF3n o soporte.",
             missingSensitiveRestrictions: "Conviene explicar c\xF3mo trat\xE1s datos sensibles, restringidos o de alto riesgo en flujos de IA.",
             missingSecurityControls: "Conviene resumir controles de seguridad y minimizaci\xF3n sobre prompts, outputs y datos vinculados a IA.",
-            noHumanReviewWarning: "Si la IA puede influir decisiones relevantes, conviene aclarar si existe revisi\xF3n humana o mecanismos de escalamiento."
+            noHumanReviewWarning: "Si la IA puede influir decisiones relevantes, conviene aclarar si existe revisi\xF3n humana o mecanismos de escalamiento.",
+            contradictionNoTrainingWithImprovement: "Marcaste que no us\xE1s datos para entrenamiento o mejora, pero tambi\xE9n seleccionaste usos concretos de improvement/evaluation. Revis\xE1 esa combinaci\xF3n.",
+            contradictionOptOutWithoutEligibleUse: "Configuraste un opt-out para entrenamiento o mejora, pero el uso de datos elegido no sugiere un flujo claro de entrenamiento/mejora que requiera ese control.",
+            contradictionOptOutMethodWithoutOptOut: "Completaste un m\xE9todo de opt-out, pero tambi\xE9n marcaste que no existe ese control. Revis\xE1 cu\xE1l de las dos cosas refleja tu flujo real.",
+            contradictionHiddenAiLabeling: "Indic\xE1s etiquetado de contenido generado por IA, pero tambi\xE9n marcaste que la IA no es visible para usuarios o clientes. Revis\xE1 si ambas afirmaciones reflejan realmente tu producto.",
+            contradictionNoHumanReviewWithAppeal: "Declaraste un canal de revisi\xF3n o apelaci\xF3n, pero tambi\xE9n marcaste que no existe revisi\xF3n humana. Revis\xE1 si quer\xE9s permitir escalamiento humano o ajustar ese canal.",
+            contradictionPersonalDataDeniedWithOperationalSources: "Marcaste que no intervienen datos personales, pero tambi\xE9n indic\xE1s fuentes como inputs de usuarios, logs o feedback que normalmente pueden contenerlos. Conviene aclarar si se excluyen, anonimizan o a\xEDslan antes de esos usos."
           } : {
             missingBusinessName: "Business name is required.",
             missingWebsite: "Service URL is required.",
@@ -3800,7 +3821,13 @@ ${paragraphs}
             missingAppealChannel: "If automated decisions or human review are involved, you should provide a channel for review or support requests.",
             missingSensitiveRestrictions: "You should explain how sensitive, restricted, or high-risk data is handled in AI workflows.",
             missingSecurityControls: "You should summarize security and minimization controls for prompts, outputs, and AI-related data.",
-            noHumanReviewWarning: "If AI can influence meaningful decisions, you should clarify whether human review or escalation mechanisms exist."
+            noHumanReviewWarning: "If AI can influence meaningful decisions, you should clarify whether human review or escalation mechanisms exist.",
+            contradictionNoTrainingWithImprovement: "You marked data use as no training/improvement, but also selected concrete improvement or evaluation uses. Review that combination.",
+            contradictionOptOutWithoutEligibleUse: "You configured an opt-out for training or improvement, but the selected data-use mode does not clearly suggest a training/improvement flow that would require that control.",
+            contradictionOptOutMethodWithoutOptOut: "You filled in an opt-out method, but also marked that no such control exists. Review which of those statements reflects the real workflow.",
+            contradictionHiddenAiLabeling: "You marked AI-generated content labeling, but also said AI is not visible to users or customers. Review whether both statements match the product.",
+            contradictionNoHumanReviewWithAppeal: "You declared a review or appeal channel, but also marked that no human review is available. Review whether you want human escalation or different wording.",
+            contradictionPersonalDataDeniedWithOperationalSources: "You marked that no personal data is involved, but also selected sources such as user inputs, service logs, or feedback that often contain it. Clarify whether those data are excluded, anonymized, or isolated before those uses."
           };
           const errors = [];
           const warnings = [];
@@ -3817,6 +3844,14 @@ ${paragraphs}
           if (!data.ai.sensitiveDataRestrictions) warnings.push(messages.missingSensitiveRestrictions);
           if (!data.ai.securityControls) warnings.push(messages.missingSecurityControls);
           if (data.ai.automatedDecisionMaking && !data.ai.humanReviewAvailable) warnings.push(messages.noHumanReviewWarning);
+          if (data.ai.trainingDataUse === "no_training" && data.ai.modelImprovementUses.length > 0) warnings.push(messages.contradictionNoTrainingWithImprovement);
+          if (data.ai.optOutAvailable && ["no_training", "evaluation_only"].includes(data.ai.trainingDataUse)) warnings.push(messages.contradictionOptOutWithoutEligibleUse);
+          if (!data.ai.optOutAvailable && data.ai.optOutMethod) warnings.push(messages.contradictionOptOutMethodWithoutOptOut);
+          if (!data.ai.userFacingAi && data.ai.generatedContentLabeling) warnings.push(messages.contradictionHiddenAiLabeling);
+          if (!data.ai.humanReviewAvailable && data.ai.appealChannel) warnings.push(messages.contradictionNoHumanReviewWithAppeal);
+          if (!data.ai.personalDataInTraining && ["model_training", "service_improvement"].includes(data.ai.trainingDataUse) && data.ai.dataSources.some((value) => ["customer_inputs", "service_logs", "feedback_signals"].includes(value))) {
+            warnings.push(messages.contradictionPersonalDataDeniedWithOperationalSources);
+          }
           return { data, errors, warnings };
         }
         buildSections(data) {
