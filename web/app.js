@@ -542,7 +542,7 @@ function buildDocuments() {
           selectField('ai.trainingDataUse', 'Uso de datos para entrenamiento o mejora', AI_TRAINING_DATA_USE, '', true),
           checkboxField('ai.dataSources', 'Fuentes de datos relacionadas', AI_DATA_SOURCES, ['customer_inputs', 'service_logs']),
           booleanField('ai.personalDataInTraining', 'Pueden intervenir datos personales en estos flujos', 'Marcá esto sólo si prompts, outputs, logs o datasets vinculados a IA pueden incluir datos personales.', false),
-          checkboxField('ai.modelImprovementUses', 'Usos concretos para mejora o evaluación', AI_MODEL_IMPROVEMENT_USES, []),
+          checkboxField('ai.modelImprovementUses', 'Actividades específicas sobre datos de IA', AI_MODEL_IMPROVEMENT_USES, []),
           booleanField('ai.optOutAvailable', 'Existe opt-out o control para entrenamiento/mejora', 'Marcá esto si el usuario o cliente puede limitar ciertos usos para training, fine-tuning o product improvement.', false),
           textareaField('ai.optOutMethod', 'Método de opt-out o control', '')
         ]
@@ -2153,6 +2153,8 @@ const AI_MODEL_IMPROVEMENT_USES = [
   { value: 'quality_evaluation', label: 'Evaluación de calidad', description: 'Benchmarking, QA o revisión de performance.' },
   { value: 'safety_testing', label: 'Pruebas de seguridad', description: 'Abuso, red teaming o seguridad del sistema.' },
   { value: 'fine_tuning', label: 'Fine-tuning', description: 'Ajuste o calibración de modelos o prompts.' },
+  { value: 'model_training', label: 'Entrenamiento amplio', description: 'Entrenamiento o ajuste más amplio del modelo con datasets o señales relevantes.' },
+  { value: 'abuse_monitoring', label: 'Abuso o monitoreo', description: 'Detección de abuso, fraude o monitoreo de riesgo operativo.' },
   { value: 'product_analytics', label: 'Analítica del producto', description: 'Mejoras operativas, UX o producto.' }
 ];
 const AI_THIRD_PARTY_PROVIDERS = [

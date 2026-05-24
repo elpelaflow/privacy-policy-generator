@@ -121,6 +121,7 @@ class AiPolicyGenerator {
           missingUseCases: 'Conviene describir para qué se usa la IA en el servicio. Esto importa especialmente si la IA afecta soporte, generación de contenido, fraude, moderación o priorización.',
           missingTrainingDisclosure: 'Debés aclarar si los datos se usan o no para entrenamiento, ajuste, evaluación o mejora de modelos. Sin esa definición la policy puede quedar ambigua justo en el punto más sensible del documento.',
           missingDataSources: 'Conviene indicar de dónde provienen los datos vinculados al uso o entrenamiento de IA. Esto es especialmente útil si usás prompts de clientes, logs, feedback, datos públicos o proveedores externos.',
+          missingActivityBreakdown: 'Conviene detallar qué actividades concretas hacés sobre datos de IA, por ejemplo evaluación, safety testing, analítica, fine-tuning o entrenamiento. Esto ayuda a que la policy no mezcle usos muy distintos en una sola frase.',
           missingOptOutMethod: 'Si ofrecés opt-out sobre entrenamiento o mejora, conviene indicar el método concreto. Si no, el usuario sabe que existe el control pero no cómo ejercerlo.',
           missingRetention: 'Conviene indicar cuánto tiempo se retienen prompts, outputs o datasets relacionados con IA. Esto importa especialmente si guardás logs, conversaciones o señales para evaluación, seguridad o mejora.',
           missingProviders: 'Conviene identificar proveedores externos o model providers si intervienen en el flujo. Esto es especialmente importante si usás APIs de terceros, infraestructura cloud o herramientas de safety/observability.',
@@ -133,7 +134,9 @@ class AiPolicyGenerator {
           contradictionOptOutMethodWithoutOptOut: 'Completaste un método de opt-out, pero también marcaste que no existe ese control. Revisá cuál de las dos cosas refleja tu flujo real para no prometer una opción que después no aparece en producto o contrato.',
           contradictionHiddenAiLabeling: 'Indicás etiquetado de contenido generado por IA, pero también marcaste que la IA no es visible para usuarios o clientes. Revisá si el etiquetado aplica a contenido público, interno o a otra feature, para que la policy no describa una experiencia inexistente.',
           contradictionNoHumanReviewWithAppeal: 'Declaraste un canal de revisión o apelación, pero también marcaste que no existe revisión humana. Revisá si querés permitir escalamiento humano real o si ese canal sólo cubre soporte general y no revisión de decisiones.',
-          contradictionPersonalDataDeniedWithOperationalSources: 'Marcaste que no intervienen datos personales, pero también indicás fuentes como inputs de usuarios, logs o feedback que normalmente pueden contenerlos. Conviene aclarar si se excluyen, anonimizan o aíslan antes de esos usos, sobre todo en SaaS, soporte o analytics.'
+          contradictionPersonalDataDeniedWithOperationalSources: 'Marcaste que no intervienen datos personales, pero también indicás fuentes como inputs de usuarios, logs o feedback que normalmente pueden contenerlos. Conviene aclarar si se excluyen, anonimizan o aíslan antes de esos usos, sobre todo en SaaS, soporte o analytics.',
+          contradictionEvaluationOnlyWithBroaderActivities: 'Marcaste un modo general de evaluación o safety review, pero también seleccionaste actividades más amplias como fine-tuning, entrenamiento o analítica de producto. Revisá si el modo general debería pasar a mejora acotada o entrenamiento más amplio.',
+          contradictionNarrowImprovementWithBroadTraining: 'Marcaste mejora acotada del producto, pero también seleccionaste entrenamiento amplio de modelos. Revisá si tu caso encaja mejor en entrenamiento/fine-tuning más amplio para no subdeclarar el uso.'
         }
       : {
           missingBusinessName: 'Business name is required.',
@@ -142,6 +145,7 @@ class AiPolicyGenerator {
           missingUseCases: 'You should describe how AI is used in the service. This matters especially if AI affects support, content generation, fraud, moderation, or prioritization.',
           missingTrainingDisclosure: 'You must clearly state whether data is used for training, fine-tuning, evaluation, or model improvement. Without that choice, the policy stays ambiguous on its most sensitive point.',
           missingDataSources: 'You should identify the sources of data linked to AI use or training. This is especially helpful if you rely on customer prompts, service logs, feedback, public data, or third-party sources.',
+          missingActivityBreakdown: 'You should describe the specific AI data-use activities involved, such as evaluation, safety testing, analytics, fine-tuning, or training. This helps keep the policy from collapsing very different uses into one vague statement.',
           missingOptOutMethod: 'If you offer an opt-out for training or improvement, you should explain the concrete method. Otherwise users know the control exists but not how to exercise it.',
           missingRetention: 'You should state how long prompts, outputs, or AI-related datasets are retained. This matters especially if you keep logs, conversations, or signals for evaluation, safety, or improvement.',
           missingProviders: 'You should identify external providers or model providers if they are part of the flow. This is especially important when third-party APIs, cloud infrastructure, or safety/observability vendors are involved.',
@@ -154,7 +158,9 @@ class AiPolicyGenerator {
           contradictionOptOutMethodWithoutOptOut: 'You filled in an opt-out method, but also marked that no such control exists. Review which statement matches the real workflow so the policy does not promise a control the product or contract does not offer.',
           contradictionHiddenAiLabeling: 'You marked AI-generated content labeling, but also said AI is not visible to users or customers. Review whether the labeling applies to public content, internal workflows, or another feature so the policy matches the actual experience.',
           contradictionNoHumanReviewWithAppeal: 'You declared a review or appeal channel, but also marked that no human review is available. Review whether you want real human escalation or whether that channel only covers general support rather than decision review.',
-          contradictionPersonalDataDeniedWithOperationalSources: 'You marked that no personal data is involved, but also selected sources such as user inputs, service logs, or feedback that often contain it. Clarify whether those data are excluded, anonymized, or isolated before those uses, especially in SaaS, support, or analytics flows.'
+          contradictionPersonalDataDeniedWithOperationalSources: 'You marked that no personal data is involved, but also selected sources such as user inputs, service logs, or feedback that often contain it. Clarify whether those data are excluded, anonymized, or isolated before those uses, especially in SaaS, support, or analytics flows.',
+          contradictionEvaluationOnlyWithBroaderActivities: 'You marked the general mode as evaluation or safety review only, but also selected broader activities such as fine-tuning, training, or product analytics. Review whether the general mode should move to limited improvement or broader training.',
+          contradictionNarrowImprovementWithBroadTraining: 'You marked limited service improvement, but also selected broader model training. Review whether the real case fits broader training/fine-tuning so the policy does not understate the use.'
         };
 
     const errors = [];
@@ -166,6 +172,9 @@ class AiPolicyGenerator {
     if (data.ai.useCases.length === 0) warnings.push(messages.missingUseCases);
     if (!data.ai.trainingDataUse) errors.push(messages.missingTrainingDisclosure);
     if (data.ai.dataSources.length === 0) warnings.push(messages.missingDataSources);
+    if (['evaluation_only', 'service_improvement', 'model_training'].includes(data.ai.trainingDataUse) && data.ai.modelImprovementUses.length === 0) {
+      warnings.push(messages.missingActivityBreakdown);
+    }
     if (data.ai.optOutAvailable && !data.ai.optOutMethod) warnings.push(messages.missingOptOutMethod);
     if (!data.ai.retentionPeriod) warnings.push(messages.missingRetention);
     if (data.ai.thirdPartyProviders.length === 0) warnings.push(messages.missingProviders);
@@ -174,6 +183,12 @@ class AiPolicyGenerator {
     if (!data.ai.securityControls) warnings.push(messages.missingSecurityControls);
     if (data.ai.automatedDecisionMaking && !data.ai.humanReviewAvailable) warnings.push(messages.noHumanReviewWarning);
     if (data.ai.trainingDataUse === 'no_training' && data.ai.modelImprovementUses.length > 0) warnings.push(messages.contradictionNoTrainingWithImprovement);
+    if (data.ai.trainingDataUse === 'evaluation_only' && data.ai.modelImprovementUses.some((value) => ['fine_tuning', 'model_training', 'product_analytics'].includes(value))) {
+      warnings.push(messages.contradictionEvaluationOnlyWithBroaderActivities);
+    }
+    if (data.ai.trainingDataUse === 'service_improvement' && data.ai.modelImprovementUses.includes('model_training')) {
+      warnings.push(messages.contradictionNarrowImprovementWithBroadTraining);
+    }
     if (data.ai.optOutAvailable && ['no_training', 'evaluation_only'].includes(data.ai.trainingDataUse)) warnings.push(messages.contradictionOptOutWithoutEligibleUse);
     if (!data.ai.optOutAvailable && data.ai.optOutMethod) warnings.push(messages.contradictionOptOutMethodWithoutOptOut);
     if (!data.ai.userFacingAi && data.ai.generatedContentLabeling) warnings.push(messages.contradictionHiddenAiLabeling);
@@ -312,7 +327,7 @@ class AiPolicyGenerator {
     }
 
     if (data.ai.modelImprovementUses.length > 0) {
-      parts.push(`${this.text('Specific improvement uses', 'Usos concretos para mejora')}: ${data.ai.modelImprovementUses.map((value) => this.improvementLabel(value)).join(', ')}.`);
+      parts.push(`${this.text('Specific AI data-use activities', 'Actividades específicas sobre datos de IA')}: ${data.ai.modelImprovementUses.map((value) => this.improvementLabel(value)).join(', ')}.`);
     }
 
     return parts.filter(Boolean).join(' ');
@@ -526,6 +541,8 @@ class AiPolicyGenerator {
       quality_evaluation: this.text('quality evaluation', 'evaluación de calidad'),
       safety_testing: this.text('safety testing', 'pruebas de seguridad'),
       fine_tuning: this.text('fine-tuning', 'fine-tuning'),
+      model_training: this.text('broader model training', 'entrenamiento amplio de modelos'),
+      abuse_monitoring: this.text('abuse detection or monitoring', 'detección o monitoreo de abuso'),
       product_analytics: this.text('product analytics', 'analítica del producto')
     };
     return labels[value] || value;

@@ -36,6 +36,7 @@
     "modelImprovementUses": [
       "quality_evaluation",
       "safety_testing",
+      "abuse_monitoring",
       "product_analytics"
     ],
     "optOutAvailable": true,

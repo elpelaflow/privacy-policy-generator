@@ -286,6 +286,8 @@ const AI_MODEL_IMPROVEMENT_OPTIONS = [
   { value: 'quality_evaluation', label: 'Evaluación de calidad', description: 'Benchmarking, QA o performance review.' },
   { value: 'safety_testing', label: 'Pruebas de seguridad', description: 'Red teaming, abuso o safety review.' },
   { value: 'fine_tuning', label: 'Fine-tuning', description: 'Ajuste o calibración del modelo.' },
+  { value: 'model_training', label: 'Entrenamiento amplio', description: 'Entrenamiento o ajuste más amplio del modelo.' },
+  { value: 'abuse_monitoring', label: 'Abuso o monitoreo', description: 'Detección de abuso, fraude o monitoreo operativo.' },
   { value: 'product_analytics', label: 'Analítica del producto', description: 'Mejoras de producto, UX u operación.' }
 ];
 
@@ -3562,7 +3564,7 @@ async function collectAiSection(rl, state) {
       state.ai.personalDataInTraining = value;
     },
     async () => {
-      const value = await promptMultiChoice(rl, 'Qué usos concretos puede haber para mejora, evaluación o ajuste', AI_MODEL_IMPROVEMENT_OPTIONS, { allowNone: true, allowOther: true });
+      const value = await promptMultiChoice(rl, 'Qué actividades concretas hacés sobre datos de IA', AI_MODEL_IMPROVEMENT_OPTIONS, { allowNone: true, allowOther: true });
       if (value === BACK) return BACK;
       state.ai.modelImprovementUses = value.values.concat(value.manualNotes);
     },

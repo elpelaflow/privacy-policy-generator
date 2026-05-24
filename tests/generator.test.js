@@ -546,6 +546,19 @@ test('ai policy validation warns about contradictory data-use combinations', asy
   assert.ok(validation.warnings.some((warning) => /human review|revisión humana/i.test(warning)));
 });
 
+test('ai policy validation warns when evaluation-only mode is mixed with broader activities', async () => {
+  const generator = new AiPolicyGenerator();
+  const input = baseAiInput();
+  input.ai.trainingDataUse = 'evaluation_only';
+  input.ai.modelImprovementUses = ['quality_evaluation', 'fine_tuning', 'model_training'];
+
+  const validation = await generator.validate(input);
+
+  assert.equal(validation.ok, true);
+  assert.ok(validation.warnings.some((warning) => /evaluation|safety review|evaluación/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /fine-tuning|training|entrenamiento/i.test(warning)));
+});
+
 function baseTermsInput() {
   return {
     documentType: 'terms',
