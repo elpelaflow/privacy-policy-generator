@@ -495,12 +495,18 @@ function buildDocuments() {
         description: 'Uso de subencargados, transferencias internacionales, auditoría y eliminación o devolución de datos.',
         fields: [
           booleanField('dpa.subprocessorsUsed', 'Usás subprocessors o subencargados', 'Hosting, cloud, soporte o proveedores operativos que traten datos por tu cuenta.', true),
+          selectField('dpa.subprocessorAuthorization', 'Modelo de autorización de subprocessors', DPA_SUBPROCESSOR_AUTHORIZATION, 'general_authorization'),
+          textField('dpa.subprocessorObjectionWindow', 'Preaviso o ventana de objeción', 'Aviso razonable previo para cambios materiales de subprocessors, sujeto al contrato principal.'),
           textareaField('dpa.subprocessorMethodology', 'Criterio sobre subprocessors', 'Se seleccionan proveedores con garantías razonables y se les imponen obligaciones contractuales de protección de datos acordes al servicio.'),
           booleanField('dpa.internationalTransfers', 'Hay transferencias internacionales', 'Marcá esto si hay acceso, soporte, hosting o subprocessors fuera de la jurisdicción principal del cliente.', false),
           textareaField('dpa.transferMechanism', 'Mecanismo de transferencias', 'Cuando corresponde, usamos cláusulas contractuales, salvaguardas equivalentes o bases legales compatibles con la jurisdicción aplicable.'),
+          textareaField('dpa.transferSupplementarySafeguards', 'Salvaguardas complementarias de transferencias', 'Podemos apoyarnos en regionalización, minimización, cifrado, segregación de accesos y evaluación razonable de vendors según el flujo aplicable.'),
           booleanField('dpa.euSccRequired', 'Puede requerirse SCC o cláusulas equivalentes', 'Útil para clientes UE/UK o evaluaciones de transferencias más formales.', false),
           textareaField('dpa.assistanceCommitments', 'Compromisos de asistencia', 'Brindamos asistencia razonable para solicitudes de titulares, evaluaciones de impacto y consultas regulatorias en la medida en que el servicio y la información disponible lo permitan.'),
           textareaField('dpa.deletionReturnPeriod', 'Plazo de devolución o eliminación', 'Al finalizar el servicio, devolvemos o eliminamos los datos personales dentro de un plazo razonable, salvo retención legal o backups de seguridad con ciclo controlado.'),
+          textareaField('dpa.backupRetentionHandling', 'Tratamiento de backups al cierre', 'Las copias de seguridad residuales siguen su ciclo de retención y purga controlada, con acceso restringido y sin reutilización activa para operaciones ordinarias.'),
+          selectField('dpa.auditMechanism', 'Mecanismo habitual de auditoría', DPA_AUDIT_MECHANISMS, 'questionnaire_and_certifications'),
+          textField('dpa.auditNoticePeriod', 'Preaviso para auditoría', 'Preaviso razonable y coordinación previa, salvo urgencia contractual o legal.'),
           textareaField('dpa.auditRights', 'Enfoque de auditoría o información', 'Podemos proporcionar información razonable, respuestas documentadas, certificaciones o evidencia equivalente, sujeto a confidencialidad y límites operativos razonables.'),
           textField('dpa.governingLaw', 'Ley aplicable o referencia contractual', 'Según el acuerdo principal entre las partes y la jurisdicción aplicable al servicio.')
         ]
@@ -2120,6 +2126,17 @@ const DPA_SUBJECT_CATEGORIES = [
   { value: 'Empleados o contratistas del cliente', label: 'Equipo del cliente', description: 'Staff, operadores, administradores o contratistas del cliente.' },
   { value: 'Prospectos o contactos comerciales del cliente', label: 'Prospectos o leads', description: 'Leads, contactos de ventas o relaciones comerciales del cliente.' },
   { value: 'Clientes o usuarios autenticados del cliente', label: 'Clientes autenticados', description: 'Cuentas o usuarios registrados del cliente.' }
+];
+const DPA_SUBPROCESSOR_AUTHORIZATION = [
+  { value: 'general_authorization', label: 'Autorización general con aviso', description: 'Se permiten subprocessors con aviso razonable y eventual derecho de objeción.' },
+  { value: 'specific_approval', label: 'Aprobación específica', description: 'Cada nuevo subprocessor requiere aprobación o consentimiento puntual.' },
+  { value: 'contract_defined', label: 'Lo define el contrato principal', description: 'El modelo exacto se remite al MSA, DPA principal o anexo comercial.' }
+];
+const DPA_AUDIT_MECHANISMS = [
+  { value: 'questionnaire_and_certifications', label: 'Cuestionarios y certificaciones', description: 'Vendor review basado en respuestas, certificaciones y evidencia documental.' },
+  { value: 'remote_review', label: 'Revisión remota', description: 'Intercambio coordinado de evidencia o revisión documental remota.' },
+  { value: 'onsite_limited', label: 'Onsite limitado', description: 'Auditoría onsite excepcional, acotada y sujeta a resguardos de confidencialidad.' },
+  { value: 'contract_defined', label: 'Definido por contrato', description: 'La mecánica exacta se remite al contrato principal o apéndice negociado.' }
 ];
 const AI_SYSTEMS_USED = [
   { value: 'chatbot_or_assistant', label: 'Chatbot o asistente', description: 'Asistentes conversacionales, soporte guiado o helpdesk asistido por IA.' },

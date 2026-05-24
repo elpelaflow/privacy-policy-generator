@@ -3257,12 +3257,18 @@ ${paragraphs}
               confidentialityMeasures: this.stringValue(input.dpa?.confidentialityMeasures),
               securityMeasures: this.stringValue(input.dpa?.securityMeasures),
               subprocessorsUsed: this.booleanValue(input.dpa?.subprocessorsUsed, true),
+              subprocessorAuthorization: this.stringValue(input.dpa?.subprocessorAuthorization),
+              subprocessorObjectionWindow: this.stringValue(input.dpa?.subprocessorObjectionWindow),
               subprocessorMethodology: this.stringValue(input.dpa?.subprocessorMethodology),
               internationalTransfers: this.booleanValue(input.dpa?.internationalTransfers, false),
               transferMechanism: this.stringValue(input.dpa?.transferMechanism),
+              transferSupplementarySafeguards: this.stringValue(input.dpa?.transferSupplementarySafeguards),
               breachNotificationTime: this.stringValue(input.dpa?.breachNotificationTime),
               assistanceCommitments: this.stringValue(input.dpa?.assistanceCommitments),
               deletionReturnPeriod: this.stringValue(input.dpa?.deletionReturnPeriod),
+              backupRetentionHandling: this.stringValue(input.dpa?.backupRetentionHandling),
+              auditMechanism: this.stringValue(input.dpa?.auditMechanism),
+              auditNoticePeriod: this.stringValue(input.dpa?.auditNoticePeriod),
               auditRights: this.stringValue(input.dpa?.auditRights),
               governingLaw: this.stringValue(input.dpa?.governingLaw),
               euSccRequired: this.booleanValue(input.dpa?.euSccRequired, false),
@@ -3284,10 +3290,16 @@ ${paragraphs}
             missingSecurityMeasures: "Conviene resumir medidas t\xE9cnicas y organizativas de seguridad. Sin eso, el DPA queda flojo para procurement, vendor review o contratos enterprise.",
             missingDeletionPeriod: "Conviene indicar qu\xE9 pasa con los datos al finalizar el servicio. Esto importa especialmente si el cliente espera devoluci\xF3n, borrado, backups controlados o retenciones legales limitadas.",
             subprocessorsNeedMethodology: "Si us\xE1s subencargados o subprocessors, conviene explicar c\xF3mo se autorizan y controlan. Esto suele ser importante para clientes B2B que revisan hosting, soporte, cloud o proveedores operativos.",
+            missingSubprocessorAuthorization: "Si us\xE1s subprocessors, conviene aclarar si funcionan con autorizaci\xF3n general, consentimiento espec\xEDfico o la mec\xE1nica que defina el contrato principal.",
+            missingSubprocessorObjectionWindow: "Si us\xE1s autorizaci\xF3n general de subprocessors, conviene indicar si existe ventana de objeci\xF3n o aviso previo para cambios materiales.",
             transfersNeedMechanism: "Si hay transferencias internacionales, conviene aclarar el mecanismo contractual o legal utilizado. Esto importa especialmente para clientes UE/UK o para soporte, hosting y accesos cross-border.",
             sccNeedsTransferMechanism: "Si marc\xE1s que puede requerirse SCC, conviene indicar el mecanismo de transferencias o el proceso contractual asociado. Si no, el cliente ve la menci\xF3n pero no entiende c\xF3mo se implementa.",
+            missingTransferSafeguards: "Si hay transferencias internacionales, conviene indicar salvaguardas complementarias como regionalizaci\xF3n, minimizaci\xF3n, cifrado, segregaci\xF3n o evaluaci\xF3n de vendors.",
             missingIncidentTiming: "Conviene indicar en cu\xE1nto tiempo se notifican incidentes o brechas relevantes. Esto importa especialmente en contratos enterprise, seguridad SaaS y obligaciones de respuesta r\xE1pida.",
+            missingBackupHandling: "Conviene explicar c\xF3mo se tratan backups o copias de seguridad al cierre del servicio, especialmente si no se borran de forma inmediata.",
             missingAuditRights: "Conviene aclarar c\xF3mo se ejercen derechos de auditor\xEDa o acceso a informaci\xF3n sobre el tratamiento. Esto es especialmente \xFAtil si ofrec\xE9s certificaciones, cuestionarios o evidencia documental en vez de auditor\xEDa onsite.",
+            missingAuditMechanism: "Conviene indicar si la auditor\xEDa se satisface con cuestionarios, certificaciones, revisi\xF3n remota o un mecanismo definido por contrato.",
+            missingAuditNotice: "Conviene indicar si las auditor\xEDas requieren preaviso o coordinaci\xF3n razonable, sobre todo en contratos enterprise o revisiones de vendor risk.",
             contradictionSubprocessorMethodWithoutSubprocessors: "Completaste una metodolog\xEDa de subprocessors, pero tambi\xE9n marcaste que no us\xE1s subencargados. Revis\xE1 cu\xE1l de las dos cosas refleja tu operaci\xF3n real para no describir una cadena de proveedores inexistente.",
             contradictionTransferMechanismWithoutTransfers: "Indic\xE1s un mecanismo de transferencias, pero tambi\xE9n marcaste que no hay transferencias internacionales. Revis\xE1 si realmente existe acceso, hosting o soporte transfronterizo, o si esa cl\xE1usula qued\xF3 de m\xE1s.",
             contradictionSccWithoutTransfers: "Marcaste que podr\xEDan requerirse SCC o cl\xE1usulas equivalentes, pero tambi\xE9n marcaste que no hay transferencias internacionales. Conviene revisar si el flujo realmente involucra transferencias o si esa cl\xE1usula sobra en este contrato.",
@@ -3305,10 +3317,16 @@ ${paragraphs}
             missingSecurityMeasures: "You should summarize the technical and organizational security measures. Without that, the DPA is weak for procurement, vendor review, or enterprise contracting.",
             missingDeletionPeriod: "You should explain what happens to data when the service ends. This matters especially when customers expect return, deletion, controlled backups, or limited legal retention.",
             subprocessorsNeedMethodology: "If subprocessors are used, you should explain how they are authorized and controlled. This is commonly important for B2B customers reviewing hosting, support, cloud, or operational vendors.",
+            missingSubprocessorAuthorization: "If subprocessors are used, you should clarify whether they rely on general authorization, specific approval, or the mechanism defined in the main contract.",
+            missingSubprocessorObjectionWindow: "If you rely on general subprocessor authorization, you should explain whether customers get notice or an objection window for material vendor changes.",
             transfersNeedMechanism: "If international transfers occur, you should explain the contractual or legal transfer mechanism used. This matters especially for EU/UK customers or cross-border hosting, support, and access.",
             sccNeedsTransferMechanism: "If you flag SCC as potentially required, you should describe the transfer mechanism or related contractual process. Otherwise the customer sees the clause but not how it is actually implemented.",
+            missingTransferSafeguards: "If international transfers occur, you should also describe supplementary safeguards such as regional hosting, minimization, encryption, segregation, or vendor review.",
             missingIncidentTiming: "You should state how quickly relevant incidents or breaches will be notified. This matters especially in enterprise contracts, SaaS security reviews, and rapid-response commitments.",
+            missingBackupHandling: "You should explain how backups or security copies are treated when the service ends, especially if they are not deleted immediately.",
             missingAuditRights: "You should explain how audit or information rights are exercised under the agreement. This is especially useful if you provide certifications, questionnaires, or documentary evidence instead of onsite audits.",
+            missingAuditMechanism: "You should indicate whether audit rights are typically handled through questionnaires, certifications, remote review, or another contract-defined mechanism.",
+            missingAuditNotice: "You should indicate whether audits require reasonable prior notice or coordination, especially in enterprise contracts or vendor-risk reviews.",
             contradictionSubprocessorMethodWithoutSubprocessors: "You filled in a subprocessor methodology, but also marked that no subprocessors are used. Review which statement reflects the real operating model so the DPA does not describe a vendor chain that does not exist.",
             contradictionTransferMechanismWithoutTransfers: "You provided a transfer mechanism, but also marked that no international transfers occur. Review whether cross-border hosting, access, or support actually exists, or whether that clause is leftover boilerplate.",
             contradictionSccWithoutTransfers: "You flagged SCC or equivalent clauses, but also marked that no international transfers occur. Review whether the flow really involves transfers or whether that clause is unnecessary in this contract.",
@@ -3328,10 +3346,16 @@ ${paragraphs}
           if (!data.dpa.securityMeasures) warnings.push(messages.missingSecurityMeasures);
           if (!data.dpa.deletionReturnPeriod) warnings.push(messages.missingDeletionPeriod);
           if (data.dpa.subprocessorsUsed && !data.dpa.subprocessorMethodology) warnings.push(messages.subprocessorsNeedMethodology);
+          if (data.dpa.subprocessorsUsed && !data.dpa.subprocessorAuthorization) warnings.push(messages.missingSubprocessorAuthorization);
+          if (data.dpa.subprocessorsUsed && data.dpa.subprocessorAuthorization === "general_authorization" && !data.dpa.subprocessorObjectionWindow) warnings.push(messages.missingSubprocessorObjectionWindow);
           if (data.dpa.internationalTransfers && !data.dpa.transferMechanism) warnings.push(messages.transfersNeedMechanism);
           if (data.dpa.euSccRequired && !data.dpa.transferMechanism) warnings.push(messages.sccNeedsTransferMechanism);
+          if (data.dpa.internationalTransfers && !data.dpa.transferSupplementarySafeguards) warnings.push(messages.missingTransferSafeguards);
           if (!data.dpa.breachNotificationTime) warnings.push(messages.missingIncidentTiming);
+          if (!data.dpa.backupRetentionHandling) warnings.push(messages.missingBackupHandling);
           if (!data.dpa.auditRights) warnings.push(messages.missingAuditRights);
+          if (!data.dpa.auditMechanism) warnings.push(messages.missingAuditMechanism);
+          if (data.dpa.auditMechanism && !data.dpa.auditNoticePeriod) warnings.push(messages.missingAuditNotice);
           if (!data.dpa.subprocessorsUsed && data.dpa.subprocessorMethodology) warnings.push(messages.contradictionSubprocessorMethodWithoutSubprocessors);
           if (!data.dpa.internationalTransfers && data.dpa.transferMechanism) warnings.push(messages.contradictionTransferMechanismWithoutTransfers);
           if (!data.dpa.internationalTransfers && data.dpa.euSccRequired) warnings.push(messages.contradictionSccWithoutTransfers);
@@ -3461,7 +3485,9 @@ ${paragraphs}
               "The processor may engage subprocessors to support infrastructure, hosting, support, communications, analytics, or related service operations, provided that appropriate contractual obligations are imposed on those subprocessors.",
               "El processor puede contratar subprocessors para infraestructura, hosting, soporte, comunicaciones, anal\xEDtica u operaciones relacionadas con el servicio, siempre que se les impongan obligaciones contractuales apropiadas."
             ),
-            data.dpa.subprocessorMethodology ? `${this.text("Subprocessor approach", "Criterio sobre subprocessors")}: ${this.sentence(data.dpa.subprocessorMethodology)}` : ""
+            data.dpa.subprocessorMethodology ? `${this.text("Subprocessor approach", "Criterio sobre subprocessors")}: ${this.sentence(data.dpa.subprocessorMethodology)}` : "",
+            data.dpa.subprocessorAuthorization ? `${this.text("Authorization model", "Modelo de autorizaci\xF3n")}: ${this.subprocessorAuthorizationLabel(data.dpa.subprocessorAuthorization)}.` : "",
+            data.dpa.subprocessorObjectionWindow ? `${this.text("Notice or objection window", "Preaviso o ventana de objeci\xF3n")}: ${this.sentence(data.dpa.subprocessorObjectionWindow)}` : ""
           ].filter(Boolean).join(" ");
         }
         transfersText(data) {
@@ -3479,6 +3505,9 @@ ${paragraphs}
           ];
           if (data.dpa.transferMechanism) {
             parts.push(`${this.text("Transfer mechanism", "Mecanismo de transferencia")}: ${this.sentence(data.dpa.transferMechanism)}`);
+          }
+          if (data.dpa.transferSupplementarySafeguards) {
+            parts.push(`${this.text("Supplementary safeguards", "Salvaguardas complementarias")}: ${this.sentence(data.dpa.transferSupplementarySafeguards)}`);
           }
           if (data.dpa.euSccRequired) {
             parts.push(this.text(
@@ -3513,6 +3542,9 @@ ${paragraphs}
           if (data.dpa.deletionReturnPeriod) {
             parts.push(`${this.text("Deletion or return timing", "Plazo de devoluci\xF3n o eliminaci\xF3n")}: ${this.sentence(data.dpa.deletionReturnPeriod)}`);
           }
+          if (data.dpa.backupRetentionHandling) {
+            parts.push(`${this.text("Backups and residual copies", "Backups y copias residuales")}: ${this.sentence(data.dpa.backupRetentionHandling)}`);
+          }
           return parts.join(" ");
         }
         auditText(data) {
@@ -3524,6 +3556,12 @@ ${paragraphs}
           ];
           if (data.dpa.auditRights) {
             parts.push(`${this.text("Audit approach", "Enfoque de auditor\xEDa")}: ${this.sentence(data.dpa.auditRights)}`);
+          }
+          if (data.dpa.auditMechanism) {
+            parts.push(`${this.text("Typical audit mechanism", "Mecanismo habitual de auditor\xEDa")}: ${this.auditMechanismLabel(data.dpa.auditMechanism)}.`);
+          }
+          if (data.dpa.auditNoticePeriod) {
+            parts.push(`${this.text("Audit notice period", "Preaviso de auditor\xEDa")}: ${this.sentence(data.dpa.auditNoticePeriod)}`);
           }
           if (data.dpa.governingLaw) {
             parts.push(`${this.text("Governing law or contractual reference", "Ley aplicable o referencia contractual")}: ${this.sentence(data.dpa.governingLaw)}`);
@@ -3551,6 +3589,23 @@ ${paragraphs}
             us: this.text("United States", "Estados Unidos"),
             ar: this.text("Argentina", "Argentina"),
             global: this.text("global or custom", "global o custom")
+          };
+          return labels[value] || value;
+        }
+        subprocessorAuthorizationLabel(value) {
+          const labels = {
+            general_authorization: this.text("general authorization with notice-based updates", "autorizaci\xF3n general con avisos de actualizaci\xF3n"),
+            specific_approval: this.text("specific approval before adding new subprocessors", "aprobaci\xF3n espec\xEDfica antes de sumar nuevos subprocessors"),
+            contract_defined: this.text("the main contract or order form defines the applicable authorization model", "el contrato principal u order form define el modelo de autorizaci\xF3n aplicable")
+          };
+          return labels[value] || value;
+        }
+        auditMechanismLabel(value) {
+          const labels = {
+            questionnaire_and_certifications: this.text("questionnaires, certifications, and documentary evidence", "cuestionarios, certificaciones y evidencia documental"),
+            remote_review: this.text("remote review of documents or coordinated evidence requests", "revisi\xF3n remota de documentos o pedidos coordinados de evidencia"),
+            onsite_limited: this.text("limited onsite audit rights subject to confidentiality and operational safeguards", "auditor\xEDa onsite limitada, sujeta a confidencialidad y resguardos operativos"),
+            contract_defined: this.text("the main contract defines the audit mechanics and escalation path", "el contrato principal define la mec\xE1nica de auditor\xEDa y el camino de escalamiento")
           };
           return labels[value] || value;
         }

@@ -369,12 +369,18 @@ function baseDpaInput() {
       confidentialityMeasures: 'Need-to-know access restrictions and confidentiality obligations.',
       securityMeasures: 'Role-based access control, logging, encryption in transit, hardening, and reasonable monitoring.',
       subprocessorsUsed: true,
+      subprocessorAuthorization: 'general_authorization',
+      subprocessorObjectionWindow: 'Reasonable prior notice for material subprocessor changes.',
       subprocessorMethodology: 'Subprocessors are reviewed and bound by contractual data protection obligations.',
       internationalTransfers: true,
       transferMechanism: 'Contractual safeguards and equivalent regional hosting controls where applicable.',
+      transferSupplementarySafeguards: 'Regional hosting, minimization, encryption, and vendor review.',
       breachNotificationTime: 'Without undue delay after confirming a relevant incident.',
       assistanceCommitments: 'Reasonable assistance for data subject requests and compliance obligations.',
       deletionReturnPeriod: 'Data is returned or deleted within a reasonable period after service termination.',
+      backupRetentionHandling: 'Residual backups remain in controlled retention cycles until secure purge.',
+      auditMechanism: 'questionnaire_and_certifications',
+      auditNoticePeriod: 'Reasonable prior notice and coordination.',
       auditRights: 'Reasonable information, certifications, or equivalent evidence may be provided subject to confidentiality.',
       governingLaw: 'As set out in the master services agreement.',
       euSccRequired: true
@@ -393,6 +399,10 @@ test('dpa generator includes controller processor style sections', async () => {
   assert.match(result.markdown, /Roles, Scope, and Subject Matter/);
   assert.match(result.markdown, /International Transfers/);
   assert.match(result.markdown, /Article 28 GDPR|controller-processor obligations/i);
+  assert.match(result.markdown, /Authorization model|Modelo de autorización/);
+  assert.match(result.markdown, /Supplementary safeguards|Salvaguardas complementarias/);
+  assert.match(result.markdown, /Backups and residual copies|Backups y copias residuales/);
+  assert.match(result.markdown, /Typical audit mechanism|Mecanismo habitual de auditoría/);
 });
 
 test('dpa html includes internal JSON-LD metadata and accessible structure', async () => {

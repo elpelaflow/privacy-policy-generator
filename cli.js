@@ -250,6 +250,17 @@ const DPA_DATA_SUBJECT_OPTIONS = [
   { value: 'Prospectos o contactos comerciales del cliente', label: 'Prospectos o leads', description: 'Leads, prospectos o contactos comerciales del cliente.' },
   { value: 'Clientes o usuarios autenticados del cliente', label: 'Clientes autenticados', description: 'Cuentas o usuarios registrados del cliente.' }
 ];
+const DPA_SUBPROCESSOR_AUTHORIZATION_OPTIONS = [
+  { value: 'general_authorization', label: 'Autorización general con aviso', description: 'Se permiten subprocessors con aviso razonable y eventual objeción del cliente.' },
+  { value: 'specific_approval', label: 'Aprobación específica', description: 'Cada nuevo subprocessor requiere aprobación o consentimiento puntual.' },
+  { value: 'contract_defined', label: 'Definido por contrato principal', description: 'La mecánica exacta se remite al MSA, DPA principal o anexo comercial.' }
+];
+const DPA_AUDIT_MECHANISM_OPTIONS = [
+  { value: 'questionnaire_and_certifications', label: 'Cuestionarios y certificaciones', description: 'Vendor review basado en respuestas, certificaciones y evidencia documental.' },
+  { value: 'remote_review', label: 'Revisión remota', description: 'Intercambio coordinado de evidencia o revisión documental remota.' },
+  { value: 'onsite_limited', label: 'Onsite limitado', description: 'Auditoría onsite excepcional y acotada.' },
+  { value: 'contract_defined', label: 'Definido por contrato', description: 'La mecánica exacta se remite al contrato principal o anexo negociado.' }
+];
 
 const AI_SYSTEM_OPTIONS = [
   { value: 'chatbot_or_assistant', label: 'Chatbot o asistente', description: 'Asistentes conversacionales o soporte guiado.' },
@@ -3282,6 +3293,21 @@ async function collectDpaSection(rl, state) {
     },
     async () => {
       if (!state.dpa.subprocessorsUsed) return;
+      const choice = await promptSingleChoice(rl, 'Cómo se autorizan los subprocessors', DPA_SUBPROCESSOR_AUTHORIZATION_OPTIONS, { allowOther: false });
+      if (choice === BACK) return BACK;
+      state.dpa.subprocessorAuthorization = choice.value;
+    },
+    async () => {
+      if (!state.dpa.subprocessorsUsed) return;
+      const value = await promptText(rl, 'Preaviso o ventana de objeción para subprocessors', {
+        allowEmpty: true,
+        defaultValue: state.dpa.subprocessorObjectionWindow || 'Aviso razonable previo para cambios materiales de subprocessors, sujeto al contrato principal.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.subprocessorObjectionWindow = value;
+    },
+    async () => {
+      if (!state.dpa.subprocessorsUsed) return;
       const value = await promptText(rl, 'Criterio o metodología sobre subprocessors', {
         allowEmpty: true,
         defaultValue: state.dpa.subprocessorMethodology || 'Se seleccionan proveedores con garantías razonables y se les imponen obligaciones contractuales de protección de datos acordes al servicio.'
@@ -3307,6 +3333,15 @@ async function collectDpaSection(rl, state) {
       });
       if (value === BACK) return BACK;
       state.dpa.transferMechanism = value;
+    },
+    async () => {
+      if (!state.dpa.internationalTransfers && !state.dpa.euSccRequired) return;
+      const value = await promptText(rl, 'Salvaguardas complementarias de transferencias', {
+        allowEmpty: true,
+        defaultValue: state.dpa.transferSupplementarySafeguards || 'Podemos apoyarnos en regionalización, minimización, cifrado, segregación de accesos y evaluación razonable de vendors según el flujo aplicable.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.transferSupplementarySafeguards = value;
     },
     async () => {
       const value = await promptYesNo(
@@ -3343,6 +3378,27 @@ async function collectDpaSection(rl, state) {
       state.dpa.deletionReturnPeriod = value;
     },
     async () => {
+      const value = await promptText(rl, 'Tratamiento de backups o copias residuales', {
+        allowEmpty: true,
+        defaultValue: state.dpa.backupRetentionHandling || 'Las copias de seguridad residuales siguen su ciclo de retención y purga controlada, con acceso restringido y sin reutilización activa para operaciones ordinarias.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.backupRetentionHandling = value;
+    },
+    async () => {
+      const choice = await promptSingleChoice(rl, 'Mecanismo habitual de auditoría', DPA_AUDIT_MECHANISM_OPTIONS, { allowOther: false });
+      if (choice === BACK) return BACK;
+      state.dpa.auditMechanism = choice.value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Preaviso para auditoría', {
+        allowEmpty: true,
+        defaultValue: state.dpa.auditNoticePeriod || 'Preaviso razonable y coordinación previa, salvo urgencia contractual o legal.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.auditNoticePeriod = value;
+    },
+    async () => {
       const value = await promptText(rl, 'Enfoque de auditoría o información', {
         allowEmpty: true,
         defaultValue: state.dpa.auditRights || 'Podemos proporcionar información razonable, respuestas documentadas, certificaciones o evidencia equivalente, sujeto a confidencialidad y límites operativos razonables.'
@@ -3373,8 +3429,10 @@ function printDpaSummary(state, validation) {
   stdout.write(`- Categorías de datos: ${state.dpa.personalDataCategories.length > 0 ? state.dpa.personalDataCategories.join(', ') : '(sin definir)'}\n`);
   stdout.write(`- Categorías de titulares: ${state.dpa.dataSubjectCategories.length > 0 ? state.dpa.dataSubjectCategories.join(', ') : '(sin definir)'}\n`);
   stdout.write(`- Subprocessors: ${state.dpa.subprocessorsUsed ? 'sí' : 'no'}\n`);
+  stdout.write(`- Autorización de subprocessors: ${optionLabel(DPA_SUBPROCESSOR_AUTHORIZATION_OPTIONS, state.dpa.subprocessorAuthorization || '(sin definir)')}\n`);
   stdout.write(`- Transferencias internacionales: ${state.dpa.internationalTransfers ? 'sí' : 'no'}\n`);
   stdout.write(`- SCC o equivalentes: ${state.dpa.euSccRequired ? 'sí' : 'no'}\n`);
+  stdout.write(`- Auditoría: ${optionLabel(DPA_AUDIT_MECHANISM_OPTIONS, state.dpa.auditMechanism || '(sin definir)')}\n`);
   stdout.write(`- Idioma de salida: ${optionLabel(OUTPUT_LANGUAGE_OPTIONS, state.output.language || 'es')}\n`);
   stdout.write(`- Formato: ${optionLabel(OUTPUT_FORMAT_OPTIONS, state.output.format || 'markdown')}\n`);
   stdout.write(`- URL pública hasheada: ${state.output.publishHashedUrl ? state.output.baseUrl : 'no'}\n`);
@@ -3429,12 +3487,18 @@ async function runDpaWizard(generator) {
       confidentialityMeasures: 'Acceso restringido por necesidad de conocer, compromisos de confidencialidad y controles internos sobre personal autorizado.',
       securityMeasures: 'Controles de acceso, registros operativos, cifrado en tránsito, revisión de dependencias y medidas razonables de hardening.',
       subprocessorsUsed: true,
+      subprocessorAuthorization: 'general_authorization',
+      subprocessorObjectionWindow: 'Aviso razonable previo para cambios materiales de subprocessors, sujeto al contrato principal.',
       subprocessorMethodology: 'Se seleccionan proveedores con garantías razonables y se les imponen obligaciones contractuales de protección de datos acordes al servicio.',
       internationalTransfers: false,
       transferMechanism: 'Cuando corresponde, usamos cláusulas contractuales, salvaguardas equivalentes o bases legales compatibles con la jurisdicción aplicable.',
+      transferSupplementarySafeguards: 'Podemos apoyarnos en regionalización, minimización, cifrado, segregación de accesos y evaluación razonable de vendors según el flujo aplicable.',
       breachNotificationTime: 'Sin demoras indebidas y dentro de un plazo razonable desde la confirmación del incidente.',
       assistanceCommitments: 'Brindamos asistencia razonable para solicitudes de titulares, evaluaciones de impacto y consultas regulatorias en la medida en que el servicio y la información disponible lo permitan.',
       deletionReturnPeriod: 'Al finalizar el servicio, devolvemos o eliminamos los datos personales dentro de un plazo razonable, salvo retención legal o backups de seguridad con ciclo controlado.',
+      backupRetentionHandling: 'Las copias de seguridad residuales siguen su ciclo de retención y purga controlada, con acceso restringido y sin reutilización activa para operaciones ordinarias.',
+      auditMechanism: 'questionnaire_and_certifications',
+      auditNoticePeriod: 'Preaviso razonable y coordinación previa, salvo urgencia contractual o legal.',
       auditRights: 'Podemos proporcionar información razonable, respuestas documentadas, certificaciones o evidencia equivalente, sujeto a confidencialidad y límites operativos razonables.',
       governingLaw: 'Según el acuerdo principal entre las partes y la jurisdicción aplicable al servicio.',
       euSccRequired: false,
