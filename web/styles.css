@@ -184,7 +184,7 @@ button, input, select, textarea { font: inherit; }
   gap: 8px;
 }
 .advisor-panel .advisor-targets .checkbox-item {
-  padding: 10px 12px;
+  padding: 9px 11px;
 }
 .advisor-panel .advisor-actions {
   display: flex;
@@ -269,12 +269,31 @@ button, input, select, textarea { font: inherit; }
   display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;
 }
 .checkbox-item {
-  display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px;
-  border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,0.04);
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.035);
 }
-.checkbox-item input { margin-top: 3px; }
-.checkbox-item strong { display: block; margin-bottom: 4px; }
-.checkbox-item small { color: var(--muted); line-height: 1.5; display: block; }
+.checkbox-item input {
+  margin-top: 2px;
+  inline-size: 15px;
+  block-size: 15px;
+}
+.checkbox-item strong {
+  display: block;
+  margin-bottom: 3px;
+  font-size: .95rem;
+  line-height: 1.25;
+}
+.checkbox-item small {
+  color: var(--muted);
+  line-height: 1.4;
+  font-size: .84rem;
+  display: block;
+}
 
 .results-shell { padding: 22px; }
 .results-top { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
