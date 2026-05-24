@@ -87,7 +87,8 @@
             effectiveDate: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
             warnings: normalized.warnings,
             sections: [],
-            language
+            language,
+            metadata: this.buildHtmlMetadata(normalized.data)
           };
           const decisionLog = [];
           if (normalized.errors.length === 0) {
@@ -507,12 +508,14 @@
         }
         formatAsHTML(policy) {
           const labels = policy.language === "es" ? { title: "Pol\xEDtica de Privacidad", effectiveDate: "Fecha de vigencia" } : { title: "Privacy Policy", effectiveDate: "Effective Date" };
+          const structuredData = this.buildPrivacyStructuredData(policy, labels.title);
           let html = `<!DOCTYPE html>
 <html lang="${policy.language === "es" ? "es" : "en"}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(labels.title)} - ${escapeHtml(policy.businessName)}</title>
+  ${structuredData ? `<script type="application/ld+json">${serializeJsonLd(structuredData)}<\/script>` : ""}
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #222; max-width: 900px; margin: 0 auto; padding: 24px; }
     h1, h2, h3 { line-height: 1.2; }
@@ -543,6 +546,52 @@
           });
           return html;
         }
+        buildHtmlMetadata(data) {
+          return {
+            websiteUrl: this.stringValue(data.business?.websiteUrl),
+            country: this.stringValue(data.business?.country),
+            contactEmail: this.stringValue(data.contact?.email),
+            contactPageUrl: this.stringValue(data.contact?.pageUrl)
+          };
+        }
+        buildPrivacyStructuredData(policy, pageTitle) {
+          const metadata = policy.metadata || {};
+          const canonicalUrl = metadata.websiteUrl || metadata.contactPageUrl;
+          if (!canonicalUrl) {
+            return null;
+          }
+          const language = policy.language === "es" ? "es" : "en";
+          const organization = {
+            "@type": "Organization",
+            name: policy.businessName
+          };
+          if (metadata.websiteUrl) {
+            organization.url = metadata.websiteUrl;
+          }
+          if (metadata.contactEmail) {
+            organization.email = metadata.contactEmail;
+          }
+          return {
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "WebPage",
+                name: `${pageTitle} - ${policy.businessName}`,
+                url: canonicalUrl,
+                inLanguage: language,
+                dateModified: policy.effectiveDate,
+                lastReviewed: policy.effectiveDate,
+                about: {
+                  "@type": "Thing",
+                  name: pageTitle
+                },
+                publisher: organization,
+                accountablePerson: organization
+              },
+              organization
+            ]
+          };
+        }
       };
       function escapeHtml(value) {
         return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -553,6 +602,9 @@
           return `<ul>${items}</ul>`;
         }
         return `<p>${escapeHtml(paragraph).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")}</p>`;
+      }
+      function serializeJsonLd(value) {
+        return JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
       }
       module.exports = PrivacyPolicyGenerator;
     }

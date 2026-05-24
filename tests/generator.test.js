@@ -175,6 +175,21 @@ test('spanish output uses spanish headings and body text', async () => {
   assert.match(result.markdown, /Cómo Usamos la Información/);
 });
 
+test('privacy html includes internal JSON-LD metadata for page and organization', async () => {
+  const generator = new PrivacyPolicyGenerator();
+  const input = baseInput();
+  input.settings = { language: 'en' };
+
+  const result = await generator.generate(input);
+
+  assert.match(result.html, /<script type="application\/ld\+json">/);
+  assert.match(result.html, /"@context":"https:\/\/schema\.org"/);
+  assert.match(result.html, /"@type":"WebPage"/);
+  assert.match(result.html, /"@type":"Organization"/);
+  assert.match(result.html, /"url":"https:\/\/acme\.test"/);
+  assert.match(result.html, /"email":"privacy@acme\.test"/);
+});
+
 test('hashed filename is deterministic for the same html content', async () => {
   const filenameA = buildHashedFilename('Acme', '<html>same</html>');
   const filenameB = buildHashedFilename('Acme', '<html>same</html>');

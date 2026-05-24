@@ -19,6 +19,7 @@ This repo now supports two delivery modes:
 - optional hashed public URL generation for HTML published through hosting you already have
 - GitHub OAuth publish flow for user-owned GitHub Pages repos
 - safe publish paths under `legal/<document-type>/...` to avoid touching a user's site root
+- privacy-policy HTML now embeds internal `JSON-LD` metadata to describe the page and responsible organization
 - validation errors and draft warnings
 - explainable `decisionLog` output
 - HTML, Markdown, and plain text generation
@@ -46,6 +47,17 @@ What it does not do yet:
 - auto-edit the user's existing homepage or footer to insert legal links
 - auto-enable GitHub Pages on repos where Pages is not configured
 - publish arbitrary custom document roots outside the current guided flow
+
+## Structured Data Note
+
+The generated privacy-policy HTML can now include embedded `JSON-LD` metadata using Schema.org types such as `WebPage` and `Organization`.
+
+Important clarification:
+
+- this metadata is internal, not visible as normal page content
+- it is meant to improve semantic machine-readable description of the page and the responsible entity
+- it does **not** guarantee special Google rich results or official legal recognition by itself
+- treat it as a structured-data enhancement, not as a compliance or SEO magic switch
 
 ## GitHub Publish v1
 
