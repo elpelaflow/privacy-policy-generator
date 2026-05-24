@@ -272,8 +272,9 @@ function buildDocuments() {
         title: 'Partes y alcance',
         description: 'Contraparte, servicio, duración y categorías de datos/titulares.',
         fields: [
-          textField('dpa.counterpartyName', 'Nombre de la contraparte', ''),
+          textField('dpa.counterpartyName', 'Nombre de la contraparte', '', '', true),
           selectField('dpa.counterpartyRole', 'Rol de la contraparte', DPA_COUNTERPARTY_ROLES, 'controller'),
+          checkboxField('dpa.regulatoryScope', 'Alcance regulatorio o regiones del cliente', DPA_REGULATORY_SCOPE, ['eu']),
           textareaField('dpa.servicesDescription', 'Descripción del servicio', 'Prestación SaaS B2B con gestión de cuentas, soporte operativo y procesamiento limitado a la prestación del servicio.'),
           textField('dpa.duration', 'Duración del tratamiento', 'Durante la vigencia del servicio y por el tiempo necesario para cierre, soporte y retenciones legales aplicables.'),
           textareaField('dpa.processingPurpose', 'Naturaleza y finalidad del tratamiento', 'Procesar datos personales por cuenta del cliente para prestar, asegurar, soportar y administrar el servicio contratado.'),
@@ -340,7 +341,7 @@ function buildDocuments() {
         title: 'Entrenamiento y mejora',
         description: 'Si se usan datos para entrenamiento, fine-tuning, evaluación o mejora del producto.',
         fields: [
-          selectField('ai.trainingDataUse', 'Uso de datos para entrenamiento o mejora', AI_TRAINING_DATA_USE, 'no_training'),
+          selectField('ai.trainingDataUse', 'Uso de datos para entrenamiento o mejora', AI_TRAINING_DATA_USE, '', true),
           checkboxField('ai.dataSources', 'Fuentes de datos relacionadas', AI_DATA_SOURCES, ['customer_inputs', 'service_logs']),
           booleanField('ai.personalDataInTraining', 'Pueden intervenir datos personales en estos flujos', 'Marcá esto sólo si prompts, outputs, logs o datasets vinculados a IA pueden incluir datos personales.', false),
           checkboxField('ai.modelImprovementUses', 'Usos concretos para mejora o evaluación', AI_MODEL_IMPROVEMENT_USES, []),
@@ -739,7 +740,9 @@ function createDefaults(type, seed = null) {
     return mergeSeed({
       ...common,
       business: { ...common.business, type: 'saas' },
-      dpa: {}
+      dpa: {
+        regulatoryScope: ['eu']
+      }
     }, seed);
   }
 
@@ -747,7 +750,9 @@ function createDefaults(type, seed = null) {
     return mergeSeed({
       ...common,
       business: { ...common.business, type: 'saas' },
-      ai: {}
+      ai: {
+        trainingDataUse: ''
+      }
     }, seed);
   }
 
@@ -1830,6 +1835,13 @@ const DPA_COUNTERPARTY_ROLES = [
   { value: 'processor', label: 'Processor / proveedor tercero' },
   { value: 'joint_controller', label: 'Joint controller' }
 ];
+const DPA_REGULATORY_SCOPE = [
+  { value: 'eu', label: 'UE / GDPR', description: 'Clientes, usuarios o tratamiento con foco GDPR / EEE.' },
+  { value: 'uk', label: 'UK / UK GDPR', description: 'Clientes o tratamiento con foco UK GDPR.' },
+  { value: 'us', label: 'Estados Unidos', description: 'Relación contractual o tratamiento con foco EE.UU.' },
+  { value: 'ar', label: 'Argentina', description: 'Relación contractual o tratamiento con foco Argentina.' },
+  { value: 'global', label: 'Global / custom', description: 'Cobertura contractual más general o multinacional.' }
+];
 const DPA_DATA_CATEGORIES = [
   { value: 'Datos de identificación y contacto', label: 'Identificación y contacto', description: 'Nombres, emails, cargos o identificadores comerciales.' },
   { value: 'Datos de cuenta o credenciales de acceso', label: 'Cuenta y acceso', description: 'Usuarios, cuentas, roles, credenciales o tokens ligados al servicio.' },
@@ -1858,6 +1870,7 @@ const AI_USE_CASES = [
   { value: 'internal_operations', label: 'Operación interna', description: 'Backoffice, soporte interno, QA o flujos internos.' }
 ];
 const AI_TRAINING_DATA_USE = [
+  { value: '', label: 'Elegí una opción' },
   { value: 'no_training', label: 'No se usa para entrenamiento' },
   { value: 'evaluation_only', label: 'Sólo evaluación o safety review' },
   { value: 'service_improvement', label: 'Mejora del producto o del modelo acotado' },

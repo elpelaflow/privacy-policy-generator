@@ -92,7 +92,7 @@ class AiPolicyGenerator {
         useCases: this.arrayValue(input.ai?.useCases),
         userFacingAi: this.booleanValue(input.ai?.userFacingAi, true),
         generatedContentLabeling: this.booleanValue(input.ai?.generatedContentLabeling, false),
-        trainingDataUse: this.stringValue(input.ai?.trainingDataUse, 'no_training'),
+        trainingDataUse: this.stringValue(input.ai?.trainingDataUse),
         dataSources: this.arrayValue(input.ai?.dataSources),
         personalDataInTraining: this.booleanValue(input.ai?.personalDataInTraining, false),
         modelImprovementUses: this.arrayValue(input.ai?.modelImprovementUses),
@@ -157,7 +157,7 @@ class AiPolicyGenerator {
     if (data.ai.optOutAvailable && !data.ai.optOutMethod) warnings.push(messages.missingOptOutMethod);
     if (!data.ai.retentionPeriod) warnings.push(messages.missingRetention);
     if (data.ai.thirdPartyProviders.length === 0) warnings.push(messages.missingProviders);
-    if ((data.ai.automatedDecisionMaking || data.ai.humanReviewAvailable) && !data.ai.appealChannel) warnings.push(messages.missingAppealChannel);
+    if (data.ai.automatedDecisionMaking && !data.ai.appealChannel) warnings.push(messages.missingAppealChannel);
     if (!data.ai.sensitiveDataRestrictions) warnings.push(messages.missingSensitiveRestrictions);
     if (!data.ai.securityControls) warnings.push(messages.missingSecurityControls);
     if (data.ai.automatedDecisionMaking && !data.ai.humanReviewAvailable) warnings.push(messages.noHumanReviewWarning);

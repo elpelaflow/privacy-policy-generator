@@ -3247,6 +3247,7 @@ ${paragraphs}
             dpa: {
               counterpartyName: this.stringValue(input.dpa?.counterpartyName),
               counterpartyRole: this.stringValue(input.dpa?.counterpartyRole, "controller"),
+              regulatoryScope: this.arrayValue(input.dpa?.regulatoryScope),
               servicesDescription: this.stringValue(input.dpa?.servicesDescription),
               duration: this.stringValue(input.dpa?.duration),
               processingPurpose: this.stringValue(input.dpa?.processingPurpose),
@@ -3274,7 +3275,8 @@ ${paragraphs}
           const messages = data.settings.language === "es" ? {
             missingBusinessName: "El nombre del negocio o proveedor es obligatorio.",
             missingWebsite: "La URL principal del servicio es obligatoria.",
-            missingCounterparty: "Conviene identificar a la contraparte del DPA (por ejemplo, el cliente o controller).",
+            missingCounterparty: "Deb\xE9s identificar a la contraparte del DPA (por ejemplo, el cliente o controller).",
+            missingRegulatoryScope: "Conviene indicar el alcance regulatorio o las regiones relevantes del cliente para no subestimar obligaciones tipo GDPR, UK GDPR u otras.",
             missingServices: "Deb\xE9s describir el servicio SaaS o el alcance principal del procesamiento.",
             missingPurpose: "Conviene describir la naturaleza y la finalidad del tratamiento.",
             missingPersonalDataCategories: "Conviene indicar qu\xE9 categor\xEDas de datos personales se procesan.",
@@ -3289,7 +3291,8 @@ ${paragraphs}
           } : {
             missingBusinessName: "Business or provider name is required.",
             missingWebsite: "Primary service URL is required.",
-            missingCounterparty: "You should identify the DPA counterparty (for example, the customer or controller).",
+            missingCounterparty: "You must identify the DPA counterparty (for example, the customer or controller).",
+            missingRegulatoryScope: "You should indicate the customer regulatory scope or relevant regions so GDPR, UK GDPR, or similar expectations are not understated.",
             missingServices: "You must describe the SaaS service or main processing scope.",
             missingPurpose: "You should describe the nature and purpose of the processing.",
             missingPersonalDataCategories: "You should identify the categories of personal data processed.",
@@ -3306,7 +3309,8 @@ ${paragraphs}
           const warnings = [];
           if (!data.business.name) errors.push(messages.missingBusinessName);
           if (!data.business.websiteUrl) errors.push(messages.missingWebsite);
-          if (!data.dpa.counterpartyName) warnings.push(messages.missingCounterparty);
+          if (!data.dpa.counterpartyName) errors.push(messages.missingCounterparty);
+          if (data.dpa.regulatoryScope.length === 0) warnings.push(messages.missingRegulatoryScope);
           if (!data.dpa.servicesDescription) errors.push(messages.missingServices);
           if (!data.dpa.processingPurpose) warnings.push(messages.missingPurpose);
           if (data.dpa.personalDataCategories.length === 0) warnings.push(messages.missingPersonalDataCategories);
@@ -3377,7 +3381,7 @@ ${paragraphs}
           return String(text || "").replaceAll("{business_name}", data.business.name || "").replaceAll("{website}", data.business.websiteUrl || "").replaceAll("{counterparty_name}", data.dpa.counterpartyName || this.text("the customer", "la contraparte"));
         }
         dpaLegalContext(data) {
-          const mentionsEuStyle = data.dpa.euSccRequired || ["eu", "uk"].includes(this.inferJurisdiction(data.business.country));
+          const mentionsEuStyle = data.dpa.euSccRequired || data.dpa.regulatoryScope.some((value) => ["eu", "uk"].includes(value)) || ["eu", "uk"].includes(this.inferJurisdiction(data.business.country));
           return mentionsEuStyle ? this.text(
             "Where applicable, this agreement is intended to support controller-processor obligations and contractual requirements commonly associated with Article 28 GDPR and similar data processing frameworks.",
             "Cuando corresponda, este acuerdo busca respaldar obligaciones controller-processor y exigencias contractuales com\xFAnmente asociadas al Art\xEDculo 28 del GDPR y marcos similares de tratamiento de datos."
@@ -3395,6 +3399,7 @@ ${paragraphs}
             ).replaceAll("{counterparty_role}", counterpartyRole), data),
             data.dpa.servicesDescription ? `${this.text("Service scope", "Alcance del servicio")}: ${this.sentence(data.dpa.servicesDescription)}` : "",
             data.dpa.duration ? `${this.text("Processing duration", "Duraci\xF3n del tratamiento")}: ${this.sentence(data.dpa.duration)}` : "",
+            data.dpa.regulatoryScope.length > 0 ? `${this.text("Relevant regulatory scope", "Alcance regulatorio relevante")}: ${data.dpa.regulatoryScope.map((value) => this.regulatoryScopeLabel(value)).join(", ")}.` : "",
             data.dpa.personalDataCategories.length > 0 ? `${this.text("Categories of personal data", "Categor\xEDas de datos personales")}: ${data.dpa.personalDataCategories.join(", ")}.` : "",
             data.dpa.dataSubjectCategories.length > 0 ? `${this.text("Categories of data subjects", "Categor\xEDas de titulares")}: ${data.dpa.dataSubjectCategories.join(", ")}.` : ""
           ];
@@ -3523,6 +3528,16 @@ ${paragraphs}
           if (["united kingdom", "uk", "reino unido", "england", "scotland", "wales"].includes(normalized)) return "uk";
           if (["germany", "france", "spain", "italy", "netherlands", "european union", "eu", "uni\xF3n europea"].includes(normalized)) return "eu";
           return "global";
+        }
+        regulatoryScopeLabel(value) {
+          const labels = {
+            eu: this.text("EU / GDPR", "UE / GDPR"),
+            uk: this.text("UK / UK GDPR", "UK / UK GDPR"),
+            us: this.text("United States", "Estados Unidos"),
+            ar: this.text("Argentina", "Argentina"),
+            global: this.text("global or custom", "global o custom")
+          };
+          return labels[value] || value;
         }
         sentence(value) {
           const normalized = this.stringValue(value);
@@ -3738,7 +3753,7 @@ ${paragraphs}
               useCases: this.arrayValue(input.ai?.useCases),
               userFacingAi: this.booleanValue(input.ai?.userFacingAi, true),
               generatedContentLabeling: this.booleanValue(input.ai?.generatedContentLabeling, false),
-              trainingDataUse: this.stringValue(input.ai?.trainingDataUse, "no_training"),
+              trainingDataUse: this.stringValue(input.ai?.trainingDataUse),
               dataSources: this.arrayValue(input.ai?.dataSources),
               personalDataInTraining: this.booleanValue(input.ai?.personalDataInTraining, false),
               modelImprovementUses: this.arrayValue(input.ai?.modelImprovementUses),
@@ -3798,7 +3813,7 @@ ${paragraphs}
           if (data.ai.optOutAvailable && !data.ai.optOutMethod) warnings.push(messages.missingOptOutMethod);
           if (!data.ai.retentionPeriod) warnings.push(messages.missingRetention);
           if (data.ai.thirdPartyProviders.length === 0) warnings.push(messages.missingProviders);
-          if ((data.ai.automatedDecisionMaking || data.ai.humanReviewAvailable) && !data.ai.appealChannel) warnings.push(messages.missingAppealChannel);
+          if (data.ai.automatedDecisionMaking && !data.ai.appealChannel) warnings.push(messages.missingAppealChannel);
           if (!data.ai.sensitiveDataRestrictions) warnings.push(messages.missingSensitiveRestrictions);
           if (!data.ai.securityControls) warnings.push(messages.missingSecurityControls);
           if (data.ai.automatedDecisionMaking && !data.ai.humanReviewAvailable) warnings.push(messages.noHumanReviewWarning);

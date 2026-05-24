@@ -352,6 +352,7 @@ function baseDpaInput() {
     dpa: {
       counterpartyName: 'Example Customer GmbH',
       counterpartyRole: 'controller',
+      regulatoryScope: ['eu'],
       servicesDescription: 'Provision of a B2B SaaS platform for account management, workflow automation, support tracking, and operational analytics.',
       duration: 'During the term of the service agreement and limited retention periods required by law or security operations.',
       processingPurpose: 'To host, secure, support, and operate the contracted SaaS platform on behalf of the customer.',
@@ -479,7 +480,7 @@ test('ai policy html includes internal JSON-LD metadata and accessible structure
   assert.match(result.html, /<meta name="legal-document-type" content="ai-policy">/);
 });
 
-test('ai policy validation warns when opt-out and review details are vague', async () => {
+test('ai policy validation warns when opt-out details and security controls are vague', async () => {
   const generator = new AiPolicyGenerator();
   const input = baseAiInput();
   input.ai.optOutAvailable = true;
@@ -491,8 +492,19 @@ test('ai policy validation warns when opt-out and review details are vague', asy
 
   assert.equal(validation.ok, true);
   assert.ok(validation.warnings.some((warning) => /opt-out|control/i.test(warning)));
-  assert.ok(validation.warnings.some((warning) => /review|support|revisión/i.test(warning)));
   assert.ok(validation.warnings.some((warning) => /security|seguridad/i.test(warning)));
+});
+
+test('ai policy validation warns about review channel only when automated decisions are involved', async () => {
+  const generator = new AiPolicyGenerator();
+  const input = baseAiInput();
+  input.ai.automatedDecisionMaking = true;
+  input.ai.appealChannel = '';
+
+  const validation = await generator.validate(input);
+
+  assert.equal(validation.ok, true);
+  assert.ok(validation.warnings.some((warning) => /review|support|revisión/i.test(warning)));
 });
 
 function baseTermsInput() {

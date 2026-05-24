@@ -228,6 +228,14 @@ const DPA_COUNTERPARTY_ROLE_OPTIONS = [
   { value: 'joint_controller', label: 'Joint controller', description: 'Las partes podrían compartir ciertas decisiones de tratamiento, sujeto a revisión legal específica.' }
 ];
 
+const DPA_REGULATORY_SCOPE_OPTIONS = [
+  { value: 'eu', label: 'UE / GDPR', description: 'Clientes, usuarios o tratamiento con foco GDPR / EEE.' },
+  { value: 'uk', label: 'UK / UK GDPR', description: 'Clientes o tratamiento con foco UK GDPR.' },
+  { value: 'us', label: 'Estados Unidos', description: 'Relación contractual o tratamiento con foco EE.UU.' },
+  { value: 'ar', label: 'Argentina', description: 'Relación contractual o tratamiento con foco Argentina.' },
+  { value: 'global', label: 'Global / custom', description: 'Cobertura contractual más general o multinacional.' }
+];
+
 const DPA_DATA_CATEGORY_OPTIONS = [
   { value: 'Datos de identificación y contacto', label: 'Identificación y contacto', description: 'Nombre, email, cargo, organización o identificadores comerciales.' },
   { value: 'Datos de cuenta o credenciales de acceso', label: 'Cuenta y acceso', description: 'Usuarios, cuentas, roles, credenciales o tokens del servicio.' },
@@ -3198,6 +3206,11 @@ async function collectDpaSection(rl, state) {
       state.dpa.counterpartyRole = choice.value;
     },
     async () => {
+      const value = await promptMultiChoice(rl, 'Qué alcance regulatorio o regiones del cliente querés reflejar', DPA_REGULATORY_SCOPE_OPTIONS, { allowNone: false, allowOther: false });
+      if (value === BACK) return BACK;
+      state.dpa.regulatoryScope = value.values;
+    },
+    async () => {
       const value = await promptText(rl, 'Descripción del servicio SaaS o del alcance del procesamiento', {
         allowEmpty: true,
         defaultValue: state.dpa.servicesDescription || 'Prestación SaaS B2B con gestión de cuentas, soporte operativo y procesamiento limitado a la prestación del servicio.'
@@ -3353,6 +3366,7 @@ function printDpaSummary(state, validation) {
   stdout.write(`- Sitio: ${state.business.websiteUrl || '(sin definir)'}\n`);
   stdout.write(`- Contraparte: ${state.dpa.counterpartyName || '(sin definir)'}\n`);
   stdout.write(`- Rol de contraparte: ${optionLabel(DPA_COUNTERPARTY_ROLE_OPTIONS, state.dpa.counterpartyRole || '(sin definir)')}\n`);
+  stdout.write(`- Alcance regulatorio cliente: ${state.dpa.regulatoryScope.length > 0 ? state.dpa.regulatoryScope.map((value) => optionLabel(DPA_REGULATORY_SCOPE_OPTIONS, value)).join(', ') : '(sin definir)'}\n`);
   stdout.write(`- Servicio: ${state.dpa.servicesDescription || '(sin definir)'}\n`);
   stdout.write(`- Categorías de datos: ${state.dpa.personalDataCategories.length > 0 ? state.dpa.personalDataCategories.join(', ') : '(sin definir)'}\n`);
   stdout.write(`- Categorías de titulares: ${state.dpa.dataSubjectCategories.length > 0 ? state.dpa.dataSubjectCategories.join(', ') : '(sin definir)'}\n`);
@@ -3396,6 +3410,7 @@ async function runDpaWizard(generator) {
     dpa: {
       counterpartyName: '',
       counterpartyRole: 'controller',
+      regulatoryScope: ['eu'],
       servicesDescription: 'Prestación SaaS B2B con gestión de cuentas, soporte operativo y procesamiento limitado a la prestación del servicio.',
       duration: 'Durante la vigencia del servicio y por el tiempo necesario para cierre, soporte y retenciones legales aplicables.',
       processingPurpose: 'Procesar datos personales por cuenta del cliente para prestar, asegurar, soportar y administrar el servicio contratado.',
@@ -3688,7 +3703,7 @@ async function runAiWizard(generator) {
       useCases: ['customer_support', 'drafting_or_generation'],
       userFacingAi: true,
       generatedContentLabeling: false,
-      trainingDataUse: 'no_training',
+      trainingDataUse: '',
       dataSources: ['customer_inputs', 'service_logs'],
       personalDataInTraining: false,
       modelImprovementUses: [],

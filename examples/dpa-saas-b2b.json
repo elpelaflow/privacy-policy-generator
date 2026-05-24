@@ -15,6 +15,9 @@
   "dpa": {
     "counterpartyName": "Example Customer GmbH",
     "counterpartyRole": "controller",
+    "regulatoryScope": [
+      "eu"
+    ],
     "servicesDescription": "Provision of a B2B SaaS platform for account management, workflow automation, support tracking, and operational analytics for the customer.",
     "duration": "For the term of the master services agreement and any limited retention periods required for support, security, backups, or legal obligations.",
     "processingPurpose": "To host, secure, support, and operate the contracted SaaS platform on behalf of the customer, including account administration, service delivery, support handling, and system reliability.",
