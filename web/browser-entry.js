@@ -5,6 +5,7 @@ const CookiesPolicyGenerator = require('../js/cookies-generator');
 const ReturnRefundPolicyGenerator = require('../js/refund-generator');
 const DisclaimerGenerator = require('../js/disclaimer-generator');
 const SecurityPolicyGenerator = require('../js/security-generator');
+const DataProcessingAgreementGenerator = require('../js/dpa-generator');
 
 globalThis.LegalGenerators = {
   PrivacyPolicyGenerator,
@@ -13,5 +14,6 @@ globalThis.LegalGenerators = {
   CookiesPolicyGenerator,
   ReturnRefundPolicyGenerator,
   DisclaimerGenerator,
-  SecurityPolicyGenerator
+  SecurityPolicyGenerator,
+  DataProcessingAgreementGenerator
 };

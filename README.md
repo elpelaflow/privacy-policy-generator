@@ -1,12 +1,12 @@
 # Privacy Policy Generator
 
-CLI-first and web-enabled generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, security policies, and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, automated tests, and GitHub Pages publishing support.
+CLI-first and web-enabled generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, security policies, data processing agreements (DPA), and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, automated tests, and GitHub Pages publishing support.
 
 ## Scope
 
 This repo now supports two delivery modes:
 
-- terminal-first generators for privacy, terms, cookies, return/refund, disclaimers, security-policy, and deletion-instructions documents
+- terminal-first generators for privacy, terms, cookies, return/refund, disclaimers, security-policy, DPA, and deletion-instructions documents
 - a client-side static web app that runs fully in the browser and can be deployed to GitHub Pages
 
 ## Features
@@ -156,6 +156,7 @@ Once the static app and backend are configured, the browser flow is:
 legal/privacy/my-app-abc123.html
 legal/terms/my-app-abc123.html
 legal/cookies/my-app-abc123.html
+legal/dpa/my-app-abc123.html
 ```
 
 If the selected repository already has GitHub Pages enabled and accessible, the final URL should be usable immediately.
@@ -266,6 +267,7 @@ but not as a full GitHub publish app.
 - `refund`: return and refund policy generator
 - `disclaimer`: modular disclaimer generator
 - `security`: security policy and responsible disclosure generator
+- `dpa`: data processing agreement generator for SaaS B2B / controller-processor relationships
 
 ## Supported Inputs
 
@@ -387,6 +389,12 @@ Validate security policy:
 privacy-policy validate --document security --input ./examples/security-disclosure.json
 ```
 
+Validate DPA:
+
+```bash
+privacy-policy validate --document dpa --input ./examples/dpa-saas-b2b.json
+```
+
 Explain which sections were included:
 
 ```bash
@@ -429,6 +437,12 @@ Generate security policy in Markdown:
 privacy-policy generate --document security --input ./examples/security-disclosure.json --format markdown
 ```
 
+Generate DPA in Markdown:
+
+```bash
+privacy-policy generate --document dpa --input ./examples/dpa-saas-b2b.json --format markdown
+```
+
 Publish directly and return the final public URL:
 
 ```bash
@@ -450,6 +464,7 @@ If you omit `--publish-dir`, the CLI defaults to generic local directories such 
 ./public/refunds
 ./public/disclaimer
 ./public/security
+./public/dpa
 ```
 
 Generate Markdown:
@@ -533,6 +548,16 @@ privacy-policy publish \
   --publish-dir ./public/security
 ```
 
+Generate and publish DPA:
+
+```bash
+privacy-policy publish \
+  --document dpa \
+  --input ./examples/dpa-saas-b2b.json \
+  --base-url https://example.com/dpa \
+  --publish-dir ./public/dpa
+```
+
 ## Input Format
 
 ```json
@@ -568,7 +593,7 @@ privacy-policy publish \
 You can still use JSON files directly, but the intended terminal workflow is now:
 
 1. run `privacy-policy`
-2. choose whether you want `privacy`, `terms`, `cookies`, `refund`, `disclaimer`, `security`, or `deletion`
+2. choose whether you want `privacy`, `terms`, `cookies`, `refund`, `disclaimer`, `security`, `dpa`, or `deletion`
 3. answer the wizard questions
 4. choose output language and output format
 5. optionally save both the generated document and the JSON input
@@ -617,6 +642,17 @@ For `security`, the wizard asks specifically about:
 - coordinated disclosure and bug bounty notes
 - optional summary of security practices
 
+For `dpa`, the wizard asks specifically about:
+
+- counterparty identity and role
+- SaaS service description and processing duration
+- processing purpose
+- categories of personal data and data subjects
+- instruction channels, confidentiality, and security measures
+- subprocessors and transfer mechanisms
+- incident timing, assistance commitments, and audit rights
+- deletion or return handling at end of service
+
 For `terms`, the wizard opens separate sections for:
 
 - service description
@@ -655,6 +691,7 @@ Current test coverage checks:
 - refund generation covers return windows, exceptions, and refund timing
 - disclaimer generation covers modular warnings for links, reviews, risks, and informational content
 - security generation covers reporting channels, safe harbor, disclosure timing, and optional security-practices summaries
+- DPA generation covers controller-processor roles, subprocessors, transfer mechanisms, incident timing, and end-of-service deletion/return language
 - deletion generation covers request channels, deletion scope, and Meta-connected account guidance
 - validation reports missing required fields
 
@@ -673,6 +710,7 @@ examples/cookies-ar-meta.json
 examples/refund-ar-ecommerce.json
 examples/disclaimer-meta-content.json
 examples/security-disclosure.json
+examples/dpa-saas-b2b.json
 js/generator.js
 js/terms-generator.js
 js/deletion-generator.js
@@ -680,6 +718,7 @@ js/cookies-generator.js
 js/refund-generator.js
 js/disclaimer-generator.js
 js/security-generator.js
+js/dpa-generator.js
 tests/generator.test.js
 package.json
 ```

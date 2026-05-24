@@ -1,0 +1,49 @@
+{
+  "documentType": "dpa",
+  "business": {
+    "name": "Acme Cloud",
+    "type": "saas",
+    "websiteUrl": "https://acme.example.com",
+    "country": "Germany",
+    "address": "Example Street 123, Berlin, Germany"
+  },
+  "contact": {
+    "email": "privacy@acme.example.com",
+    "phone": "",
+    "pageUrl": "https://acme.example.com/legal/dpa"
+  },
+  "dpa": {
+    "counterpartyName": "Example Customer GmbH",
+    "counterpartyRole": "controller",
+    "servicesDescription": "Provision of a B2B SaaS platform for account management, workflow automation, support tracking, and operational analytics for the customer.",
+    "duration": "For the term of the master services agreement and any limited retention periods required for support, security, backups, or legal obligations.",
+    "processingPurpose": "To host, secure, support, and operate the contracted SaaS platform on behalf of the customer, including account administration, service delivery, support handling, and system reliability.",
+    "personalDataCategories": [
+      "Identification and contact data",
+      "Account and authentication data",
+      "Usage logs and technical events",
+      "Customer-uploaded operational data"
+    ],
+    "dataSubjectCategories": [
+      "Customer employees and contractors",
+      "Customer end users",
+      "Customer commercial contacts"
+    ],
+    "instructionsChannel": "Documented contractual requests, support tickets from authorized customer administrators, or written email instructions from designated customer contacts.",
+    "confidentialityMeasures": "Need-to-know access restrictions, internal confidentiality obligations, access reviews, and role-based controls for authorized personnel.",
+    "securityMeasures": "Role-based access control, audit logs, encryption in transit, hardened infrastructure, dependency review, monitoring, and reasonable backup/security procedures.",
+    "subprocessorsUsed": true,
+    "subprocessorMethodology": "Infrastructure and specialist providers may be engaged where reasonably necessary, subject to contractual data protection obligations and vendor review.",
+    "internationalTransfers": true,
+    "transferMechanism": "Where applicable, transfers rely on contractual safeguards, equivalent legal mechanisms, or regional hosting arrangements assessed for the customer relationship.",
+    "breachNotificationTime": "Without undue delay after confirming a relevant incident affecting customer personal data.",
+    "assistanceCommitments": "Reasonable assistance is provided for data subject requests, security inquiries, and compliance obligations, taking into account the nature of the processing and available information.",
+    "deletionReturnPeriod": "At the end of services, personal data is returned or deleted within a reasonable period, subject to legal retention duties and documented backup/security cycles.",
+    "auditRights": "The processor may provide reasonable information, responses, certifications, or comparable evidence of compliance, subject to confidentiality and operational limits.",
+    "governingLaw": "As set out in the master services agreement and applicable data protection law.",
+    "euSccRequired": true
+  },
+  "settings": {
+    "language": "en"
+  }
+}

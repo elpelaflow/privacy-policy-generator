@@ -11,6 +11,7 @@ const CookiesPolicyGenerator = require('./js/cookies-generator');
 const ReturnRefundPolicyGenerator = require('./js/refund-generator');
 const DisclaimerGenerator = require('./js/disclaimer-generator');
 const SecurityPolicyGenerator = require('./js/security-generator');
+const DataProcessingAgreementGenerator = require('./js/dpa-generator');
 const { publishPolicy } = require('./js/publishing');
 
 const DOCUMENT_OPTIONS = [
@@ -20,7 +21,8 @@ const DOCUMENT_OPTIONS = [
   { value: 'cookies', label: 'Política de cookies', description: 'Genera una política específica de cookies, consentimiento y tecnologías similares.' },
   { value: 'refund', label: 'Devoluciones y reembolsos', description: 'Genera una política de devoluciones, cambios y reembolsos para compartir como URL pública.' },
   { value: 'disclaimer', label: 'Disclaimer / descargo', description: 'Genera descargos de responsabilidad modulares para contenido, enlaces, reseñas, salud, fitness y uso del sitio.' },
-  { value: 'security', label: 'Política de seguridad', description: 'Genera una política de seguridad y divulgación responsable para recibir reportes de vulnerabilidades.' }
+  { value: 'security', label: 'Política de seguridad', description: 'Genera una política de seguridad y divulgación responsable para recibir reportes de vulnerabilidades.' },
+  { value: 'dpa', label: 'DPA / acuerdo de tratamiento de datos', description: 'Genera un Data Processing Agreement para SaaS B2B con roles, subprocessors, seguridad y transferencias.' }
 ];
 
 const BUSINESS_TYPE_OPTIONS = [
@@ -216,6 +218,27 @@ const SECURITY_REPORT_REQUIREMENT_OPTIONS = [
   { value: 'Pasos de reproducción o prueba de concepto razonable', label: 'Reproducción o PoC', description: 'Cómo reproducir el hallazgo sin exagerar riesgo.' },
   { value: 'Activos, URLs, endpoints o cuentas involucradas', label: 'Activos afectados', description: 'Qué activos o superficies están involucrados.' },
   { value: 'Información de contacto para seguimiento', label: 'Contacto de seguimiento', description: 'Cómo continuar la coordinación del caso.' }
+];
+
+const DPA_COUNTERPARTY_ROLE_OPTIONS = [
+  { value: 'controller', label: 'Controller / cliente', description: 'La contraparte define fines y medios del tratamiento y contrata el servicio.' },
+  { value: 'processor', label: 'Processor / tercero', description: 'La contraparte también actúa como processor en una cadena de subprocesamiento.' },
+  { value: 'joint_controller', label: 'Joint controller', description: 'Las partes podrían compartir ciertas decisiones de tratamiento, sujeto a revisión legal específica.' }
+];
+
+const DPA_DATA_CATEGORY_OPTIONS = [
+  { value: 'Datos de identificación y contacto', label: 'Identificación y contacto', description: 'Nombre, email, cargo, organización o identificadores comerciales.' },
+  { value: 'Datos de cuenta o credenciales de acceso', label: 'Cuenta y acceso', description: 'Usuarios, cuentas, roles, credenciales o tokens del servicio.' },
+  { value: 'Datos de uso, eventos y registros técnicos', label: 'Uso y logs', description: 'Eventos, métricas, logs, IP y registros técnicos del uso del servicio.' },
+  { value: 'Datos comerciales o de soporte del cliente', label: 'Comercial o soporte', description: 'Tickets, conversaciones, estados operativos o soporte del cliente.' },
+  { value: 'Datos importados o cargados por el cliente', label: 'Datos cargados por el cliente', description: 'Contenido, archivos o registros que el cliente sube al servicio.' }
+];
+
+const DPA_DATA_SUBJECT_OPTIONS = [
+  { value: 'Usuarios finales del cliente', label: 'Usuarios finales', description: 'Usuarios del producto o servicio del cliente.' },
+  { value: 'Empleados o contratistas del cliente', label: 'Equipo del cliente', description: 'Administradores, empleados o contratistas del cliente.' },
+  { value: 'Prospectos o contactos comerciales del cliente', label: 'Prospectos o leads', description: 'Leads, prospectos o contactos comerciales del cliente.' },
+  { value: 'Clientes o usuarios autenticados del cliente', label: 'Clientes autenticados', description: 'Cuentas o usuarios registrados del cliente.' }
 ];
 
 const DISCLAIMER_OPTIONS = [
@@ -564,6 +587,9 @@ function defaultBaseUrlForDocument(documentType) {
   if (documentType === 'security') {
     return 'https://example.com/security';
   }
+  if (documentType === 'dpa') {
+    return 'https://example.com/dpa';
+  }
   return DEFAULT_PUBLIC_BASE_URL;
 }
 
@@ -586,14 +612,17 @@ function defaultPublishDirForDocument(documentType) {
   if (documentType === 'security') {
     return './public/security';
   }
+  if (documentType === 'dpa') {
+    return './public/dpa';
+  }
   return DEFAULT_PUBLISH_DIR;
 }
 
 function resolveDocumentType(options, input) {
-  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer', 'security'].includes(options.document)) {
+  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer', 'security', 'dpa'].includes(options.document)) {
     return options.document;
   }
-  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer', 'security'].includes(input?.documentType)) {
+  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer', 'security', 'dpa'].includes(input?.documentType)) {
     return input.documentType;
   }
   if (input?.terms) {
@@ -613,6 +642,9 @@ function resolveDocumentType(options, input) {
   }
   if (input?.security) {
     return 'security';
+  }
+  if (input?.dpa) {
+    return 'dpa';
   }
   return 'privacy';
 }
@@ -708,6 +740,7 @@ function documentOutputSuffix(documentType) {
   if (documentType === 'refund') return 'return-refund-policy';
   if (documentType === 'disclaimer') return 'disclaimer';
   if (documentType === 'security') return 'security-policy';
+  if (documentType === 'dpa') return 'data-processing-agreement';
   return 'privacy-policy';
 }
 
@@ -981,6 +1014,30 @@ function buildSecurityInputFromState(state) {
     },
     security: {
       ...state.security
+    },
+    settings: {
+      language: state.output.language
+    }
+  };
+}
+
+function buildDpaInputFromState(state) {
+  return {
+    documentType: 'dpa',
+    business: {
+      name: state.business.name,
+      type: state.business.type,
+      websiteUrl: state.business.websiteUrl,
+      country: state.business.country,
+      address: state.business.address
+    },
+    contact: {
+      email: state.contact.email,
+      phone: state.contact.phone,
+      pageUrl: state.contact.pageUrl
+    },
+    dpa: {
+      ...state.dpa
     },
     settings: {
       language: state.output.language
@@ -3044,6 +3101,318 @@ ${bold(yellow('Advertencias de revisión:'))}
   }
 }
 
+async function collectDpaSection(rl, state) {
+  await runQuestions([
+    async () => {
+      const value = await promptText(rl, 'Nombre de la contraparte del DPA', {
+        allowEmpty: true,
+        defaultValue: state.dpa.counterpartyName || ''
+      });
+      if (value === BACK) return BACK;
+      state.dpa.counterpartyName = value;
+    },
+    async () => {
+      const choice = await promptSingleChoice(rl, 'Rol principal de la contraparte', DPA_COUNTERPARTY_ROLE_OPTIONS, { allowOther: false });
+      if (choice === BACK) return BACK;
+      state.dpa.counterpartyRole = choice.value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Descripción del servicio SaaS o del alcance del procesamiento', {
+        allowEmpty: true,
+        defaultValue: state.dpa.servicesDescription || 'Prestación SaaS B2B con gestión de cuentas, soporte operativo y procesamiento limitado a la prestación del servicio.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.servicesDescription = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Duración del tratamiento', {
+        allowEmpty: true,
+        defaultValue: state.dpa.duration || 'Durante la vigencia del servicio y por el tiempo necesario para cierre, soporte y retenciones legales aplicables.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.duration = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Naturaleza y finalidad del tratamiento', {
+        allowEmpty: true,
+        defaultValue: state.dpa.processingPurpose || 'Procesar datos personales por cuenta del cliente para prestar, asegurar, soportar y administrar el servicio contratado.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.processingPurpose = value;
+    },
+    async () => {
+      const value = await promptMultiChoice(rl, 'Qué categorías de datos personales abarca el DPA', DPA_DATA_CATEGORY_OPTIONS, { allowNone: false, allowOther: true });
+      if (value === BACK) return BACK;
+      state.dpa.personalDataCategories = value.values.concat(value.manualNotes);
+    },
+    async () => {
+      const value = await promptMultiChoice(rl, 'Qué categorías de titulares están involucradas', DPA_DATA_SUBJECT_OPTIONS, { allowNone: false, allowOther: true });
+      if (value === BACK) return BACK;
+      state.dpa.dataSubjectCategories = value.values.concat(value.manualNotes);
+    },
+    async () => {
+      const value = await promptText(rl, 'Canal para instrucciones documentadas', {
+        allowEmpty: true,
+        defaultValue: state.dpa.instructionsChannel || 'Email contractual, ticket formal o instrucciones emitidas por administradores autorizados del cliente.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.instructionsChannel = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Medidas de confidencialidad', {
+        allowEmpty: true,
+        defaultValue: state.dpa.confidentialityMeasures || 'Acceso restringido por necesidad de conocer, compromisos de confidencialidad y controles internos sobre personal autorizado.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.confidentialityMeasures = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Medidas técnicas y organizativas de seguridad', {
+        allowEmpty: true,
+        defaultValue: state.dpa.securityMeasures || 'Controles de acceso, registros operativos, cifrado en tránsito, revisión de dependencias y medidas razonables de hardening.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.securityMeasures = value;
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Usás subprocessors o subencargados',
+        'Marcá sí si el servicio depende de hosting, cloud, soporte u otros proveedores que procesen datos por tu cuenta.',
+        state.dpa.subprocessorsUsed
+      );
+      if (value === BACK) return BACK;
+      state.dpa.subprocessorsUsed = value;
+    },
+    async () => {
+      if (!state.dpa.subprocessorsUsed) return;
+      const value = await promptText(rl, 'Criterio o metodología sobre subprocessors', {
+        allowEmpty: true,
+        defaultValue: state.dpa.subprocessorMethodology || 'Se seleccionan proveedores con garantías razonables y se les imponen obligaciones contractuales de protección de datos acordes al servicio.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.subprocessorMethodology = value;
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Hay transferencias internacionales',
+        'Marcá sí si hay hosting, soporte, acceso remoto o subprocessors fuera de la jurisdicción principal del cliente.',
+        state.dpa.internationalTransfers
+      );
+      if (value === BACK) return BACK;
+      state.dpa.internationalTransfers = value;
+    },
+    async () => {
+      if (!state.dpa.internationalTransfers && !state.dpa.euSccRequired) return;
+      const value = await promptText(rl, 'Mecanismo de transferencias internacionales', {
+        allowEmpty: true,
+        defaultValue: state.dpa.transferMechanism || 'Cuando corresponde, usamos cláusulas contractuales, salvaguardas equivalentes o bases legales compatibles con la jurisdicción aplicable.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.transferMechanism = value;
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Puede requerirse SCC o salvaguardas equivalentes',
+        'Marcá sí si esperás clientes UE/UK o análisis formales de transferencias.',
+        state.dpa.euSccRequired
+      );
+      if (value === BACK) return BACK;
+      state.dpa.euSccRequired = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Plazo para notificar incidentes o brechas', {
+        allowEmpty: true,
+        defaultValue: state.dpa.breachNotificationTime || 'Sin demoras indebidas y dentro de un plazo razonable desde la confirmación del incidente.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.breachNotificationTime = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Compromisos de asistencia al cliente/controller', {
+        allowEmpty: true,
+        defaultValue: state.dpa.assistanceCommitments || 'Brindamos asistencia razonable para solicitudes de titulares, evaluaciones de impacto y consultas regulatorias en la medida en que el servicio y la información disponible lo permitan.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.assistanceCommitments = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Plazo de devolución o eliminación de datos al cierre', {
+        allowEmpty: true,
+        defaultValue: state.dpa.deletionReturnPeriod || 'Al finalizar el servicio, devolvemos o eliminamos los datos personales dentro de un plazo razonable, salvo retención legal o backups de seguridad con ciclo controlado.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.deletionReturnPeriod = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Enfoque de auditoría o información', {
+        allowEmpty: true,
+        defaultValue: state.dpa.auditRights || 'Podemos proporcionar información razonable, respuestas documentadas, certificaciones o evidencia equivalente, sujeto a confidencialidad y límites operativos razonables.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.auditRights = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Ley aplicable o referencia contractual', {
+        allowEmpty: true,
+        defaultValue: state.dpa.governingLaw || 'Según el acuerdo principal entre las partes y la jurisdicción aplicable al servicio.'
+      });
+      if (value === BACK) return BACK;
+      state.dpa.governingLaw = value;
+    }
+  ]);
+}
+
+function printDpaSummary(state, validation) {
+  stdout.write(`\n${bold(magenta('Resumen antes de generar'))}\n`);
+  stdout.write(`- Documento: DPA / acuerdo de tratamiento de datos\n`);
+  stdout.write(`- Proveedor: ${state.business.name || '(sin definir)'}\n`);
+  stdout.write(`- Sitio: ${state.business.websiteUrl || '(sin definir)'}\n`);
+  stdout.write(`- Contraparte: ${state.dpa.counterpartyName || '(sin definir)'}\n`);
+  stdout.write(`- Rol de contraparte: ${optionLabel(DPA_COUNTERPARTY_ROLE_OPTIONS, state.dpa.counterpartyRole || '(sin definir)')}\n`);
+  stdout.write(`- Servicio: ${state.dpa.servicesDescription || '(sin definir)'}\n`);
+  stdout.write(`- Categorías de datos: ${state.dpa.personalDataCategories.length > 0 ? state.dpa.personalDataCategories.join(', ') : '(sin definir)'}\n`);
+  stdout.write(`- Categorías de titulares: ${state.dpa.dataSubjectCategories.length > 0 ? state.dpa.dataSubjectCategories.join(', ') : '(sin definir)'}\n`);
+  stdout.write(`- Subprocessors: ${state.dpa.subprocessorsUsed ? 'sí' : 'no'}\n`);
+  stdout.write(`- Transferencias internacionales: ${state.dpa.internationalTransfers ? 'sí' : 'no'}\n`);
+  stdout.write(`- SCC o equivalentes: ${state.dpa.euSccRequired ? 'sí' : 'no'}\n`);
+  stdout.write(`- Idioma de salida: ${optionLabel(OUTPUT_LANGUAGE_OPTIONS, state.output.language || 'es')}\n`);
+  stdout.write(`- Formato: ${optionLabel(OUTPUT_FORMAT_OPTIONS, state.output.format || 'markdown')}\n`);
+  stdout.write(`- URL pública hasheada: ${state.output.publishHashedUrl ? state.output.baseUrl : 'no'}\n`);
+  if (state.output.publishHashedUrl) stdout.write(`- Directorio publicable: ${state.output.publishDir}\n`);
+  stdout.write(`- Guardar a archivo: ${state.output.writeToFile ? state.output.outputPath : 'no'}\n`);
+  stdout.write(`- Guardar input JSON: ${state.output.saveInput ? state.output.inputPath : 'no'}\n`);
+  if (validation.warnings.length > 0) {
+    stdout.write(`\n${bold(yellow('Advertencias de revisión:'))}\n`);
+    validation.warnings.forEach((warning) => stdout.write(`- ${warning}\n`));
+  }
+}
+
+async function promptDpaReviewAction(rl) {
+  stdout.write(`\n${bold(cyan('Qué querés hacer ahora'))}\n`);
+  stdout.write(`  ${yellow('1')}. ${bold('Generar DPA')}\n`);
+  stdout.write(`  ${yellow('2')}. ${bold('Editar negocio')}\n`);
+  stdout.write(`  ${yellow('3')}. ${bold('Editar contacto')}\n`);
+  stdout.write(`  ${yellow('4')}. ${bold('Editar DPA')}\n`);
+  stdout.write(`  ${yellow('5')}. ${bold('Editar formato y guardado')}\n`);
+  stdout.write(`  ${yellow('6')}. ${bold('Cancelar')}\n`);
+  while (true) {
+    const answer = (await rl.question(`${green('Elegí un número')}: `)).trim();
+    const choice = Number.parseInt(answer, 10);
+    if (choice >= 1 && choice <= 6) return choice;
+    stdout.write(`${red('Opción inválida. Probá de nuevo.')}\n`);
+  }
+}
+
+async function runDpaWizard(generator) {
+  const rl = readline.createInterface({ input: stdin, output: stdout });
+  const state = {
+    documentType: 'dpa',
+    business: { name: '', type: 'saas', websiteUrl: '', country: 'Argentina', address: '' },
+    contact: { email: '', phone: '', pageUrl: '' },
+    dpa: {
+      counterpartyName: '',
+      counterpartyRole: 'controller',
+      servicesDescription: 'Prestación SaaS B2B con gestión de cuentas, soporte operativo y procesamiento limitado a la prestación del servicio.',
+      duration: 'Durante la vigencia del servicio y por el tiempo necesario para cierre, soporte y retenciones legales aplicables.',
+      processingPurpose: 'Procesar datos personales por cuenta del cliente para prestar, asegurar, soportar y administrar el servicio contratado.',
+      personalDataCategories: [
+        'Datos de identificación y contacto',
+        'Datos de cuenta o credenciales de acceso',
+        'Datos de uso, eventos y registros técnicos'
+      ],
+      dataSubjectCategories: [
+        'Usuarios finales del cliente',
+        'Empleados o contratistas del cliente'
+      ],
+      instructionsChannel: 'Email contractual, ticket formal o instrucciones emitidas por administradores autorizados del cliente.',
+      confidentialityMeasures: 'Acceso restringido por necesidad de conocer, compromisos de confidencialidad y controles internos sobre personal autorizado.',
+      securityMeasures: 'Controles de acceso, registros operativos, cifrado en tránsito, revisión de dependencias y medidas razonables de hardening.',
+      subprocessorsUsed: true,
+      subprocessorMethodology: 'Se seleccionan proveedores con garantías razonables y se les imponen obligaciones contractuales de protección de datos acordes al servicio.',
+      internationalTransfers: false,
+      transferMechanism: 'Cuando corresponde, usamos cláusulas contractuales, salvaguardas equivalentes o bases legales compatibles con la jurisdicción aplicable.',
+      breachNotificationTime: 'Sin demoras indebidas y dentro de un plazo razonable desde la confirmación del incidente.',
+      assistanceCommitments: 'Brindamos asistencia razonable para solicitudes de titulares, evaluaciones de impacto y consultas regulatorias en la medida en que el servicio y la información disponible lo permitan.',
+      deletionReturnPeriod: 'Al finalizar el servicio, devolvemos o eliminamos los datos personales dentro de un plazo razonable, salvo retención legal o backups de seguridad con ciclo controlado.',
+      auditRights: 'Podemos proporcionar información razonable, respuestas documentadas, certificaciones o evidencia equivalente, sujeto a confidencialidad y límites operativos razonables.',
+      governingLaw: 'Según el acuerdo principal entre las partes y la jurisdicción aplicable al servicio.',
+      euSccRequired: false,
+      notes: []
+    },
+    output: { language: 'es', format: 'markdown', publishHashedUrl: false, baseUrl: defaultBaseUrlForDocument('dpa'), publishDir: defaultPublishDirForDocument('dpa'), writeToFile: false, outputPath: '', saveInput: true, inputPath: '', importPath: '' },
+    manualDisclosures: []
+  };
+
+  try {
+    stdout.write(`${bold(cyan('Asistente interactivo de DPA'))}\n`);
+    stdout.write(`${dim('Te voy a ayudar a generar un Data Processing Agreement orientado a SaaS B2B y relaciones controller-processor.')}\n`);
+    await collectBusinessSection(rl, state);
+    await collectContactSection(rl, state);
+    await collectDpaSection(rl, state);
+    await collectOutputSection(rl, state);
+
+    while (true) {
+      const input = buildDpaInputFromState(state);
+      const validation = await generator.validate(input);
+      if (!validation.ok) {
+        stdout.write(`\n${bold(red('Todavía faltan datos obligatorios:'))}\n`);
+        validation.errors.forEach((error) => stdout.write(`- ${error}\n`));
+      }
+      printDpaSummary(state, validation);
+      const action = await promptDpaReviewAction(rl);
+      if (action === 2) { await collectBusinessSection(rl, state); continue; }
+      if (action === 3) { await collectContactSection(rl, state); continue; }
+      if (action === 4) { await collectDpaSection(rl, state); continue; }
+      if (action === 5) { await collectOutputSection(rl, state); continue; }
+      if (action === 6) { stdout.write(`${yellow('Wizard cancelado.')}\n`); return; }
+      if (!validation.ok) {
+        stdout.write(`${red('No puedo generar hasta que corrijas los datos faltantes.')}\n`);
+        continue;
+      }
+
+      if (state.output.saveInput) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.inputPath || `${slugify(state.business.name)}-dpa-input.json`), `${JSON.stringify(input, null, 2)}\n`, 'utf8');
+        stdout.write(`\n${green(`Guardé el input en ${state.output.inputPath || `${slugify(state.business.name)}-dpa-input.json`}`)}\n`);
+      }
+
+      const result = await generator.generate(input);
+      const output = result[state.output.format];
+      let published = null;
+
+      if (state.output.publishHashedUrl) {
+        published = await publishGeneratedPolicy(input, result, {
+          publishDir: state.output.publishDir || defaultPublishDirForDocument('dpa'),
+          baseUrl: state.output.baseUrl || defaultBaseUrlForDocument('dpa')
+        });
+      }
+
+      if (state.output.writeToFile) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.outputPath), output, 'utf8');
+        stdout.write(`${green(`Guardé el DPA en ${state.output.outputPath}`)}\n`);
+      } else {
+        stdout.write(`\n${output}\n`);
+      }
+
+      if (published) {
+        stdout.write(`\n${bold(green('URL pública generada:'))} ${published.publicUrl}\n`);
+        stdout.write(`${green('Archivo HTML publicado:')} ${published.filePath}\n`);
+        stdout.write(`${green('Manifest:')} ${published.manifestPath}\n`);
+      }
+
+      if (result.warnings.length > 0) {
+        stdout.write(`\n${bold(yellow('Advertencias de revisión:'))}\n`);
+        result.warnings.forEach((warning) => stdout.write(`- ${warning}\n`));
+      }
+      return;
+    }
+  } finally {
+    rl.close();
+  }
+}
+
 async function promptDeletionReviewAction(rl) {
   stdout.write(`\n${bold(cyan('Qué querés hacer ahora'))}\n`);
   stdout.write(`  ${yellow('1')}. ${bold('Generar instrucciones de eliminación')}\n`);
@@ -3426,10 +3795,10 @@ function usage() {
   return [
     'Usage:',
     '  privacy-policy wizard',
-    '  privacy-policy generate --document privacy|terms|deletion|cookies|refund|disclaimer|security --input <file.json> [--format html|markdown|text] [--output file]',
-    '  privacy-policy publish --document privacy|terms|deletion|cookies|refund|disclaimer|security --input <file.json> --base-url <url> [--publish-dir <dir>]',
-    '  privacy-policy validate --document privacy|terms|deletion|cookies|refund|disclaimer|security --input <file.json>',
-    '  privacy-policy explain --document privacy|terms|deletion|cookies|refund|disclaimer|security --input <file.json>',
+    '  privacy-policy generate --document privacy|terms|deletion|cookies|refund|disclaimer|security|dpa --input <file.json> [--format html|markdown|text] [--output file]',
+    '  privacy-policy publish --document privacy|terms|deletion|cookies|refund|disclaimer|security|dpa --input <file.json> --base-url <url> [--publish-dir <dir>]',
+    '  privacy-policy validate --document privacy|terms|deletion|cookies|refund|disclaimer|security|dpa --input <file.json>',
+    '  privacy-policy explain --document privacy|terms|deletion|cookies|refund|disclaimer|security|dpa --input <file.json>',
     '',
     'If you run `privacy-policy` with no command, the interactive wizard starts automatically.'
   ].join('\n');
@@ -3444,6 +3813,7 @@ async function main() {
   const refundGenerator = new ReturnRefundPolicyGenerator();
   const disclaimerGenerator = new DisclaimerGenerator();
   const securityGenerator = new SecurityPolicyGenerator();
+  const dpaGenerator = new DataProcessingAgreementGenerator();
 
   if (!command || command === 'wizard') {
     const rl = readline.createInterface({ input: stdin, output: stdout });
@@ -3463,6 +3833,8 @@ async function main() {
         await runDisclaimerWizard(disclaimerGenerator);
       } else if (documentType === 'security') {
         await runSecurityWizard(securityGenerator);
+      } else if (documentType === 'dpa') {
+        await runDpaWizard(dpaGenerator);
       } else {
         await runWizard(privacyGenerator);
       }
@@ -3490,6 +3862,8 @@ async function main() {
             ? disclaimerGenerator
             : documentType === 'security'
               ? securityGenerator
+              : documentType === 'dpa'
+                ? dpaGenerator
         : privacyGenerator;
 
   if (command === 'validate') {

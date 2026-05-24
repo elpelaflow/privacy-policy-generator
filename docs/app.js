@@ -260,6 +260,64 @@ function buildDocuments() {
       };
     }
   },
+  dpa: {
+    label: 'DPA / Acuerdo de tratamiento de datos',
+    description: 'Documento controller-processor para SaaS B2B con instrucciones, seguridad, subprocessors, transferencias y cierre del servicio.',
+    basePath: 'dpa',
+    generator: () => new globalThis.LegalGenerators.DataProcessingAgreementGenerator(),
+    sections: [
+      { title: 'Proveedor', description: 'Identidad del proveedor SaaS o processor.', fields: commonBusinessFields('saas') },
+      { title: 'Contacto', description: 'Canales contractuales o de privacidad vinculados al DPA.', fields: commonContactFields() },
+      {
+        title: 'Partes y alcance',
+        description: 'Contraparte, servicio, duración y categorías de datos/titulares.',
+        fields: [
+          textField('dpa.counterpartyName', 'Nombre de la contraparte', ''),
+          selectField('dpa.counterpartyRole', 'Rol de la contraparte', DPA_COUNTERPARTY_ROLES, 'controller'),
+          textareaField('dpa.servicesDescription', 'Descripción del servicio', 'Prestación SaaS B2B con gestión de cuentas, soporte operativo y procesamiento limitado a la prestación del servicio.'),
+          textField('dpa.duration', 'Duración del tratamiento', 'Durante la vigencia del servicio y por el tiempo necesario para cierre, soporte y retenciones legales aplicables.'),
+          textareaField('dpa.processingPurpose', 'Naturaleza y finalidad del tratamiento', 'Procesar datos personales por cuenta del cliente para prestar, asegurar, soportar y administrar el servicio contratado.'),
+          checkboxField('dpa.personalDataCategories', 'Categorías de datos personales', DPA_DATA_CATEGORIES, ['Datos de identificación y contacto', 'Datos de cuenta o credenciales de acceso', 'Datos de uso, eventos y registros técnicos']),
+          checkboxField('dpa.dataSubjectCategories', 'Categorías de titulares', DPA_SUBJECT_CATEGORIES, ['Usuarios finales del cliente', 'Empleados o contratistas del cliente'])
+        ]
+      },
+      {
+        title: 'Instrucciones y seguridad',
+        description: 'Canales de instrucciones, confidencialidad, medidas de seguridad e incidentes.',
+        fields: [
+          textField('dpa.instructionsChannel', 'Canal para instrucciones documentadas', 'Email contractual, ticket formal o instrucciones emitidas por administradores autorizados del cliente.'),
+          textareaField('dpa.confidentialityMeasures', 'Medidas de confidencialidad', 'Acceso restringido por necesidad de conocer, compromisos de confidencialidad y controles internos sobre personal autorizado.'),
+          textareaField('dpa.securityMeasures', 'Medidas técnicas y organizativas', 'Controles de acceso, registros operativos, cifrado en tránsito, revisión de dependencias y medidas razonables de hardening.'),
+          textField('dpa.breachNotificationTime', 'Plazo para notificar incidentes o brechas', 'Sin demoras indebidas y dentro de un plazo razonable desde la confirmación del incidente.')
+        ]
+      },
+      {
+        title: 'Subprocessors, transferencias y cierre',
+        description: 'Uso de subencargados, transferencias internacionales, auditoría y eliminación o devolución de datos.',
+        fields: [
+          booleanField('dpa.subprocessorsUsed', 'Usás subprocessors o subencargados', 'Hosting, cloud, soporte o proveedores operativos que traten datos por tu cuenta.', true),
+          textareaField('dpa.subprocessorMethodology', 'Criterio sobre subprocessors', 'Se seleccionan proveedores con garantías razonables y se les imponen obligaciones contractuales de protección de datos acordes al servicio.'),
+          booleanField('dpa.internationalTransfers', 'Hay transferencias internacionales', 'Marcá esto si hay acceso, soporte, hosting o subprocessors fuera de la jurisdicción principal del cliente.', false),
+          textareaField('dpa.transferMechanism', 'Mecanismo de transferencias', 'Cuando corresponde, usamos cláusulas contractuales, salvaguardas equivalentes o bases legales compatibles con la jurisdicción aplicable.'),
+          booleanField('dpa.euSccRequired', 'Puede requerirse SCC o cláusulas equivalentes', 'Útil para clientes UE/UK o evaluaciones de transferencias más formales.', false),
+          textareaField('dpa.assistanceCommitments', 'Compromisos de asistencia', 'Brindamos asistencia razonable para solicitudes de titulares, evaluaciones de impacto y consultas regulatorias en la medida en que el servicio y la información disponible lo permitan.'),
+          textareaField('dpa.deletionReturnPeriod', 'Plazo de devolución o eliminación', 'Al finalizar el servicio, devolvemos o eliminamos los datos personales dentro de un plazo razonable, salvo retención legal o backups de seguridad con ciclo controlado.'),
+          textareaField('dpa.auditRights', 'Enfoque de auditoría o información', 'Podemos proporcionar información razonable, respuestas documentadas, certificaciones o evidencia equivalente, sujeto a confidencialidad y límites operativos razonables.'),
+          textField('dpa.governingLaw', 'Ley aplicable o referencia contractual', 'Según el acuerdo principal entre las partes y la jurisdicción aplicable al servicio.')
+        ]
+      },
+      outputFields()
+    ],
+    buildInput(values) {
+      return {
+        documentType: 'dpa',
+        business: values.business,
+        contact: values.contact,
+        dpa: values.dpa,
+        settings: values.settings
+      };
+    }
+  },
   deletion: {
     label: 'Instrucciones de eliminación de datos',
     description: 'Canal de eliminación, alcance, excepciones de retención y guía para cuentas conectadas con Meta.',
@@ -621,6 +679,14 @@ function createDefaults(type, seed = null) {
     }, seed);
   }
 
+  if (type === 'dpa') {
+    return mergeSeed({
+      ...common,
+      business: { ...common.business, type: 'saas' },
+      dpa: {}
+    }, seed);
+  }
+
   return mergeSeed({
     ...common,
     business: { ...common.business, type: 'saas' },
@@ -817,6 +883,7 @@ function resolveInputDocumentType(input) {
   if (input?.refund) return 'refund';
   if (input?.disclaimer) return 'disclaimer';
   if (input?.security) return 'security';
+  if (input?.dpa) return 'dpa';
   if (input?.deletion) return 'deletion';
   return 'privacy';
 }
@@ -1692,6 +1759,24 @@ const SECURITY_REPORT_REQUIREMENTS = [
   { value: 'Pasos de reproducción o prueba de concepto razonable', label: 'Reproducción o PoC', description: 'Cómo reproducir el hallazgo sin exagerar riesgo.' },
   { value: 'Activos, URLs, endpoints o cuentas involucradas', label: 'Activos afectados', description: 'Qué activos o superficies están involucrados.' },
   { value: 'Información de contacto para seguimiento', label: 'Contacto de seguimiento', description: 'Cómo continuar la coordinación del caso.' }
+];
+const DPA_COUNTERPARTY_ROLES = [
+  { value: 'controller', label: 'Controller / cliente' },
+  { value: 'processor', label: 'Processor / proveedor tercero' },
+  { value: 'joint_controller', label: 'Joint controller' }
+];
+const DPA_DATA_CATEGORIES = [
+  { value: 'Datos de identificación y contacto', label: 'Identificación y contacto', description: 'Nombres, emails, cargos o identificadores comerciales.' },
+  { value: 'Datos de cuenta o credenciales de acceso', label: 'Cuenta y acceso', description: 'Usuarios, cuentas, roles, credenciales o tokens ligados al servicio.' },
+  { value: 'Datos de uso, eventos y registros técnicos', label: 'Uso y logs', description: 'Eventos, métricas, logs, IP y registros técnicos del uso del servicio.' },
+  { value: 'Datos comerciales o de soporte del cliente', label: 'Datos comerciales o soporte', description: 'Tickets, mensajes, estados de servicio o información operativa del cliente.' },
+  { value: 'Datos importados o cargados por el cliente', label: 'Datos cargados por el cliente', description: 'Contenido, archivos o registros que el cliente sube al servicio.' }
+];
+const DPA_SUBJECT_CATEGORIES = [
+  { value: 'Usuarios finales del cliente', label: 'Usuarios finales', description: 'Personas usuarias del producto o servicio del cliente.' },
+  { value: 'Empleados o contratistas del cliente', label: 'Equipo del cliente', description: 'Staff, operadores, administradores o contratistas del cliente.' },
+  { value: 'Prospectos o contactos comerciales del cliente', label: 'Prospectos o leads', description: 'Leads, contactos de ventas o relaciones comerciales del cliente.' },
+  { value: 'Clientes o usuarios autenticados del cliente', label: 'Clientes autenticados', description: 'Cuentas o usuarios registrados del cliente.' }
 ];
 const DISCLAIMER_TYPES = [
   { value: 'medical', label: 'Medical information', description: 'Health or medical content.' },

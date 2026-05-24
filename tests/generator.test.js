@@ -11,6 +11,7 @@ const CookiesPolicyGenerator = require('../js/cookies-generator');
 const ReturnRefundPolicyGenerator = require('../js/refund-generator');
 const DisclaimerGenerator = require('../js/disclaimer-generator');
 const SecurityPolicyGenerator = require('../js/security-generator');
+const DataProcessingAgreementGenerator = require('../js/dpa-generator');
 const { buildHashedFilename, publishPolicy } = require('../js/publishing');
 const execFileAsync = promisify(execFile);
 
@@ -330,6 +331,91 @@ test('security validation warns when safe harbor and expectations are too vague'
   assert.ok(validation.warnings.some((warning) => /safe harbor|buena fe/i.test(warning)));
   assert.ok(validation.warnings.some((warning) => /triage|inclu/i.test(warning)));
   assert.ok(validation.warnings.some((warning) => /acusar|acknowledge/i.test(warning)));
+});
+
+function baseDpaInput() {
+  return {
+    documentType: 'dpa',
+    business: {
+      name: 'Acme Cloud',
+      type: 'saas',
+      websiteUrl: 'https://acme.example.com',
+      country: 'Germany',
+      address: 'Example Street 123, Berlin, Germany'
+    },
+    contact: {
+      email: 'privacy@acme.example.com',
+      phone: '',
+      pageUrl: 'https://acme.example.com/legal/dpa'
+    },
+    dpa: {
+      counterpartyName: 'Example Customer GmbH',
+      counterpartyRole: 'controller',
+      servicesDescription: 'Provision of a B2B SaaS platform for account management, workflow automation, support tracking, and operational analytics.',
+      duration: 'During the term of the service agreement and limited retention periods required by law or security operations.',
+      processingPurpose: 'To host, secure, support, and operate the contracted SaaS platform on behalf of the customer.',
+      personalDataCategories: [
+        'Identification and contact data',
+        'Account and authentication data',
+        'Usage logs and technical events'
+      ],
+      dataSubjectCategories: [
+        'Customer employees and contractors',
+        'Customer end users'
+      ],
+      instructionsChannel: 'Email or support tickets from authorized customer administrators.',
+      confidentialityMeasures: 'Need-to-know access restrictions and confidentiality obligations.',
+      securityMeasures: 'Role-based access control, logging, encryption in transit, hardening, and reasonable monitoring.',
+      subprocessorsUsed: true,
+      subprocessorMethodology: 'Subprocessors are reviewed and bound by contractual data protection obligations.',
+      internationalTransfers: true,
+      transferMechanism: 'Contractual safeguards and equivalent regional hosting controls where applicable.',
+      breachNotificationTime: 'Without undue delay after confirming a relevant incident.',
+      assistanceCommitments: 'Reasonable assistance for data subject requests and compliance obligations.',
+      deletionReturnPeriod: 'Data is returned or deleted within a reasonable period after service termination.',
+      auditRights: 'Reasonable information, certifications, or equivalent evidence may be provided subject to confidentiality.',
+      governingLaw: 'As set out in the master services agreement.',
+      euSccRequired: true
+    },
+    settings: {
+      language: 'en'
+    }
+  };
+}
+
+test('dpa generator includes controller processor style sections', async () => {
+  const generator = new DataProcessingAgreementGenerator();
+  const result = await generator.generate(baseDpaInput());
+
+  assert.match(result.markdown, /Data Processing Agreement \(DPA\)/);
+  assert.match(result.markdown, /Roles, Scope, and Subject Matter/);
+  assert.match(result.markdown, /International Transfers/);
+  assert.match(result.markdown, /Article 28 GDPR|controller-processor obligations/i);
+});
+
+test('dpa html includes internal JSON-LD metadata and accessible structure', async () => {
+  const generator = new DataProcessingAgreementGenerator();
+  const result = await generator.generate(baseDpaInput());
+
+  assert.match(result.html, /<script type="application\/ld\+json">/);
+  assert.match(result.html, /"@type":"WebPage"/);
+  assert.match(result.html, /<main id="main-content" aria-labelledby="document-title">/);
+  assert.match(result.html, /<meta name="legal-document-type" content="dpa">/);
+});
+
+test('dpa validation requires service description and warns about missing transfer and subprocessor detail', async () => {
+  const generator = new DataProcessingAgreementGenerator();
+  const input = baseDpaInput();
+  input.dpa.servicesDescription = '';
+  input.dpa.transferMechanism = '';
+  input.dpa.subprocessorMethodology = '';
+
+  const validation = await generator.validate(input);
+
+  assert.equal(validation.ok, false);
+  assert.ok(validation.errors.some((error) => /service|servicio/i.test(error)));
+  assert.ok(validation.warnings.some((warning) => /transfer/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /subprocessor/i.test(warning)));
 });
 
 function baseTermsInput() {
