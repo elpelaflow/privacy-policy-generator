@@ -31,6 +31,8 @@ This repo now supports two delivery modes:
 
 The repo now includes a browser-based static app under `web/` and a GitHub Pages-ready build output under `docs/`.
 
+Use the [public web app](https://elpelaflow.github.io/privacy-policy-generator/) if you want to generate documents in the browser without forking or deploying your own copy.
+
 What the static app can do today:
 
 - choose any supported legal document
@@ -180,7 +182,7 @@ If you only want to generate legal documents, you do not need to fork this repo.
 
 Typical flow:
 
-1. open the public web app
+1. open the [public web app](https://elpelaflow.github.io/privacy-policy-generator/)
 2. choose a document type
 3. complete the form
 4. generate the document in the browser
