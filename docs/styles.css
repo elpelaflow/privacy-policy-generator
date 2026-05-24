@@ -164,6 +164,13 @@ button, input, select, textarea { font: inherit; }
   font-size: .92rem;
   color: #f3f6ff;
 }
+.import-config-block {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
 .rail-card > select,
 .publish-stack select,
 .field select {

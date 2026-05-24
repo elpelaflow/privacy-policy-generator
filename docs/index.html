@@ -87,6 +87,11 @@
               <label for="document-type">Tipo de documento</label>
               <select id="document-type"></select>
               <p id="document-description" class="muted-copy"></p>
+              <div class="import-config-block">
+                <button class="button button-secondary" type="button" id="load-config-button">Cargar configuración</button>
+                <input type="file" id="load-config-input" accept="application/json,.json" hidden>
+                <p class="muted-copy">Importá un JSON generado antes para seguir editándolo sin empezar de cero.</p>
+              </div>
             </div>
             <div class="rail-card">
               <h3>Límites del modo estático</h3>
