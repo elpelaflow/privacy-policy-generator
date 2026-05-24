@@ -709,6 +709,7 @@ const clearSuiteEl = document.getElementById('clear-suite');
 const suiteListEl = document.getElementById('suite-list');
 const generateButtonEl = document.getElementById('generate-button');
 const downloadHtmlEl = document.getElementById('download-html');
+const downloadDocxEl = document.getElementById('download-docx');
 const downloadMarkdownEl = document.getElementById('download-markdown');
 const downloadTextEl = document.getElementById('download-text');
 const downloadJsonEl = document.getElementById('download-json');
@@ -732,6 +733,7 @@ const githubState = {
 
 generateButtonEl.addEventListener('click', generateDocument);
 downloadHtmlEl.addEventListener('click', () => downloadOutput('html'));
+downloadDocxEl.addEventListener('click', () => downloadOutput('docx'));
 downloadMarkdownEl.addEventListener('click', () => downloadOutput('markdown'));
 downloadTextEl.addEventListener('click', () => downloadOutput('text'));
 downloadJsonEl.addEventListener('click', downloadJson);
@@ -1426,8 +1428,19 @@ function gatherFormValues() {
   return values;
 }
 
-function downloadOutput(format) {
+async function downloadOutput(format) {
   if (!appState.lastGenerated || !appState.lastInput) return;
+  if (format === 'docx') {
+    try {
+      const blob = await buildDocxBlob();
+      triggerBlobDownload(`${slugify(appState.lastInput.business?.name || 'legal-document')}-${DOCUMENTS[appState.documentType].basePath}.docx`, blob);
+      setStatus('DOCX generado correctamente.', 'success');
+    } catch (error) {
+      setStatus(`No pude generar el DOCX: ${error.message}`, 'error');
+    }
+    return;
+  }
+
   const ext = format === 'markdown' ? 'md' : format === 'text' ? 'txt' : 'html';
   const filename = `${slugify(appState.lastInput.business?.name || 'legal-document')}-${DOCUMENTS[appState.documentType].basePath}.${ext}`;
   triggerDownload(filename, appState.lastGenerated[format], format === 'html' ? 'text/html' : 'text/plain');
@@ -1441,12 +1454,90 @@ function downloadJson() {
 
 function triggerDownload(filename, contents, type) {
   const blob = new Blob([contents], { type });
+  triggerBlobDownload(filename, blob);
+}
+
+function triggerBlobDownload(filename, blob) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
+}
+
+async function buildDocxBlob() {
+  const docxApi = globalThis.LegalDocx;
+  if (!docxApi) {
+    throw new Error('La librería DOCX no está disponible en esta build.');
+  }
+
+  const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docxApi;
+  const title = `${DOCUMENTS[appState.documentType].label} - ${appState.lastInput.business?.name || 'Legal document'}`;
+  const lines = String(appState.lastGenerated.markdown || '').split('\n');
+  const children = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      continue;
+    }
+
+    if (trimmed.startsWith('# ')) {
+      children.push(new Paragraph({
+        heading: HeadingLevel.TITLE,
+        spacing: { after: 240 },
+        children: [new TextRun(trimmed.replace(/^#\s+/, ''))]
+      }));
+      continue;
+    }
+
+    if (trimmed.startsWith('## ')) {
+      children.push(new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        spacing: { before: 240, after: 120 },
+        children: [new TextRun(trimmed.replace(/^##\s+/, ''))]
+      }));
+      continue;
+    }
+
+    if (trimmed.startsWith('### ')) {
+      children.push(new Paragraph({
+        heading: HeadingLevel.HEADING_2,
+        spacing: { before: 180, after: 120 },
+        children: [new TextRun(trimmed.replace(/^###\s+/, ''))]
+      }));
+      continue;
+    }
+
+    if (trimmed.startsWith('- ')) {
+      children.push(new Paragraph({
+        bullet: { level: 0 },
+        spacing: { after: 80 },
+        children: [new TextRun(trimmed.replace(/^- /, ''))]
+      }));
+      continue;
+    }
+
+    children.push(new Paragraph({
+      spacing: { after: 120 },
+      children: [new TextRun(trimmed)]
+    }));
+  }
+
+  const doc = new Document({
+    creator: 'Legal Generator Hub',
+    title,
+    description: title,
+    sections: [
+      {
+        properties: {},
+        children
+      }
+    ]
+  });
+
+  return Packer.toBlob(doc);
 }
 
 function buildPreparedPath() {
@@ -1572,7 +1663,7 @@ async function copySnippet(type) {
 }
 
 function setExportState(enabled) {
-  for (const button of [downloadHtmlEl, downloadMarkdownEl, downloadTextEl, downloadJsonEl]) {
+  for (const button of [downloadHtmlEl, downloadDocxEl, downloadMarkdownEl, downloadTextEl, downloadJsonEl]) {
     button.disabled = !enabled;
     button.classList.toggle('button-disabled', !enabled);
   }
