@@ -417,6 +417,33 @@ button, input, select, textarea { font: inherit; }
   color: var(--muted);
   line-height: 1.5;
 }
+.snippet-box {
+  margin: 18px 0;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+}
+.snippet-box h4 {
+  margin: 0 0 10px;
+}
+.snippet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0;
+}
+.snippet-preview {
+  margin: 0;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(7,10,24,0.72);
+  color: #d9e6ff;
+  font-family: var(--mono);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
 .download-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .download-actions .button-secondary:not(:disabled) {

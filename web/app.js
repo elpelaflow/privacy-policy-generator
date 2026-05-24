@@ -306,7 +306,8 @@ const appState = {
   lastInput: null,
   isDirtySinceGenerate: false,
   formSeed: null,
-  advisorRecommendation: null
+  advisorRecommendation: null,
+  publishedSnippets: null
 };
 
 const formEl = document.getElementById('generator-form');
@@ -321,6 +322,9 @@ const loadConfigButtonEl = document.getElementById('load-config-button');
 const loadConfigInputEl = document.getElementById('load-config-input');
 const advisorPanelEl = document.getElementById('advisor-panel');
 const preparedPathEl = document.getElementById('prepared-path');
+const copyHtmlSnippetEl = document.getElementById('copy-html-snippet');
+const copyMarkdownSnippetEl = document.getElementById('copy-markdown-snippet');
+const snippetPreviewEl = document.getElementById('snippet-preview');
 const generateButtonEl = document.getElementById('generate-button');
 const downloadHtmlEl = document.getElementById('download-html');
 const downloadMarkdownEl = document.getElementById('download-markdown');
@@ -352,6 +356,8 @@ downloadJsonEl.addEventListener('click', downloadJson);
 connectGitHubEl.addEventListener('click', connectGitHub);
 logoutGitHubEl.addEventListener('click', logoutGitHub);
 publishGitHubPagesEl.addEventListener('click', publishToGitHubPages);
+copyHtmlSnippetEl.addEventListener('click', () => copySnippet('html'));
+copyMarkdownSnippetEl.addEventListener('click', () => copySnippet('markdown'));
 githubRepoSelectEl.addEventListener('change', updatePublishControls);
 loadConfigButtonEl.addEventListener('click', () => loadConfigInputEl.click());
 loadConfigInputEl.addEventListener('change', loadExistingConfig);
@@ -374,6 +380,7 @@ function init() {
   setPreviewPlaceholder('Generá un documento para ver la salida acá.');
   setExportState(false);
   setStatus('');
+  renderSnippetState();
   initGitHubPublish();
 }
 
@@ -464,6 +471,7 @@ function renderForm() {
   appState.lastGenerated = null;
   appState.lastInput = null;
   appState.isDirtySinceGenerate = false;
+  appState.publishedSnippets = null;
   validationRequestId += 1;
   clearTimeout(validationTimer);
 
@@ -492,6 +500,7 @@ function renderForm() {
   setExportState(false);
   setStatus('');
   renderAdvisorRecommendation();
+  renderSnippetState();
 }
 
 function renderField(field, defaults) {
@@ -952,6 +961,47 @@ function setStatus(message) {
   statusEl.textContent = message;
 }
 
+function renderSnippetState() {
+  const snippets = appState.publishedSnippets;
+  if (!snippets) {
+    snippetPreviewEl.textContent = 'Publicá un documento para generar snippets listos para copiar.';
+    setSnippetButtons(false);
+    return;
+  }
+
+  snippetPreviewEl.textContent = `HTML:
+${snippets.html}
+
+Markdown:
+${snippets.markdown}`;
+  setSnippetButtons(true);
+}
+
+function setSnippetButtons(enabled) {
+  for (const button of [copyHtmlSnippetEl, copyMarkdownSnippetEl]) {
+    button.disabled = !enabled;
+    button.classList.toggle('button-disabled', !enabled);
+  }
+}
+
+function buildPublishedSnippets(url, label) {
+  return {
+    html: `<a href="${url}" target="_blank" rel="noopener">${label}</a>`,
+    markdown: `[${label}](${url})`
+  };
+}
+
+async function copySnippet(type) {
+  if (!appState.publishedSnippets) return;
+  const value = type === 'html' ? appState.publishedSnippets.html : appState.publishedSnippets.markdown;
+  try {
+    await navigator.clipboard.writeText(value);
+    setStatus(`Snippet ${type === 'html' ? 'HTML' : 'Markdown'} copiado al portapapeles.`);
+  } catch {
+    setStatus('No pude copiar el snippet automáticamente. Podés copiarlo manualmente desde la caja de snippets.');
+  }
+}
+
 function setExportState(enabled) {
   for (const button of [downloadHtmlEl, downloadMarkdownEl, downloadTextEl, downloadJsonEl]) {
     button.disabled = !enabled;
@@ -1192,6 +1242,8 @@ async function publishToGitHubPages() {
       throw new Error(payload.error || 'No se pudo publicar el documento.');
     }
     preparedPathEl.textContent = payload.public_url || preparedPathEl.textContent;
+    appState.publishedSnippets = buildPublishedSnippets(payload.public_url, DOCUMENTS[appState.documentType].label);
+    renderSnippetState();
     setStatus(`Documento publicado. URL final: ${payload.public_url}`);
   } catch (error) {
     setStatus(`Error al publicar en GitHub Pages: ${error.message}`);
@@ -1237,8 +1289,10 @@ function markDirtySinceGenerate() {
 
   appState.isDirtySinceGenerate = true;
   appState.lastGenerated = null;
+  appState.publishedSnippets = null;
   setExportState(false);
   setPreviewPlaceholder('El formulario cambió desde la última generación. Volvé a generar el documento para actualizar la vista previa y las descargas.');
+  renderSnippetState();
   setStatus('La versión generada quedó desactualizada. Volvé a generar el documento para que la vista previa y las descargas reflejen los cambios.');
 }
 
