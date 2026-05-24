@@ -305,7 +305,8 @@ const appState = {
   lastGenerated: null,
   lastInput: null,
   isDirtySinceGenerate: false,
-  formSeed: null
+  formSeed: null,
+  advisorRecommendation: null
 };
 
 const formEl = document.getElementById('generator-form');
@@ -318,6 +319,7 @@ const documentSelectEl = document.getElementById('document-type');
 const documentDescriptionEl = document.getElementById('document-description');
 const loadConfigButtonEl = document.getElementById('load-config-button');
 const loadConfigInputEl = document.getElementById('load-config-input');
+const advisorPanelEl = document.getElementById('advisor-panel');
 const preparedPathEl = document.getElementById('prepared-path');
 const generateButtonEl = document.getElementById('generate-button');
 const downloadHtmlEl = document.getElementById('download-html');
@@ -367,6 +369,7 @@ function init() {
   bootstrapOAuthSessionFromUrl();
   renderDocumentCards();
   renderDocumentSelect();
+  renderJurisdictionAdvisor();
   renderForm();
   setPreviewPlaceholder('Generá un documento para ver la salida acá.');
   setExportState(false);
@@ -408,6 +411,52 @@ function renderDocumentSelect() {
   });
 }
 
+function renderJurisdictionAdvisor() {
+  advisorPanelEl.innerHTML = `
+    <div class="advisor-grid">
+      <div class="field">
+        <label for="advisor-home-jurisdiction">Dónde está establecido el negocio</label>
+        <select id="advisor-home-jurisdiction">
+          ${JURISDICTIONS.map((option) => `<option value="${option.value}" ${option.value === 'ar' ? 'selected' : ''}>${option.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label for="advisor-business-type">Qué tipo de producto o negocio tenés</label>
+        <select id="advisor-business-type">
+          ${BUSINESS_TYPES.map((option) => `<option value="${option.value}" ${option.value === 'saas' ? 'selected' : ''}>${option.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field full">
+        <label>En qué regiones esperás usuarios o clientes</label>
+        <div class="advisor-targets">
+          ${REGIONS.map((option) => `
+            <label class="checkbox-item">
+              <input type="checkbox" name="advisor.targetRegions" value="${option.value}" ${option.value === 'ar' ? 'checked' : ''}>
+              <span><strong>${option.label}</strong><small>${option.description || ''}</small></span>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+      <label class="checkbox-item">
+        <input type="checkbox" id="advisor-california">
+        <span><strong>¿Tenés usuarios o clientes en California?</strong><small>Esto ayuda a sugerir foco CCPA/CalOPPA en vez de asumirlo para todo Estados Unidos.</small></span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" id="advisor-children">
+        <span><strong>¿El servicio apunta a menores o trata datos de chicos?</strong><small>Esto ayuda a sugerir enfoque tipo COPPA y lenguaje infantil reforzado.</small></span>
+      </label>
+    </div>
+    <div class="advisor-actions">
+      <button type="button" class="button button-secondary" id="advisor-run">Sugerir configuración</button>
+      <button type="button" class="button button-primary button-disabled" id="advisor-apply" disabled>Aplicar sugerencia</button>
+    </div>
+    <div class="advisor-summary" id="advisor-summary"></div>
+  `;
+
+  advisorPanelEl.querySelector('#advisor-run').addEventListener('click', runJurisdictionAdvisor);
+  advisorPanelEl.querySelector('#advisor-apply').addEventListener('click', applyJurisdictionRecommendation);
+}
+
 function renderForm() {
   const config = DOCUMENTS[appState.documentType];
   documentDescriptionEl.textContent = config.description;
@@ -442,6 +491,7 @@ function renderForm() {
   setPreviewPlaceholder('Generá un documento para ver la salida acá.');
   setExportState(false);
   setStatus('');
+  renderAdvisorRecommendation();
 }
 
 function renderField(field, defaults) {
@@ -597,6 +647,141 @@ async function loadExistingConfig(event) {
   } catch (error) {
     setStatus(`No pude cargar la configuración: ${error.message}`);
   }
+}
+
+function runJurisdictionAdvisor() {
+  appState.advisorRecommendation = computeJurisdictionRecommendation(gatherAdvisorValues());
+  renderAdvisorRecommendation();
+}
+
+function gatherAdvisorValues() {
+  return {
+    homeJurisdiction: advisorPanelEl.querySelector('#advisor-home-jurisdiction')?.value || 'ar',
+    businessType: advisorPanelEl.querySelector('#advisor-business-type')?.value || 'saas',
+    targetRegions: Array.from(advisorPanelEl.querySelectorAll('input[name="advisor.targetRegions"]:checked')).map((input) => input.value),
+    californiaResidents: Boolean(advisorPanelEl.querySelector('#advisor-california')?.checked),
+    childrenAudience: Boolean(advisorPanelEl.querySelector('#advisor-children')?.checked)
+  };
+}
+
+function computeJurisdictionRecommendation(values) {
+  const targetRegions = values.targetRegions.length > 0 ? values.targetRegions : [values.homeJurisdiction].filter(Boolean);
+  const requestedFrameworks = [];
+  const notes = [];
+
+  if (values.californiaResidents) {
+    requestedFrameworks.push('ccpa', 'caloppa');
+    notes.push('Se recomienda reforzar derechos de privacidad para California.');
+  } else if (targetRegions.includes('us')) {
+    notes.push('Operar en Estados Unidos no activa CCPA automáticamente; si tenés usuarios en California, conviene revisar ese foco.');
+  }
+
+  if (values.childrenAudience) {
+    requestedFrameworks.push('coppa');
+    notes.push('Se recomienda lenguaje reforzado para privacidad infantil y revisión específica del flujo de datos de menores.');
+  }
+
+  if (values.homeJurisdiction === 'ca' || targetRegions.includes('ca')) {
+    requestedFrameworks.push('pipeda');
+    notes.push('Se recomienda reforzar lenguaje orientado a Canadá/PIPEDA.');
+  }
+
+  if (targetRegions.includes('eu') || targetRegions.includes('uk') || values.homeJurisdiction === 'eu' || values.homeJurisdiction === 'uk') {
+    notes.push('Conviene revisar bases legales, derechos del usuario y transferencias con foco GDPR/UK GDPR.');
+  }
+
+  if (values.homeJurisdiction === 'ar' || targetRegions.includes('ar')) {
+    notes.push('Se recomiendan defaults en español y lenguaje alineado a Argentina para privacidad, consumo y e-commerce.');
+  }
+
+  return {
+    ...values,
+    targetRegions,
+    requestedFrameworks: [...new Set(requestedFrameworks)],
+    language: values.homeJurisdiction === 'ar' || targetRegions.includes('ar') ? 'es' : 'en',
+    countryLabel: jurisdictionLabel(values.homeJurisdiction),
+    notes
+  };
+}
+
+function renderAdvisorRecommendation() {
+  const summaryEl = advisorPanelEl.querySelector('#advisor-summary');
+  const applyButtonEl = advisorPanelEl.querySelector('#advisor-apply');
+  if (!summaryEl || !applyButtonEl) return;
+
+  if (!appState.advisorRecommendation) {
+    summaryEl.classList.remove('is-visible');
+    summaryEl.innerHTML = '';
+    applyButtonEl.disabled = true;
+    applyButtonEl.classList.add('button-disabled');
+    return;
+  }
+
+  const recommendation = appState.advisorRecommendation;
+  const bullets = [
+    `Jurisdicción principal sugerida: ${jurisdictionLabel(recommendation.homeJurisdiction)}`,
+    `Regiones operativas sugeridas: ${recommendation.targetRegions.map(jurisdictionLabel).join(', ') || 'Sin definir'}`,
+    `Tipo de negocio sugerido: ${BUSINESS_TYPES.find((option) => option.value === recommendation.businessType)?.label || recommendation.businessType}`,
+    `Idioma sugerido: ${recommendation.language === 'es' ? 'Español' : 'English'}`,
+    recommendation.requestedFrameworks.length > 0
+      ? `Marcos sugeridos: ${recommendation.requestedFrameworks.join(', ')}`
+      : 'No hace falta activar marcos extra automáticamente con estas respuestas.'
+  ];
+
+  summaryEl.classList.add('is-visible');
+  summaryEl.innerHTML = `
+    <strong>Sugerencia actual</strong>
+    <ul>${bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
+    ${recommendation.notes.length > 0 ? `<ul>${recommendation.notes.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
+  `;
+  applyButtonEl.disabled = false;
+  applyButtonEl.classList.remove('button-disabled');
+}
+
+function applyJurisdictionRecommendation() {
+  if (!appState.advisorRecommendation) return;
+
+  const currentValues = gatherFormValues();
+  const patch = buildRecommendationPatch(appState.documentType, appState.advisorRecommendation);
+  appState.formSeed = deepMerge(currentValues, patch);
+  renderForm();
+  scheduleLiveValidation();
+  setStatus(`Sugerencia aplicada sobre ${DOCUMENTS[appState.documentType].label}. Revisá los campos y ajustá lo que no refleje tu operación real.`);
+}
+
+function buildRecommendationPatch(documentType, recommendation) {
+  const patch = {
+    business: {
+      type: recommendation.businessType,
+      country: recommendation.countryLabel
+    },
+    settings: {
+      language: recommendation.language
+    }
+  };
+
+  if (['privacy', 'terms', 'cookies'].includes(documentType)) {
+    patch.operations = {
+      primaryJurisdiction: recommendation.homeJurisdiction,
+      sellRegions: recommendation.targetRegions
+    };
+  }
+
+  if (documentType === 'privacy') {
+    patch.operations = {
+      ...(patch.operations || {}),
+      childrenAudience: recommendation.childrenAudience
+    };
+    patch.compliance = {
+      requestedFrameworks: recommendation.requestedFrameworks
+    };
+  }
+
+  return patch;
+}
+
+function jurisdictionLabel(value) {
+  return JURISDICTIONS.find((option) => option.value === value)?.label || value;
 }
 
 function resolveInputDocumentType(input) {

@@ -171,6 +171,46 @@ button, input, select, textarea { font: inherit; }
   padding-top: 16px;
   border-top: 1px solid var(--line);
 }
+.advisor-panel {
+  display: grid;
+  gap: 12px;
+}
+.advisor-panel .advisor-grid {
+  display: grid;
+  gap: 12px;
+}
+.advisor-panel .advisor-targets {
+  display: grid;
+  gap: 8px;
+}
+.advisor-panel .advisor-targets .checkbox-item {
+  padding: 10px 12px;
+}
+.advisor-panel .advisor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.advisor-panel .advisor-summary {
+  display: none;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+}
+.advisor-panel .advisor-summary.is-visible {
+  display: grid;
+}
+.advisor-panel .advisor-summary strong {
+  color: var(--tertiary);
+}
+.advisor-panel .advisor-summary ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.6;
+}
 .rail-card > select,
 .publish-stack select,
 .field select {
