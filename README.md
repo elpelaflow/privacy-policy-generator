@@ -1,12 +1,12 @@
 # Privacy Policy Generator
 
-CLI-first and web-enabled generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, security policies, data processing agreements (DPA), and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, automated tests, and GitHub Pages publishing support.
+CLI-first and web-enabled generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, security policies, data processing agreements (DPA), AI transparency / training-data policies, and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, automated tests, and GitHub Pages publishing support.
 
 ## Scope
 
 This repo now supports two delivery modes:
 
-- terminal-first generators for privacy, terms, cookies, return/refund, disclaimers, security-policy, DPA, and deletion-instructions documents
+- terminal-first generators for privacy, terms, cookies, return/refund, disclaimers, security-policy, DPA, AI-policy, and deletion-instructions documents
 - a client-side static web app that runs fully in the browser and can be deployed to GitHub Pages
 
 ## Features
@@ -268,6 +268,7 @@ but not as a full GitHub publish app.
 - `disclaimer`: modular disclaimer generator
 - `security`: security policy and responsible disclosure generator
 - `dpa`: data processing agreement generator for SaaS B2B / controller-processor relationships
+- `ai`: AI use and training data policy generator
 
 ## Supported Inputs
 
@@ -395,6 +396,12 @@ Validate DPA:
 privacy-policy validate --document dpa --input ./examples/dpa-saas-b2b.json
 ```
 
+Validate AI policy:
+
+```bash
+privacy-policy validate --document ai --input ./examples/ai-policy-saas.json
+```
+
 Explain which sections were included:
 
 ```bash
@@ -443,6 +450,12 @@ Generate DPA in Markdown:
 privacy-policy generate --document dpa --input ./examples/dpa-saas-b2b.json --format markdown
 ```
 
+Generate AI policy in Markdown:
+
+```bash
+privacy-policy generate --document ai --input ./examples/ai-policy-saas.json --format markdown
+```
+
 Publish directly and return the final public URL:
 
 ```bash
@@ -465,6 +478,7 @@ If you omit `--publish-dir`, the CLI defaults to generic local directories such 
 ./public/disclaimer
 ./public/security
 ./public/dpa
+./public/ai
 ```
 
 Generate Markdown:
@@ -558,6 +572,16 @@ privacy-policy publish \
   --publish-dir ./public/dpa
 ```
 
+Generate and publish AI policy:
+
+```bash
+privacy-policy publish \
+  --document ai \
+  --input ./examples/ai-policy-saas.json \
+  --base-url https://example.com/ai \
+  --publish-dir ./public/ai
+```
+
 ## Input Format
 
 ```json
@@ -593,7 +617,7 @@ privacy-policy publish \
 You can still use JSON files directly, but the intended terminal workflow is now:
 
 1. run `privacy-policy`
-2. choose whether you want `privacy`, `terms`, `cookies`, `refund`, `disclaimer`, `security`, `dpa`, or `deletion`
+2. choose whether you want `privacy`, `terms`, `cookies`, `refund`, `disclaimer`, `security`, `dpa`, `ai`, or `deletion`
 3. answer the wizard questions
 4. choose output language and output format
 5. optionally save both the generated document and the JSON input
@@ -653,6 +677,16 @@ For `dpa`, the wizard asks specifically about:
 - incident timing, assistance commitments, and audit rights
 - deletion or return handling at end of service
 
+For `ai`, the wizard asks specifically about:
+
+- what AI systems or features are in scope
+- what use cases they serve
+- whether data is used for evaluation, improvement, or training
+- what data sources and third-party providers are involved
+- retention and opt-out controls
+- whether automated decisions or human review apply
+- sensitive-data restrictions and security controls
+
 For `terms`, the wizard opens separate sections for:
 
 - service description
@@ -692,6 +726,7 @@ Current test coverage checks:
 - disclaimer generation covers modular warnings for links, reviews, risks, and informational content
 - security generation covers reporting channels, safe harbor, disclosure timing, and optional security-practices summaries
 - DPA generation covers controller-processor roles, subprocessors, transfer mechanisms, incident timing, and end-of-service deletion/return language
+- AI policy generation covers AI use cases, training/improvement disclosures, providers, retention, review paths, and high-level safeguards
 - deletion generation covers request channels, deletion scope, and Meta-connected account guidance
 - validation reports missing required fields
 
@@ -711,6 +746,7 @@ examples/refund-ar-ecommerce.json
 examples/disclaimer-meta-content.json
 examples/security-disclosure.json
 examples/dpa-saas-b2b.json
+examples/ai-policy-saas.json
 js/generator.js
 js/terms-generator.js
 js/deletion-generator.js
@@ -719,6 +755,7 @@ js/refund-generator.js
 js/disclaimer-generator.js
 js/security-generator.js
 js/dpa-generator.js
+js/ai-policy-generator.js
 tests/generator.test.js
 package.json
 ```

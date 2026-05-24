@@ -318,6 +318,62 @@ function buildDocuments() {
       };
     }
   },
+  ai: {
+    label: 'Política de IA y datos de entrenamiento',
+    description: 'Transparencia sobre uso de IA, datasets, entrenamiento, proveedores, retención y revisión humana.',
+    basePath: 'ai',
+    generator: () => new globalThis.LegalGenerators.AiPolicyGenerator(),
+    sections: [
+      { title: 'Negocio', description: 'Identidad del negocio o servicio que usa IA.', fields: commonBusinessFields('saas') },
+      { title: 'Contacto', description: 'Canales de contacto para consultas o revisiones vinculadas a IA.', fields: commonContactFields() },
+      {
+        title: 'Sistemas y usos de IA',
+        description: 'Qué sistemas de IA usás y para qué funciones del servicio.',
+        fields: [
+          checkboxField('ai.systemsUsed', 'Sistemas o funciones de IA', AI_SYSTEMS_USED, ['chatbot_or_assistant', 'content_generation']),
+          checkboxField('ai.useCases', 'Casos de uso', AI_USE_CASES, ['customer_support', 'drafting_or_generation']),
+          booleanField('ai.userFacingAi', 'La IA es visible para usuarios o clientes', 'Marcá esto si hay asistentes, recomendaciones, generación o scoring visible en la experiencia del usuario.', true),
+          booleanField('ai.generatedContentLabeling', 'Indicás contenido generado o asistido por IA', 'Marcá esto si el servicio etiqueta o señala contenido generado o materialmente asistido por IA.', false)
+        ]
+      },
+      {
+        title: 'Entrenamiento y mejora',
+        description: 'Si se usan datos para entrenamiento, fine-tuning, evaluación o mejora del producto.',
+        fields: [
+          selectField('ai.trainingDataUse', 'Uso de datos para entrenamiento o mejora', AI_TRAINING_DATA_USE, 'no_training'),
+          checkboxField('ai.dataSources', 'Fuentes de datos relacionadas', AI_DATA_SOURCES, ['customer_inputs', 'service_logs']),
+          booleanField('ai.personalDataInTraining', 'Pueden intervenir datos personales en estos flujos', 'Marcá esto sólo si prompts, outputs, logs o datasets vinculados a IA pueden incluir datos personales.', false),
+          checkboxField('ai.modelImprovementUses', 'Usos concretos para mejora o evaluación', AI_MODEL_IMPROVEMENT_USES, []),
+          booleanField('ai.optOutAvailable', 'Existe opt-out o control para entrenamiento/mejora', 'Marcá esto si el usuario o cliente puede limitar ciertos usos para training, fine-tuning o product improvement.', false),
+          textareaField('ai.optOutMethod', 'Método de opt-out o control', '')
+        ]
+      },
+      {
+        title: 'Proveedores, retención y salvaguardas',
+        description: 'Model providers, retención, revisión humana y restricciones sobre datos sensibles.',
+        fields: [
+          textareaField('ai.retentionPeriod', 'Retención de prompts, outputs o datasets', 'Los datos vinculados a IA se retienen sólo por el tiempo razonablemente necesario para prestación, seguridad, soporte, evaluación o mejora, según el flujo aplicable.'),
+          checkboxField('ai.thirdPartyProviders', 'Proveedores externos o model providers', AI_THIRD_PARTY_PROVIDERS, ['third_party_model_api', 'cloud_infrastructure']),
+          booleanField('ai.automatedDecisionMaking', 'La IA puede influir decisiones automatizadas o scoring relevante', 'Marcá esto si la IA puede afectar ranking, moderación, acceso, fraude, priorización o decisiones con impacto relevante.', false),
+          booleanField('ai.humanReviewAvailable', 'Existe revisión humana o escalamiento', 'Marcá esto si el usuario o el equipo pueden escalar casos y obtener revisión humana.', true),
+          textField('ai.appealChannel', 'Canal para revisión o soporte', ''),
+          textareaField('ai.sensitiveDataRestrictions', 'Restricciones sobre datos sensibles o de alto riesgo', 'No pedimos ni recomendamos cargar datos sensibles salvo que exista base legal, controles reforzados y necesidad operativa claramente justificada.'),
+          textareaField('ai.securityControls', 'Controles de seguridad y minimización', 'Aplicamos minimización, controles de acceso, registros operativos y medidas razonables de seguridad sobre prompts, outputs y datos vinculados a IA.'),
+          textareaField('ai.transparencyNotes', 'Nota adicional de transparencia', '')
+        ]
+      },
+      outputFields()
+    ],
+    buildInput(values) {
+      return {
+        documentType: 'ai',
+        business: values.business,
+        contact: values.contact,
+        ai: values.ai,
+        settings: values.settings
+      };
+    }
+  },
   deletion: {
     label: 'Instrucciones de eliminación de datos',
     description: 'Canal de eliminación, alcance, excepciones de retención y guía para cuentas conectadas con Meta.',
@@ -687,6 +743,14 @@ function createDefaults(type, seed = null) {
     }, seed);
   }
 
+  if (type === 'ai') {
+    return mergeSeed({
+      ...common,
+      business: { ...common.business, type: 'saas' },
+      ai: {}
+    }, seed);
+  }
+
   return mergeSeed({
     ...common,
     business: { ...common.business, type: 'saas' },
@@ -884,6 +948,7 @@ function resolveInputDocumentType(input) {
   if (input?.disclaimer) return 'disclaimer';
   if (input?.security) return 'security';
   if (input?.dpa) return 'dpa';
+  if (input?.ai) return 'ai';
   if (input?.deletion) return 'deletion';
   return 'privacy';
 }
@@ -1777,6 +1842,45 @@ const DPA_SUBJECT_CATEGORIES = [
   { value: 'Empleados o contratistas del cliente', label: 'Equipo del cliente', description: 'Staff, operadores, administradores o contratistas del cliente.' },
   { value: 'Prospectos o contactos comerciales del cliente', label: 'Prospectos o leads', description: 'Leads, contactos de ventas o relaciones comerciales del cliente.' },
   { value: 'Clientes o usuarios autenticados del cliente', label: 'Clientes autenticados', description: 'Cuentas o usuarios registrados del cliente.' }
+];
+const AI_SYSTEMS_USED = [
+  { value: 'chatbot_or_assistant', label: 'Chatbot o asistente', description: 'Asistentes conversacionales, soporte guiado o helpdesk asistido por IA.' },
+  { value: 'content_generation', label: 'Generación de contenido', description: 'Texto, resúmenes, emails, imágenes u otros outputs generativos.' },
+  { value: 'ranking_or_recommendation', label: 'Ranking o recomendaciones', description: 'Priorización, matching o recomendaciones personalizadas.' },
+  { value: 'classification_or_moderation', label: 'Clasificación o moderación', description: 'Etiquetado, moderación, fraude o triage automatizado.' },
+  { value: 'analytics_or_forecasting', label: 'Analítica o predicción', description: 'Predicción, scoring, forecasting o análisis de comportamiento.' }
+];
+const AI_USE_CASES = [
+  { value: 'customer_support', label: 'Soporte al cliente', description: 'Respuestas, ayuda contextual o soporte operativo.' },
+  { value: 'drafting_or_generation', label: 'Redacción o generación', description: 'Borradores, resúmenes, respuestas o contenido generado.' },
+  { value: 'search_and_retrieval', label: 'Búsqueda y retrieval', description: 'Búsqueda semántica, knowledge base o recuperación contextual.' },
+  { value: 'moderation_or_safety', label: 'Moderación o seguridad', description: 'Abuso, fraude, detección de riesgo o seguridad.' },
+  { value: 'internal_operations', label: 'Operación interna', description: 'Backoffice, soporte interno, QA o flujos internos.' }
+];
+const AI_TRAINING_DATA_USE = [
+  { value: 'no_training', label: 'No se usa para entrenamiento' },
+  { value: 'evaluation_only', label: 'Sólo evaluación o safety review' },
+  { value: 'service_improvement', label: 'Mejora del producto o del modelo acotado' },
+  { value: 'model_training', label: 'Entrenamiento o fine-tuning más amplio' }
+];
+const AI_DATA_SOURCES = [
+  { value: 'customer_inputs', label: 'Inputs del cliente o usuario', description: 'Prompts, formularios, archivos o contenido provisto por el usuario.' },
+  { value: 'service_logs', label: 'Logs y telemetría del servicio', description: 'Eventos, métricas, logs u observabilidad técnica.' },
+  { value: 'feedback_signals', label: 'Feedback explícito', description: 'Thumbs up/down, calificaciones, correcciones o reportes.' },
+  { value: 'public_or_licensed_data', label: 'Datos públicos o licenciados', description: 'Datasets públicos, licenciados o de terceros.' },
+  { value: 'synthetic_or_test_data', label: 'Datos sintéticos o de prueba', description: 'Datos sintéticos, test fixtures o datasets de evaluación.' }
+];
+const AI_MODEL_IMPROVEMENT_USES = [
+  { value: 'quality_evaluation', label: 'Evaluación de calidad', description: 'Benchmarking, QA o revisión de performance.' },
+  { value: 'safety_testing', label: 'Pruebas de seguridad', description: 'Abuso, red teaming o seguridad del sistema.' },
+  { value: 'fine_tuning', label: 'Fine-tuning', description: 'Ajuste o calibración de modelos o prompts.' },
+  { value: 'product_analytics', label: 'Analítica del producto', description: 'Mejoras operativas, UX o producto.' }
+];
+const AI_THIRD_PARTY_PROVIDERS = [
+  { value: 'third_party_model_api', label: 'API de modelos de terceros', description: 'LLMs, visión, embeddings u otros modelos externos.' },
+  { value: 'cloud_infrastructure', label: 'Infraestructura cloud', description: 'Hosting, storage, colas o componentes de soporte.' },
+  { value: 'annotation_or_review_vendor', label: 'Vendor de anotación o revisión', description: 'Etiquetado, QA, revisión humana o proveedores de evaluación.' },
+  { value: 'monitoring_or_safety_tooling', label: 'Monitoreo o safety tooling', description: 'Observabilidad, filtros, seguridad o herramientas de control.' }
 ];
 const DISCLAIMER_TYPES = [
   { value: 'medical', label: 'Medical information', description: 'Health or medical content.' },

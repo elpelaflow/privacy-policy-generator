@@ -1,0 +1,59 @@
+{
+  "documentType": "ai",
+  "business": {
+    "name": "Acme AI Cloud",
+    "type": "saas",
+    "websiteUrl": "https://ai.acme.example.com",
+    "country": "Germany",
+    "address": "Example Street 123, Berlin, Germany"
+  },
+  "contact": {
+    "email": "privacy@acme.example.com",
+    "phone": "",
+    "pageUrl": "https://ai.acme.example.com/legal/ai"
+  },
+  "ai": {
+    "systemsUsed": [
+      "chatbot_or_assistant",
+      "content_generation",
+      "ranking_or_recommendation"
+    ],
+    "useCases": [
+      "customer_support",
+      "drafting_or_generation",
+      "search_and_retrieval"
+    ],
+    "userFacingAi": true,
+    "generatedContentLabeling": true,
+    "trainingDataUse": "service_improvement",
+    "dataSources": [
+      "customer_inputs",
+      "service_logs",
+      "feedback_signals",
+      "synthetic_or_test_data"
+    ],
+    "personalDataInTraining": false,
+    "modelImprovementUses": [
+      "quality_evaluation",
+      "safety_testing",
+      "product_analytics"
+    ],
+    "optOutAvailable": true,
+    "optOutMethod": "Enterprise account controls, contractual settings, or support requests for eligible workflows.",
+    "retentionPeriod": "Prompts, outputs, and related logs are retained only for the time reasonably necessary for service delivery, abuse prevention, quality review, and product improvement under the applicable workflow.",
+    "thirdPartyProviders": [
+      "third_party_model_api",
+      "cloud_infrastructure",
+      "monitoring_or_safety_tooling"
+    ],
+    "automatedDecisionMaking": false,
+    "humanReviewAvailable": true,
+    "appealChannel": "privacy@acme.example.com",
+    "sensitiveDataRestrictions": "Users should avoid submitting sensitive data unless explicitly required by the service, contractually agreed, and protected by stronger controls.",
+    "securityControls": "Minimization, access controls, audit logs, segmented environments, and reasonable monitoring are applied to prompts, outputs, and AI-related operational data.",
+    "transparencyNotes": "We review high-risk or newly introduced AI features before rollout and may provide feature-specific notices where the workflow requires more detailed disclosure."
+  },
+  "settings": {
+    "language": "en"
+  }
+}

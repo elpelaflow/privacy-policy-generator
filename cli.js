@@ -12,6 +12,7 @@ const ReturnRefundPolicyGenerator = require('./js/refund-generator');
 const DisclaimerGenerator = require('./js/disclaimer-generator');
 const SecurityPolicyGenerator = require('./js/security-generator');
 const DataProcessingAgreementGenerator = require('./js/dpa-generator');
+const AiPolicyGenerator = require('./js/ai-policy-generator');
 const { publishPolicy } = require('./js/publishing');
 
 const DOCUMENT_OPTIONS = [
@@ -22,7 +23,8 @@ const DOCUMENT_OPTIONS = [
   { value: 'refund', label: 'Devoluciones y reembolsos', description: 'Genera una política de devoluciones, cambios y reembolsos para compartir como URL pública.' },
   { value: 'disclaimer', label: 'Disclaimer / descargo', description: 'Genera descargos de responsabilidad modulares para contenido, enlaces, reseñas, salud, fitness y uso del sitio.' },
   { value: 'security', label: 'Política de seguridad', description: 'Genera una política de seguridad y divulgación responsable para recibir reportes de vulnerabilidades.' },
-  { value: 'dpa', label: 'DPA / acuerdo de tratamiento de datos', description: 'Genera un Data Processing Agreement para SaaS B2B con roles, subprocessors, seguridad y transferencias.' }
+  { value: 'dpa', label: 'DPA / acuerdo de tratamiento de datos', description: 'Genera un Data Processing Agreement para SaaS B2B con roles, subprocessors, seguridad y transferencias.' },
+  { value: 'ai', label: 'Política de IA y datos de entrenamiento', description: 'Genera una política de transparencia sobre uso de IA, entrenamiento, proveedores, retención y revisión humana.' }
 ];
 
 const BUSINESS_TYPE_OPTIONS = [
@@ -239,6 +241,51 @@ const DPA_DATA_SUBJECT_OPTIONS = [
   { value: 'Empleados o contratistas del cliente', label: 'Equipo del cliente', description: 'Administradores, empleados o contratistas del cliente.' },
   { value: 'Prospectos o contactos comerciales del cliente', label: 'Prospectos o leads', description: 'Leads, prospectos o contactos comerciales del cliente.' },
   { value: 'Clientes o usuarios autenticados del cliente', label: 'Clientes autenticados', description: 'Cuentas o usuarios registrados del cliente.' }
+];
+
+const AI_SYSTEM_OPTIONS = [
+  { value: 'chatbot_or_assistant', label: 'Chatbot o asistente', description: 'Asistentes conversacionales o soporte guiado.' },
+  { value: 'content_generation', label: 'Generación de contenido', description: 'Texto, imágenes, resúmenes u otros outputs generativos.' },
+  { value: 'ranking_or_recommendation', label: 'Ranking o recomendaciones', description: 'Priorización, matching o recomendaciones.' },
+  { value: 'classification_or_moderation', label: 'Clasificación o moderación', description: 'Moderación, fraude, triage o etiquetado.' },
+  { value: 'analytics_or_forecasting', label: 'Analítica o predicción', description: 'Predicción, scoring o forecasting.' }
+];
+
+const AI_USE_CASE_OPTIONS = [
+  { value: 'customer_support', label: 'Soporte al cliente', description: 'Respuestas, ayuda contextual o soporte operativo.' },
+  { value: 'drafting_or_generation', label: 'Redacción o generación', description: 'Borradores, respuestas o contenido generado.' },
+  { value: 'search_and_retrieval', label: 'Búsqueda y retrieval', description: 'Búsqueda semántica o knowledge base.' },
+  { value: 'moderation_or_safety', label: 'Moderación o seguridad', description: 'Abuso, fraude o seguridad del sistema.' },
+  { value: 'internal_operations', label: 'Operación interna', description: 'Backoffice, QA o flujos internos.' }
+];
+
+const AI_TRAINING_DATA_USE_OPTIONS = [
+  { value: 'no_training', label: 'No se usa para entrenamiento', description: 'No se usa para entrenamiento o fine-tuning general.' },
+  { value: 'evaluation_only', label: 'Sólo evaluación o safety review', description: 'Uso acotado para evaluación o seguridad.' },
+  { value: 'service_improvement', label: 'Mejora del producto', description: 'Mejora del producto o del comportamiento acotado del sistema.' },
+  { value: 'model_training', label: 'Entrenamiento o fine-tuning', description: 'Uso más amplio para entrenamiento o ajuste de modelos.' }
+];
+
+const AI_DATA_SOURCE_OPTIONS = [
+  { value: 'customer_inputs', label: 'Inputs del cliente o usuario', description: 'Prompts, formularios, archivos o contenido provisto por el usuario.' },
+  { value: 'service_logs', label: 'Logs y telemetría', description: 'Eventos, métricas y observabilidad técnica.' },
+  { value: 'feedback_signals', label: 'Feedback explícito', description: 'Calificaciones, correcciones o thumbs up/down.' },
+  { value: 'public_or_licensed_data', label: 'Datos públicos o licenciados', description: 'Datasets públicos, licenciados o de terceros.' },
+  { value: 'synthetic_or_test_data', label: 'Datos sintéticos o de prueba', description: 'Datos sintéticos o fixtures de evaluación.' }
+];
+
+const AI_MODEL_IMPROVEMENT_OPTIONS = [
+  { value: 'quality_evaluation', label: 'Evaluación de calidad', description: 'Benchmarking, QA o performance review.' },
+  { value: 'safety_testing', label: 'Pruebas de seguridad', description: 'Red teaming, abuso o safety review.' },
+  { value: 'fine_tuning', label: 'Fine-tuning', description: 'Ajuste o calibración del modelo.' },
+  { value: 'product_analytics', label: 'Analítica del producto', description: 'Mejoras de producto, UX u operación.' }
+];
+
+const AI_PROVIDER_OPTIONS = [
+  { value: 'third_party_model_api', label: 'API de modelos de terceros', description: 'LLMs, visión, embeddings u otros modelos externos.' },
+  { value: 'cloud_infrastructure', label: 'Infraestructura cloud', description: 'Hosting, storage o cómputo de soporte.' },
+  { value: 'annotation_or_review_vendor', label: 'Vendor de anotación o revisión', description: 'Etiquetado, QA o revisión humana.' },
+  { value: 'monitoring_or_safety_tooling', label: 'Monitoreo o safety tooling', description: 'Observabilidad, filtros o herramientas de control.' }
 ];
 
 const DISCLAIMER_OPTIONS = [
@@ -590,6 +637,9 @@ function defaultBaseUrlForDocument(documentType) {
   if (documentType === 'dpa') {
     return 'https://example.com/dpa';
   }
+  if (documentType === 'ai') {
+    return 'https://example.com/ai';
+  }
   return DEFAULT_PUBLIC_BASE_URL;
 }
 
@@ -615,14 +665,17 @@ function defaultPublishDirForDocument(documentType) {
   if (documentType === 'dpa') {
     return './public/dpa';
   }
+  if (documentType === 'ai') {
+    return './public/ai';
+  }
   return DEFAULT_PUBLISH_DIR;
 }
 
 function resolveDocumentType(options, input) {
-  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer', 'security', 'dpa'].includes(options.document)) {
+  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer', 'security', 'dpa', 'ai'].includes(options.document)) {
     return options.document;
   }
-  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer', 'security', 'dpa'].includes(input?.documentType)) {
+  if (['terms', 'privacy', 'deletion', 'cookies', 'refund', 'disclaimer', 'security', 'dpa', 'ai'].includes(input?.documentType)) {
     return input.documentType;
   }
   if (input?.terms) {
@@ -645,6 +698,9 @@ function resolveDocumentType(options, input) {
   }
   if (input?.dpa) {
     return 'dpa';
+  }
+  if (input?.ai) {
+    return 'ai';
   }
   return 'privacy';
 }
@@ -741,6 +797,7 @@ function documentOutputSuffix(documentType) {
   if (documentType === 'disclaimer') return 'disclaimer';
   if (documentType === 'security') return 'security-policy';
   if (documentType === 'dpa') return 'data-processing-agreement';
+  if (documentType === 'ai') return 'ai-policy';
   return 'privacy-policy';
 }
 
@@ -1038,6 +1095,30 @@ function buildDpaInputFromState(state) {
     },
     dpa: {
       ...state.dpa
+    },
+    settings: {
+      language: state.output.language
+    }
+  };
+}
+
+function buildAiInputFromState(state) {
+  return {
+    documentType: 'ai',
+    business: {
+      name: state.business.name,
+      type: state.business.type,
+      websiteUrl: state.business.websiteUrl,
+      country: state.business.country,
+      address: state.business.address
+    },
+    contact: {
+      email: state.contact.email,
+      phone: state.contact.phone,
+      pageUrl: state.contact.pageUrl
+    },
+    ai: {
+      ...state.ai
     },
     settings: {
       language: state.output.language
@@ -3413,6 +3494,287 @@ async function runDpaWizard(generator) {
   }
 }
 
+async function collectAiSection(rl, state) {
+  await runQuestions([
+    async () => {
+      const value = await promptMultiChoice(rl, 'Qué sistemas o funciones de IA usa el servicio', AI_SYSTEM_OPTIONS, { allowNone: false, allowOther: true });
+      if (value === BACK) return BACK;
+      state.ai.systemsUsed = value.values.concat(value.manualNotes);
+    },
+    async () => {
+      const value = await promptMultiChoice(rl, 'Para qué se usa la IA en el servicio', AI_USE_CASE_OPTIONS, { allowNone: false, allowOther: true });
+      if (value === BACK) return BACK;
+      state.ai.useCases = value.values.concat(value.manualNotes);
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'La IA es visible para usuarios o clientes',
+        'Marcá sí si el usuario interactúa con asistentes, recomendaciones, generación, scoring o funciones claramente asistidas por IA.',
+        state.ai.userFacingAi
+      );
+      if (value === BACK) return BACK;
+      state.ai.userFacingAi = value;
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Indicás contenido generado o asistido por IA',
+        'Marcá sí si el servicio etiqueta o señala contenido generado o materialmente asistido por IA.',
+        state.ai.generatedContentLabeling
+      );
+      if (value === BACK) return BACK;
+      state.ai.generatedContentLabeling = value;
+    },
+    async () => {
+      const choice = await promptSingleChoice(rl, 'Cómo se usan los datos para entrenamiento o mejora de modelos', AI_TRAINING_DATA_USE_OPTIONS, { allowOther: false });
+      if (choice === BACK) return BACK;
+      state.ai.trainingDataUse = choice.value;
+    },
+    async () => {
+      const value = await promptMultiChoice(rl, 'Qué fuentes de datos están relacionadas con el uso o mejora de IA', AI_DATA_SOURCE_OPTIONS, { allowNone: false, allowOther: true });
+      if (value === BACK) return BACK;
+      state.ai.dataSources = value.values.concat(value.manualNotes);
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Pueden intervenir datos personales en estos flujos',
+        'Marcá sí sólo si prompts, outputs, logs o datasets vinculados a IA pueden incluir datos personales.',
+        state.ai.personalDataInTraining
+      );
+      if (value === BACK) return BACK;
+      state.ai.personalDataInTraining = value;
+    },
+    async () => {
+      const value = await promptMultiChoice(rl, 'Qué usos concretos puede haber para mejora, evaluación o ajuste', AI_MODEL_IMPROVEMENT_OPTIONS, { allowNone: true, allowOther: true });
+      if (value === BACK) return BACK;
+      state.ai.modelImprovementUses = value.values.concat(value.manualNotes);
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Existe opt-out o control para entrenamiento/mejora',
+        'Marcá sí si el usuario o cliente puede limitar ciertos usos vinculados a training, fine-tuning o mejora del producto.',
+        state.ai.optOutAvailable
+      );
+      if (value === BACK) return BACK;
+      state.ai.optOutAvailable = value;
+    },
+    async () => {
+      if (!state.ai.optOutAvailable) return;
+      const value = await promptText(rl, 'Método de opt-out o control', {
+        allowEmpty: true,
+        defaultValue: state.ai.optOutMethod || 'Configuración de cuenta, solicitud por soporte o canal contractual específico.'
+      });
+      if (value === BACK) return BACK;
+      state.ai.optOutMethod = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Retención de prompts, outputs o datasets relacionados', {
+        allowEmpty: true,
+        defaultValue: state.ai.retentionPeriod || 'Los datos vinculados a IA se retienen sólo por el tiempo razonablemente necesario para prestación, seguridad, soporte, evaluación o mejora, según el flujo aplicable.'
+      });
+      if (value === BACK) return BACK;
+      state.ai.retentionPeriod = value;
+    },
+    async () => {
+      const value = await promptMultiChoice(rl, 'Qué proveedores externos o model providers intervienen', AI_PROVIDER_OPTIONS, { allowNone: false, allowOther: true });
+      if (value === BACK) return BACK;
+      state.ai.thirdPartyProviders = value.values.concat(value.manualNotes);
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'La IA puede influir decisiones automatizadas o scoring relevante',
+        'Marcá sí si la IA puede afectar ranking, moderación, acceso, fraude, priorización o decisiones con impacto relevante.',
+        state.ai.automatedDecisionMaking
+      );
+      if (value === BACK) return BACK;
+      state.ai.automatedDecisionMaking = value;
+    },
+    async () => {
+      const value = await promptYesNo(
+        rl,
+        'Existe revisión humana o escalamiento',
+        'Marcá sí si el usuario o el equipo pueden escalar casos y obtener revisión humana.',
+        state.ai.humanReviewAvailable
+      );
+      if (value === BACK) return BACK;
+      state.ai.humanReviewAvailable = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Canal para revisión o soporte', {
+        allowEmpty: true,
+        defaultValue: state.ai.appealChannel || state.contact.email || ''
+      });
+      if (value === BACK) return BACK;
+      state.ai.appealChannel = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Restricciones sobre datos sensibles o de alto riesgo', {
+        allowEmpty: true,
+        defaultValue: state.ai.sensitiveDataRestrictions || 'No pedimos ni recomendamos cargar datos sensibles salvo que exista base legal, controles reforzados y necesidad operativa claramente justificada.'
+      });
+      if (value === BACK) return BACK;
+      state.ai.sensitiveDataRestrictions = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Controles de seguridad y minimización', {
+        allowEmpty: true,
+        defaultValue: state.ai.securityControls || 'Aplicamos minimización, controles de acceso, registros operativos y medidas razonables de seguridad sobre prompts, outputs y datos vinculados a IA.'
+      });
+      if (value === BACK) return BACK;
+      state.ai.securityControls = value;
+    },
+    async () => {
+      const value = await promptText(rl, 'Nota adicional de transparencia (opcional)', {
+        allowEmpty: true,
+        defaultValue: state.ai.transparencyNotes || ''
+      });
+      if (value === BACK) return BACK;
+      state.ai.transparencyNotes = value;
+    }
+  ]);
+}
+
+function printAiSummary(state, validation) {
+  stdout.write(`\n${bold(magenta('Resumen antes de generar'))}\n`);
+  stdout.write(`- Documento: Política de IA y datos de entrenamiento\n`);
+  stdout.write(`- Negocio: ${state.business.name || '(sin definir)'}\n`);
+  stdout.write(`- Sitio: ${state.business.websiteUrl || '(sin definir)'}\n`);
+  stdout.write(`- Sistemas de IA: ${state.ai.systemsUsed.length > 0 ? state.ai.systemsUsed.join(', ') : '(sin definir)'}\n`);
+  stdout.write(`- Casos de uso: ${state.ai.useCases.length > 0 ? state.ai.useCases.join(', ') : '(sin definir)'}\n`);
+  stdout.write(`- Uso para entrenamiento/mejora: ${optionLabel(AI_TRAINING_DATA_USE_OPTIONS, state.ai.trainingDataUse || '(sin definir)')}\n`);
+  stdout.write(`- Proveedores externos: ${state.ai.thirdPartyProviders.length > 0 ? state.ai.thirdPartyProviders.join(', ') : '(sin definir)'}\n`);
+  stdout.write(`- Decisiones automatizadas: ${state.ai.automatedDecisionMaking ? 'sí' : 'no'}\n`);
+  stdout.write(`- Revisión humana: ${state.ai.humanReviewAvailable ? 'sí' : 'no'}\n`);
+  stdout.write(`- Idioma de salida: ${optionLabel(OUTPUT_LANGUAGE_OPTIONS, state.output.language || 'es')}\n`);
+  stdout.write(`- Formato: ${optionLabel(OUTPUT_FORMAT_OPTIONS, state.output.format || 'markdown')}\n`);
+  stdout.write(`- URL pública hasheada: ${state.output.publishHashedUrl ? state.output.baseUrl : 'no'}\n`);
+  if (state.output.publishHashedUrl) stdout.write(`- Directorio publicable: ${state.output.publishDir}\n`);
+  stdout.write(`- Guardar a archivo: ${state.output.writeToFile ? state.output.outputPath : 'no'}\n`);
+  stdout.write(`- Guardar input JSON: ${state.output.saveInput ? state.output.inputPath : 'no'}\n`);
+  if (validation.warnings.length > 0) {
+    stdout.write(`\n${bold(yellow('Advertencias de revisión:'))}\n`);
+    validation.warnings.forEach((warning) => stdout.write(`- ${warning}\n`));
+  }
+}
+
+async function promptAiReviewAction(rl) {
+  stdout.write(`\n${bold(cyan('Qué querés hacer ahora'))}\n`);
+  stdout.write(`  ${yellow('1')}. ${bold('Generar política de IA')}\n`);
+  stdout.write(`  ${yellow('2')}. ${bold('Editar negocio')}\n`);
+  stdout.write(`  ${yellow('3')}. ${bold('Editar contacto')}\n`);
+  stdout.write(`  ${yellow('4')}. ${bold('Editar política de IA')}\n`);
+  stdout.write(`  ${yellow('5')}. ${bold('Editar formato y guardado')}\n`);
+  stdout.write(`  ${yellow('6')}. ${bold('Cancelar')}\n`);
+  while (true) {
+    const answer = (await rl.question(`${green('Elegí un número')}: `)).trim();
+    const choice = Number.parseInt(answer, 10);
+    if (choice >= 1 && choice <= 6) return choice;
+    stdout.write(`${red('Opción inválida. Probá de nuevo.')}\n`);
+  }
+}
+
+async function runAiWizard(generator) {
+  const rl = readline.createInterface({ input: stdin, output: stdout });
+  const state = {
+    documentType: 'ai',
+    business: { name: '', type: 'saas', websiteUrl: '', country: 'Argentina', address: '' },
+    contact: { email: '', phone: '', pageUrl: '' },
+    ai: {
+      systemsUsed: ['chatbot_or_assistant', 'content_generation'],
+      useCases: ['customer_support', 'drafting_or_generation'],
+      userFacingAi: true,
+      generatedContentLabeling: false,
+      trainingDataUse: 'no_training',
+      dataSources: ['customer_inputs', 'service_logs'],
+      personalDataInTraining: false,
+      modelImprovementUses: [],
+      optOutAvailable: false,
+      optOutMethod: '',
+      retentionPeriod: 'Los datos vinculados a IA se retienen sólo por el tiempo razonablemente necesario para prestación, seguridad, soporte, evaluación o mejora, según el flujo aplicable.',
+      thirdPartyProviders: ['third_party_model_api', 'cloud_infrastructure'],
+      automatedDecisionMaking: false,
+      humanReviewAvailable: true,
+      appealChannel: '',
+      sensitiveDataRestrictions: 'No pedimos ni recomendamos cargar datos sensibles salvo que exista base legal, controles reforzados y necesidad operativa claramente justificada.',
+      securityControls: 'Aplicamos minimización, controles de acceso, registros operativos y medidas razonables de seguridad sobre prompts, outputs y datos vinculados a IA.',
+      transparencyNotes: '',
+      notes: []
+    },
+    output: { language: 'es', format: 'markdown', publishHashedUrl: false, baseUrl: defaultBaseUrlForDocument('ai'), publishDir: defaultPublishDirForDocument('ai'), writeToFile: false, outputPath: '', saveInput: true, inputPath: '', importPath: '' },
+    manualDisclosures: []
+  };
+
+  try {
+    stdout.write(`${bold(cyan('Asistente interactivo de política de IA'))}\n`);
+    stdout.write(`${dim('Te voy a ayudar a generar una política de transparencia sobre uso de IA, entrenamiento, proveedores, retención y revisión humana.')}\n`);
+    await collectBusinessSection(rl, state);
+    await collectContactSection(rl, state);
+    await collectAiSection(rl, state);
+    await collectOutputSection(rl, state);
+
+    while (true) {
+      const input = buildAiInputFromState(state);
+      const validation = await generator.validate(input);
+      if (!validation.ok) {
+        stdout.write(`\n${bold(red('Todavía faltan datos obligatorios:'))}\n`);
+        validation.errors.forEach((error) => stdout.write(`- ${error}\n`));
+      }
+      printAiSummary(state, validation);
+      const action = await promptAiReviewAction(rl);
+      if (action === 2) { await collectBusinessSection(rl, state); continue; }
+      if (action === 3) { await collectContactSection(rl, state); continue; }
+      if (action === 4) { await collectAiSection(rl, state); continue; }
+      if (action === 5) { await collectOutputSection(rl, state); continue; }
+      if (action === 6) { stdout.write(`${yellow('Wizard cancelado.')}\n`); return; }
+      if (!validation.ok) {
+        stdout.write(`${red('No puedo generar hasta que corrijas los datos faltantes.')}\n`);
+        continue;
+      }
+
+      if (state.output.saveInput) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.inputPath || `${slugify(state.business.name)}-ai-policy-input.json`), `${JSON.stringify(input, null, 2)}\n`, 'utf8');
+        stdout.write(`\n${green(`Guardé el input en ${state.output.inputPath || `${slugify(state.business.name)}-ai-policy-input.json`}`)}\n`);
+      }
+
+      const result = await generator.generate(input);
+      const output = result[state.output.format];
+      let published = null;
+
+      if (state.output.publishHashedUrl) {
+        published = await publishGeneratedPolicy(input, result, {
+          publishDir: state.output.publishDir || defaultPublishDirForDocument('ai'),
+          baseUrl: state.output.baseUrl || defaultBaseUrlForDocument('ai')
+        });
+      }
+
+      if (state.output.writeToFile) {
+        await fs.writeFile(path.resolve(process.cwd(), state.output.outputPath), output, 'utf8');
+        stdout.write(`${green(`Guardé la política de IA en ${state.output.outputPath}`)}\n`);
+      } else {
+        stdout.write(`\n${output}\n`);
+      }
+
+      if (published) {
+        stdout.write(`\n${bold(green('URL pública generada:'))} ${published.publicUrl}\n`);
+        stdout.write(`${green('Archivo HTML publicado:')} ${published.filePath}\n`);
+        stdout.write(`${green('Manifest:')} ${published.manifestPath}\n`);
+      }
+
+      if (result.warnings.length > 0) {
+        stdout.write(`\n${bold(yellow('Advertencias de revisión:'))}\n`);
+        result.warnings.forEach((warning) => stdout.write(`- ${warning}\n`));
+      }
+      return;
+    }
+  } finally {
+    rl.close();
+  }
+}
+
 async function promptDeletionReviewAction(rl) {
   stdout.write(`\n${bold(cyan('Qué querés hacer ahora'))}\n`);
   stdout.write(`  ${yellow('1')}. ${bold('Generar instrucciones de eliminación')}\n`);
@@ -3795,10 +4157,10 @@ function usage() {
   return [
     'Usage:',
     '  privacy-policy wizard',
-    '  privacy-policy generate --document privacy|terms|deletion|cookies|refund|disclaimer|security|dpa --input <file.json> [--format html|markdown|text] [--output file]',
-    '  privacy-policy publish --document privacy|terms|deletion|cookies|refund|disclaimer|security|dpa --input <file.json> --base-url <url> [--publish-dir <dir>]',
-    '  privacy-policy validate --document privacy|terms|deletion|cookies|refund|disclaimer|security|dpa --input <file.json>',
-    '  privacy-policy explain --document privacy|terms|deletion|cookies|refund|disclaimer|security|dpa --input <file.json>',
+    '  privacy-policy generate --document privacy|terms|deletion|cookies|refund|disclaimer|security|dpa|ai --input <file.json> [--format html|markdown|text] [--output file]',
+    '  privacy-policy publish --document privacy|terms|deletion|cookies|refund|disclaimer|security|dpa|ai --input <file.json> --base-url <url> [--publish-dir <dir>]',
+    '  privacy-policy validate --document privacy|terms|deletion|cookies|refund|disclaimer|security|dpa|ai --input <file.json>',
+    '  privacy-policy explain --document privacy|terms|deletion|cookies|refund|disclaimer|security|dpa|ai --input <file.json>',
     '',
     'If you run `privacy-policy` with no command, the interactive wizard starts automatically.'
   ].join('\n');
@@ -3814,6 +4176,7 @@ async function main() {
   const disclaimerGenerator = new DisclaimerGenerator();
   const securityGenerator = new SecurityPolicyGenerator();
   const dpaGenerator = new DataProcessingAgreementGenerator();
+  const aiGenerator = new AiPolicyGenerator();
 
   if (!command || command === 'wizard') {
     const rl = readline.createInterface({ input: stdin, output: stdout });
@@ -3835,6 +4198,8 @@ async function main() {
         await runSecurityWizard(securityGenerator);
       } else if (documentType === 'dpa') {
         await runDpaWizard(dpaGenerator);
+      } else if (documentType === 'ai') {
+        await runAiWizard(aiGenerator);
       } else {
         await runWizard(privacyGenerator);
       }
@@ -3864,6 +4229,8 @@ async function main() {
               ? securityGenerator
               : documentType === 'dpa'
                 ? dpaGenerator
+                : documentType === 'ai'
+                  ? aiGenerator
         : privacyGenerator;
 
   if (command === 'validate') {

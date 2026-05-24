@@ -12,6 +12,7 @@ const ReturnRefundPolicyGenerator = require('../js/refund-generator');
 const DisclaimerGenerator = require('../js/disclaimer-generator');
 const SecurityPolicyGenerator = require('../js/security-generator');
 const DataProcessingAgreementGenerator = require('../js/dpa-generator');
+const AiPolicyGenerator = require('../js/ai-policy-generator');
 const { buildHashedFilename, publishPolicy } = require('../js/publishing');
 const execFileAsync = promisify(execFile);
 
@@ -416,6 +417,82 @@ test('dpa validation requires service description and warns about missing transf
   assert.ok(validation.errors.some((error) => /service|servicio/i.test(error)));
   assert.ok(validation.warnings.some((warning) => /transfer/i.test(warning)));
   assert.ok(validation.warnings.some((warning) => /subprocessor/i.test(warning)));
+});
+
+function baseAiInput() {
+  return {
+    documentType: 'ai',
+    business: {
+      name: 'Acme AI Cloud',
+      type: 'saas',
+      websiteUrl: 'https://ai.acme.example.com',
+      country: 'Germany',
+      address: 'Example Street 123, Berlin, Germany'
+    },
+    contact: {
+      email: 'privacy@acme.example.com',
+      phone: '',
+      pageUrl: 'https://ai.acme.example.com/legal/ai'
+    },
+    ai: {
+      systemsUsed: ['chatbot_or_assistant', 'content_generation'],
+      useCases: ['customer_support', 'drafting_or_generation'],
+      userFacingAi: true,
+      generatedContentLabeling: true,
+      trainingDataUse: 'service_improvement',
+      dataSources: ['customer_inputs', 'service_logs', 'feedback_signals'],
+      personalDataInTraining: false,
+      modelImprovementUses: ['quality_evaluation', 'safety_testing'],
+      optOutAvailable: true,
+      optOutMethod: 'Enterprise controls or support request.',
+      retentionPeriod: 'Retained only as reasonably necessary for service delivery, safety, and product review.',
+      thirdPartyProviders: ['third_party_model_api', 'cloud_infrastructure'],
+      automatedDecisionMaking: false,
+      humanReviewAvailable: true,
+      appealChannel: 'privacy@acme.example.com',
+      sensitiveDataRestrictions: 'Sensitive data should not be submitted unless explicitly required and protected by stronger controls.',
+      securityControls: 'Minimization, access control, logs, and reasonable security measures are applied.',
+      transparencyNotes: 'Feature-specific notices may apply for higher-risk workflows.'
+    },
+    settings: {
+      language: 'en'
+    }
+  };
+}
+
+test('ai policy generator includes training and review sections', async () => {
+  const generator = new AiPolicyGenerator();
+  const result = await generator.generate(baseAiInput());
+
+  assert.match(result.markdown, /AI Use and Training Data Policy/);
+  assert.match(result.markdown, /Training, Evaluation, and Model Improvement/);
+  assert.match(result.markdown, /Automated Decisions and Human Review/);
+});
+
+test('ai policy html includes internal JSON-LD metadata and accessible structure', async () => {
+  const generator = new AiPolicyGenerator();
+  const result = await generator.generate(baseAiInput());
+
+  assert.match(result.html, /<script type="application\/ld\+json">/);
+  assert.match(result.html, /"@type":"WebPage"/);
+  assert.match(result.html, /<main id="main-content" aria-labelledby="document-title">/);
+  assert.match(result.html, /<meta name="legal-document-type" content="ai-policy">/);
+});
+
+test('ai policy validation warns when opt-out and review details are vague', async () => {
+  const generator = new AiPolicyGenerator();
+  const input = baseAiInput();
+  input.ai.optOutAvailable = true;
+  input.ai.optOutMethod = '';
+  input.ai.appealChannel = '';
+  input.ai.securityControls = '';
+
+  const validation = await generator.validate(input);
+
+  assert.equal(validation.ok, true);
+  assert.ok(validation.warnings.some((warning) => /opt-out|control/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /review|support|revisión/i.test(warning)));
+  assert.ok(validation.warnings.some((warning) => /security|seguridad/i.test(warning)));
 });
 
 function baseTermsInput() {
