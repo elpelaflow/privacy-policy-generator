@@ -1,6 +1,23 @@
 # Privacy Policy Generator
 
-CLI-first and web-enabled generator for privacy policies, terms and conditions, cookie policies, return and refund policies, disclaimers, security policies, end user license agreements (EULA), data processing agreements (DPA), AI transparency / training-data policies, and data deletion instructions, with structured validation, explainable generation, interactive terminal flows, automated tests, and GitHub Pages publishing support.
+Generate legal documents for apps, SaaS, ecommerce, and websites from a CLI or a browser app, then download them or publish them to GitHub Pages.
+
+Use the [public web app](https://elpelaflow.github.io/privacy-policy-generator/) if you want to try it immediately without forking or deploying anything.
+
+## At a Glance
+
+- generate privacy, terms, cookies, refund, security, EULA, DPA, AI, and deletion documents
+- use the public browser app or run the CLI locally
+- apply document-specific presets for common scenarios
+- export `html`, `md`, `txt`, `docx`, and input `json`
+- publish documents into your own GitHub Pages repo under safe `legal/...` paths
+
+## Who This Is For
+
+- SaaS and app operators who need public legal pages quickly
+- ecommerce or content-site owners who want editable legal docs
+- developers who want a local CLI plus a browser workflow
+- teams that want to keep legal-document inputs versionable as JSON
 
 ## Scope
 
@@ -9,7 +26,7 @@ This repo now supports two delivery modes:
 - terminal-first generators for privacy, terms, cookies, return/refund, disclaimers, security-policy, EULA, DPA, AI-policy, and deletion-instructions documents
 - a client-side static web app that runs fully in the browser and can be deployed to GitHub Pages
 
-## Features
+## Core Features
 
 - structured rules instead of string-based condition parsing
 - canonical JSON input format
@@ -29,11 +46,39 @@ This repo now supports two delivery modes:
 - HTML, Markdown, and plain text generation
 - automated regression tests
 
+## Choose Your Workflow
+
+### 1. Public Web App
+
+Use the hosted browser app to:
+
+- choose a document
+- fill the guided form
+- apply presets
+- download the result
+- optionally publish it into your own GitHub Pages repo
+
+### 2. Local CLI
+
+Use the CLI if you want:
+
+- terminal-first generation
+- local validation
+- scripting or repeatable workflows
+- publishing into hosting you already control
+
+### 3. Your Own Hosted Copy
+
+Fork the repo and deploy your own static app + Worker backend if you want:
+
+- your own branding
+- your own OAuth app
+- your own backend
+- full control of the public instance
+
 ## Static Web App
 
 The repo now includes a browser-based static app under `web/` and a GitHub Pages-ready build output under `docs/`.
-
-Use the [public web app](https://elpelaflow.github.io/privacy-policy-generator/) if you want to generate documents in the browser without forking or deploying your own copy.
 
 What the static app can do today:
 
