@@ -380,6 +380,151 @@ const DOCUMENT_PRESETS = {
       }
     }
   ],
+  refund: [
+    {
+      value: 'physical_ecommerce',
+      label: 'E-commerce productos físicos',
+      description: 'Base para tienda online con entregas físicas, devoluciones operativas, productos no retornables y manejo de daños o faltantes.',
+      summary: [
+        'Asume venta de productos físicos con cambios y reembolsos.',
+        'Marca plazos operativos típicos y logística caso por caso.',
+        'Incluye exclusiones razonables y proceso para productos dañados o incorrectos.'
+      ],
+      patch: {
+        business: { type: 'ecommerce', country: 'Argentina' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar']
+        },
+        refund: {
+          offeringType: 'physical_goods',
+          acceptsReturns: true,
+          refundWindow: '10 días',
+          exchangeWindow: '10 días',
+          returnConditions: 'El producto debe devolverse sin uso, con accesorios y empaque razonablemente conservado.',
+          refundMethod: 'el mismo medio de pago original',
+          refundProcessingTime: '10 días hábiles',
+          returnShippingResponsibility: 'case_by_case',
+          returnRequestChannel: 'Email de soporte o formulario de contacto del sitio.',
+          nonReturnableItems: [
+            'Productos personalizados o hechos a medida',
+            'Productos usados, dañados por mal uso o incompletos'
+          ],
+          digitalGoodsFinal: false,
+          damagedItemsProcess: 'Si el producto llega dañado, incorrecto o con fallas, pedimos que nos contactes con fotos y datos del pedido para revisar el caso.'
+        }
+      }
+    },
+    {
+      value: 'digital_products',
+      label: 'Productos digitales',
+      description: 'Escenario para descargas, licencias, activos digitales o accesos activados, con política más restrictiva después del acceso.',
+      summary: [
+        'Asume entrega digital sin logística física.',
+        'Marca venta digital definitiva y excepciones más claras.',
+        'Útil para ebooks, plantillas, licencias, cursos o productos descargables.'
+      ],
+      patch: {
+        business: { type: 'ecommerce' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar', 'global']
+        },
+        refund: {
+          offeringType: 'digital_products',
+          acceptsReturns: true,
+          refundWindow: '7 días',
+          exchangeWindow: '',
+          returnConditions: 'Los reembolsos pueden limitarse o excluirse una vez iniciado el acceso, descarga, activación o consumo del producto digital, sin perjuicio de derechos obligatorios aplicables.',
+          refundMethod: 'el mismo medio de pago original',
+          refundProcessingTime: '10 días hábiles',
+          returnShippingResponsibility: 'merchant',
+          returnRequestChannel: 'Email de soporte o formulario de contacto del sitio.',
+          nonReturnableItems: [
+            'Licencias o accesos ya activados',
+            'Descargas ya iniciadas o consumidas',
+            'Productos digitales personalizados o adaptados al cliente'
+          ],
+          digitalGoodsFinal: true,
+          damagedItemsProcess: 'Si el acceso, enlace o archivo llega incompleto, corrupto o no coincide con la compra, pedimos que nos contactes con evidencia para revisar y corregir el caso.'
+        }
+      }
+    },
+    {
+      value: 'services_or_bookings',
+      label: 'Servicios o reservas',
+      description: 'Base para servicios, turnos, reservas o trabajo por encargo, con foco en cancelación, reprogramación y estado de ejecución.',
+      summary: [
+        'Asume prestación de servicios o reservas más que venta de bienes.',
+        'Usa evaluación caso por caso según el estado del servicio.',
+        'Sirve para consultoría, reservas, sesiones o servicios a medida.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar', 'global']
+        },
+        refund: {
+          offeringType: 'services',
+          acceptsReturns: true,
+          refundWindow: 'Hasta 48 horas antes del servicio',
+          exchangeWindow: 'Sujeto a disponibilidad',
+          returnConditions: 'Las cancelaciones, reprogramaciones o reembolsos se evalúan según el momento del aviso, la disponibilidad y el nivel de ejecución del servicio ya comprometido.',
+          refundMethod: 'el mismo medio de pago original u otro medio acordado',
+          refundProcessingTime: '10 días hábiles',
+          returnShippingResponsibility: 'merchant',
+          returnRequestChannel: 'Email de soporte o canal de atención del servicio.',
+          nonReturnableItems: [
+            'Servicios ya prestados total o parcialmente',
+            'Reservas no canceladas dentro del plazo operativo informado',
+            'Gastos o insumos ya comprometidos específicamente para el cliente'
+          ],
+          digitalGoodsFinal: false,
+          damagedItemsProcess: 'Si el servicio se presta con errores, de forma incompleta o no coincide materialmente con lo contratado, pedimos que nos contactes para revisar corrección, reprogramación o remedio razonable.'
+        }
+      }
+    },
+    {
+      value: 'saas_subscriptions',
+      label: 'Suscripción SaaS',
+      description: 'Escenario para suscripciones o planes SaaS con cancelación, prorrateo limitado y evaluación del uso ya consumido.',
+      summary: [
+        'Asume cobro por suscripción o plan recurrente.',
+        'Marca evaluación según tiempo transcurrido y uso efectivo.',
+        'Útil para software, membresías o acceso online continuo.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar', 'global']
+        },
+        refund: {
+          offeringType: 'subscriptions',
+          acceptsReturns: true,
+          refundWindow: '14 días desde la contratación inicial',
+          exchangeWindow: '',
+          returnConditions: 'Los reembolsos o créditos, si corresponden, se evalúan según el plan contratado, el tiempo transcurrido, el uso efectivo del servicio y cualquier derecho legal obligatorio aplicable.',
+          refundMethod: 'el mismo medio de pago original o crédito equivalente cuando corresponda',
+          refundProcessingTime: '10 días hábiles',
+          returnShippingResponsibility: 'merchant',
+          returnRequestChannel: 'Email de soporte o canal de cuenta del usuario.',
+          nonReturnableItems: [
+            'Períodos ya consumidos de la suscripción',
+            'Servicios profesionales, onboarding o setup ya prestados',
+            'Planes o add-ons activados y usados fuera de cualquier ventana promocional aplicable'
+          ],
+          digitalGoodsFinal: false,
+          damagedItemsProcess: 'Si el servicio no puede usarse razonablemente, se activa de forma incorrecta o presenta una falla material, pedimos que nos contactes para revisar soporte, corrección, crédito o remedio razonable.'
+        }
+      }
+    }
+  ],
   dpa: [
     {
       value: 'saas_b2b_eu',
