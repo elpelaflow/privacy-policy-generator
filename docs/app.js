@@ -798,6 +798,156 @@ const DOCUMENT_PRESETS = {
       }
     }
   ],
+  security: [
+    {
+      value: 'open_source_maintainer',
+      label: 'Open source maintainer',
+      description: 'Base para proyectos open source o mantenedores con disclosure coordinado, canal simple y restricciones fuertes sobre pruebas disruptivas.',
+      summary: [
+        'Asume reportes por email y/o página simple.',
+        'Mantiene disclosure coordinado sin bug bounty formal.',
+        'Útil para repos, librerías o proyectos públicos con recursos limitados.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        security: {
+          reportChannel: 'both',
+          reportEmail: '',
+          reportUrl: '',
+          scope: ['web_application', 'api', 'content'],
+          safeHarborOffered: true,
+          automatedTestingAllowed: true,
+          denialOfServiceTestingAllowed: false,
+          socialEngineeringAllowed: false,
+          reportRequirements: [
+            'Descripción clara del hallazgo y del impacto esperado',
+            'Pasos de reproducción o prueba de concepto razonable',
+            'Activos, URLs, endpoints o cuentas involucradas',
+            'Información de contacto para seguimiento'
+          ],
+          acknowledgementTime: '5 días hábiles',
+          statusUpdateTime: '15 días hábiles',
+          disclosurePreference: 'coordinated',
+          bugBountyOffered: false,
+          bugBountyNotes: '',
+          remediationGuidance: 'Priorizamos los reportes según severidad, impacto y complejidad, y podemos pedir tiempo razonable para investigar, corregir y coordinar el disclosure antes de cualquier publicación pública.',
+          securityPracticesSummary: 'Aplicamos controles de acceso, revisión de dependencias, hardening razonable y medidas de seguridad acordes a la escala y recursos del proyecto.'
+        }
+      }
+    },
+    {
+      value: 'saas_b2b_api',
+      label: 'SaaS B2B con API',
+      description: 'Escenario para producto SaaS con panel web, API y expectativas más claras de triage, updates y coordinación.',
+      summary: [
+        'Asume alcance sobre app web, API e integraciones.',
+        'Permite testing automatizado de bajo volumen, pero no DoS ni social engineering.',
+        'Útil para SaaS con developers, webhooks o superficie técnica más amplia.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        security: {
+          reportChannel: 'both',
+          reportEmail: '',
+          reportUrl: '',
+          scope: ['web_application', 'api', 'integrations', 'infrastructure'],
+          safeHarborOffered: true,
+          automatedTestingAllowed: true,
+          denialOfServiceTestingAllowed: false,
+          socialEngineeringAllowed: false,
+          reportRequirements: [
+            'Descripción clara del hallazgo y del impacto esperado',
+            'Pasos de reproducción o prueba de concepto razonable',
+            'Activos, URLs, endpoints o cuentas involucradas',
+            'Información de contacto para seguimiento'
+          ],
+          acknowledgementTime: '3 días hábiles',
+          statusUpdateTime: '10 días hábiles',
+          disclosurePreference: 'coordinated',
+          bugBountyOffered: false,
+          bugBountyNotes: '',
+          remediationGuidance: 'Priorizamos los reportes según severidad, exposición, explotabilidad y riesgo para clientes o integraciones, y coordinamos mitigación antes del disclosure público cuando corresponda.',
+          securityPracticesSummary: 'Aplicamos controles de acceso, registros operativos, revisión de dependencias, segmentación razonable y medidas de hardening sobre aplicaciones, APIs e infraestructura expuesta.'
+        }
+      }
+    },
+    {
+      value: 'startup_light_program',
+      label: 'Startup con programa liviano',
+      description: 'Base para equipo pequeño que quiere recibir reportes bien formados sin prometer bounty ni procesos pesados.',
+      summary: [
+        'Canal simple, safe harbor y reglas claras de testing.',
+        'No admite DoS ni social engineering.',
+        'Útil para startups o productos en crecimiento con capacidad de respuesta limitada.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        security: {
+          reportChannel: 'email',
+          reportEmail: '',
+          reportUrl: '',
+          scope: ['web_application', 'api'],
+          safeHarborOffered: true,
+          automatedTestingAllowed: true,
+          denialOfServiceTestingAllowed: false,
+          socialEngineeringAllowed: false,
+          reportRequirements: [
+            'Descripción clara del hallazgo y del impacto esperado',
+            'Pasos de reproducción o prueba de concepto razonable',
+            'Activos, URLs, endpoints o cuentas involucradas',
+            'Información de contacto para seguimiento'
+          ],
+          acknowledgementTime: '5 días hábiles',
+          statusUpdateTime: '15 días hábiles',
+          disclosurePreference: 'silent_fix',
+          bugBountyOffered: false,
+          bugBountyNotes: '',
+          remediationGuidance: 'Podemos necesitar tiempo razonable para validar, reproducir y corregir reportes antes de compartir detalles públicos o técnicos más amplios.',
+          securityPracticesSummary: 'Aplicamos controles de acceso, registros operativos, gestión de dependencias y medidas razonables de hardening acordes al tamaño y madurez del producto.'
+        }
+      }
+    },
+    {
+      value: 'enterprise_formal_process',
+      label: 'Enterprise con proceso formal',
+      description: 'Escenario para organización con proceso más formal, evidencia documental, coordinación más estructurada y eventual recompensa o reconocimiento.',
+      summary: [
+        'Asume canal dual, triage formal y updates más estructurados.',
+        'Mantiene disclosure coordinado con documentación y evidencia.',
+        'Útil para organizaciones con vendor review, compliance o seguridad más madura.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        security: {
+          reportChannel: 'both',
+          reportEmail: '',
+          reportUrl: '',
+          scope: ['web_application', 'api', 'mobile_app', 'infrastructure', 'integrations'],
+          safeHarborOffered: true,
+          automatedTestingAllowed: true,
+          denialOfServiceTestingAllowed: false,
+          socialEngineeringAllowed: false,
+          reportRequirements: [
+            'Descripción clara del hallazgo y del impacto esperado',
+            'Pasos de reproducción o prueba de concepto razonable',
+            'Activos, URLs, endpoints o cuentas involucradas',
+            'Información de contacto para seguimiento'
+          ],
+          acknowledgementTime: '2 días hábiles',
+          statusUpdateTime: '7 días hábiles',
+          disclosurePreference: 'coordinated',
+          bugBountyOffered: true,
+          bugBountyNotes: 'Algunos hallazgos pueden ser elegibles para reconocimiento o recompensa, sujeto a severidad, alcance, validez y reglas específicas del programa.',
+          remediationGuidance: 'Los reportes válidos se priorizan según severidad, exposición y explotabilidad. Podemos solicitar coordinación razonable, confidencialidad temporal y tiempo suficiente para corregir antes del disclosure.',
+          securityPracticesSummary: 'Aplicamos controles de acceso, gestión de dependencias, registros operativos, hardening, revisión razonable de cambios y otras medidas técnicas y organizativas acordes al servicio.'
+        }
+      }
+    }
+  ],
   dpa: [
     {
       value: 'saas_b2b_eu',
