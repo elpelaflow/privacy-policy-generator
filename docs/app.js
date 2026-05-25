@@ -1,6 +1,143 @@
 let DOCUMENTS;
 
 const DOCUMENT_PRESETS = {
+  privacy: [
+    {
+      value: 'saas_b2b_argentina',
+      label: 'SaaS B2B Argentina',
+      description: 'Base local para SaaS o app web con clientes principalmente en Argentina y proveedores cloud/analytics habituales.',
+      summary: [
+        'Foco principal en Argentina con operación local.',
+        'Asume datos personales, uso y cookies con base contractual e interés legítimo.',
+        'Marca cloud, analítica y email transaccional como terceros típicos.'
+      ],
+      patch: {
+        business: { type: 'saas', country: 'Argentina' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar'],
+          childrenAudience: false
+        },
+        dataPractices: {
+          collectedData: ['personal', 'usage', 'cookies'],
+          thirdParties: ['cloud', 'analytics', 'email'],
+          legalBases: ['contract', 'legitimate_interest']
+        },
+        compliance: {
+          requestedFrameworks: []
+        }
+      }
+    },
+    {
+      value: 'global_saas_eu',
+      label: 'SaaS global con clientes UE',
+      description: 'Escenario para SaaS o app web con usuarios o clientes en la Unión Europea y foco más fuerte en GDPR.',
+      summary: [
+        'Activa Unión Europea y Reino Unido como regiones operativas.',
+        'Suma consentimiento además de contrato e interés legítimo.',
+        'Asume cloud, analítica y email como proveedores típicos con transferencias potenciales.'
+      ],
+      patch: {
+        business: { type: 'saas', country: 'Germany' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'eu',
+          sellRegions: ['eu', 'uk'],
+          childrenAudience: false
+        },
+        dataPractices: {
+          collectedData: ['personal', 'usage', 'cookies'],
+          thirdParties: ['cloud', 'analytics', 'email'],
+          legalBases: ['contract', 'consent', 'legitimate_interest']
+        },
+        compliance: {
+          requestedFrameworks: []
+        }
+      }
+    },
+    {
+      value: 'ecommerce_argentina',
+      label: 'E-commerce Argentina',
+      description: 'Base para comercio electrónico local con pagos, facturación, logística y prácticas de analítica/cookies comunes.',
+      summary: [
+        'Asume operación principal en Argentina para ventas online.',
+        'Incluye datos personales, financieros, fiscales, uso y cookies.',
+        'Marca pagos, logística, cloud, analítica y email como terceros frecuentes.'
+      ],
+      patch: {
+        business: { type: 'ecommerce', country: 'Argentina' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar'],
+          childrenAudience: false
+        },
+        dataPractices: {
+          collectedData: ['personal', 'financial', 'tax', 'usage', 'cookies'],
+          thirdParties: ['payment', 'shipping', 'cloud', 'analytics', 'email'],
+          legalBases: ['contract', 'legal_obligation', 'legitimate_interest']
+        },
+        compliance: {
+          requestedFrameworks: []
+        }
+      }
+    },
+    {
+      value: 'mobile_meta_social',
+      label: 'App con login social y Meta',
+      description: 'Escenario para app móvil o servicio con login social, integraciones Meta/sociales y flujo de deletion más sensible.',
+      summary: [
+        'Asume app móvil con integraciones sociales y terceros cloud/analytics.',
+        'Marca datos personales, uso, cookies e identificadores de cuenta.',
+        'Útil para productos con login social, SDKs sociales o APIs conectadas.'
+      ],
+      patch: {
+        business: { type: 'mobile', country: 'Argentina' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar', 'global'],
+          childrenAudience: false
+        },
+        dataPractices: {
+          collectedData: ['personal', 'identity', 'usage', 'cookies'],
+          thirdParties: ['social', 'cloud', 'analytics'],
+          legalBases: ['contract', 'consent', 'legitimate_interest']
+        },
+        compliance: {
+          requestedFrameworks: []
+        }
+      }
+    },
+    {
+      value: 'content_newsletter',
+      label: 'Contenido / blog con newsletter',
+      description: 'Preset liviano para sitio de contenido con suscripción por email, analítica y cookies básicas.',
+      summary: [
+        'Pensado para blog, medio o proyecto de contenido con newsletter.',
+        'Asume datos personales básicos, analítica y cookies.',
+        'Marca email/marketing, cloud y analítica como terceros usuales.'
+      ],
+      patch: {
+        business: { type: 'blog' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar', 'global'],
+          childrenAudience: false
+        },
+        dataPractices: {
+          collectedData: ['personal', 'usage', 'cookies'],
+          thirdParties: ['email', 'analytics', 'cloud'],
+          legalBases: ['consent', 'legitimate_interest']
+        },
+        compliance: {
+          requestedFrameworks: []
+        }
+      }
+    }
+  ],
   dpa: [
     {
       value: 'saas_b2b_eu',
