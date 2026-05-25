@@ -138,6 +138,248 @@ const DOCUMENT_PRESETS = {
       }
     }
   ],
+  terms: [
+    {
+      value: 'ecommerce_argentina',
+      label: 'E-commerce Argentina',
+      description: 'Base para tienda online local con productos físicos, pagos, logística, devoluciones y foco consumidor.',
+      summary: [
+        'Asume venta de productos físicos en Argentina.',
+        'Activa impuestos incluidos, pagos, devoluciones y garantía.',
+        'Usa foro local y disclaimer por demoras de envío.'
+      ],
+      patch: {
+        business: { type: 'ecommerce', country: 'Argentina' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar']
+        },
+        terms: {
+          offeringType: 'physical_goods',
+          hasAccounts: false,
+          requiresRegistration: false,
+          allowsUserContent: false,
+          pricesIncludeTaxes: true,
+          currency: 'ARS',
+          paymentProvider: 'Mercado Pago',
+          refundsOffered: true,
+          refundWindow: '10 días',
+          refundConditions: 'El producto debe devolverse sin uso, con accesorios y empaque razonablemente conservado.',
+          returnShippingResponsibility: 'case_by_case',
+          warrantyOffered: true,
+          warrantyDetails: 'La garantía legal y cualquier remedio aplicable se interpretarán de forma compatible con la normativa de defensa del consumidor aplicable.',
+          prohibitedActivities: [
+            'No usar el sitio para actividades ilegales.',
+            'No interferir con la seguridad, estabilidad o funcionamiento técnico del sitio.',
+            'No copiar, revender o explotar el contenido o productos fuera de lo permitido.'
+          ],
+          ipOwner: '',
+          ugcLicenseGranted: false,
+          limitIndirectDamages: true,
+          shippingDelayDisclaimer: true,
+          customDisclaimer: '',
+          maySuspendAccounts: true,
+          terminationGrounds: 'Podemos suspender cuentas, pedidos o acceso por fraude, abuso, incumplimiento o riesgos operativos o legales.',
+          changeNotification: 'both',
+          disputesForum: 'Tribunales competentes de la Ciudad Autónoma de Buenos Aires',
+          adrMethod: 'none'
+        }
+      }
+    },
+    {
+      value: 'subscription_saas',
+      label: 'SaaS por suscripción',
+      description: 'Escenario para software o app web con cuentas, acceso revocable y pagos recurrentes.',
+      summary: [
+        'Asume cuentas de usuario y registro obligatorio.',
+        'Base pensada para suscripciones y acceso al servicio.',
+        'Refuerza suspensión, limitación de daños y cambios del servicio.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar', 'global']
+        },
+        terms: {
+          offeringType: 'subscriptions',
+          hasAccounts: true,
+          requiresRegistration: true,
+          allowsUserContent: false,
+          pricesIncludeTaxes: false,
+          currency: 'USD',
+          paymentProvider: 'Stripe',
+          refundsOffered: true,
+          refundWindow: '14 días',
+          refundConditions: 'Los reembolsos, si corresponden, se evalúan según el plan, el tiempo transcurrido y el uso efectivo del servicio.',
+          returnShippingResponsibility: 'merchant',
+          warrantyOffered: false,
+          warrantyDetails: '',
+          prohibitedActivities: [
+            'No usar el sitio para actividades ilegales.',
+            'No interferir con la seguridad, estabilidad o funcionamiento técnico del sitio.',
+            'No enviar spam, contenido abusivo o información falsa.'
+          ],
+          ipOwner: '',
+          ugcLicenseGranted: false,
+          limitIndirectDamages: true,
+          shippingDelayDisclaimer: false,
+          customDisclaimer: 'La disponibilidad, continuidad y features del servicio pueden evolucionar con actualizaciones razonables y límites operativos propios de un servicio SaaS.',
+          maySuspendAccounts: true,
+          terminationGrounds: 'Podemos suspender o terminar cuentas por fraude, abuso, uso indebido, impago, incumplimiento contractual o riesgos operativos, legales o de seguridad.',
+          changeNotification: 'both',
+          disputesForum: 'Tribunales competentes de la Ciudad Autónoma de Buenos Aires',
+          adrMethod: 'mediation'
+        }
+      }
+    },
+    {
+      value: 'digital_downloads',
+      label: 'Producto digital descargable',
+      description: 'Base para ebooks, plantillas, assets, cursos descargables o licencias de acceso digital.',
+      summary: [
+        'Asume entrega digital y sin logística física.',
+        'Hace más restrictiva la política de reembolsos después del acceso.',
+        'Sirve para descargas, activos y productos digitales simples.'
+      ],
+      patch: {
+        business: { type: 'ecommerce' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar', 'global']
+        },
+        terms: {
+          offeringType: 'digital_products',
+          hasAccounts: false,
+          requiresRegistration: false,
+          allowsUserContent: false,
+          pricesIncludeTaxes: false,
+          currency: 'USD',
+          paymentProvider: 'Stripe',
+          refundsOffered: true,
+          refundWindow: '7 días',
+          refundConditions: 'Los reembolsos pueden limitarse cuando el acceso digital, descarga o consumo del producto ya comenzó, sin perjuicio de los derechos obligatorios aplicables.',
+          returnShippingResponsibility: 'merchant',
+          warrantyOffered: false,
+          warrantyDetails: '',
+          prohibitedActivities: [
+            'No usar el sitio para actividades ilegales.',
+            'No copiar, revender o explotar el contenido o productos fuera de lo permitido.',
+            'No enviar spam, contenido abusivo o información falsa.'
+          ],
+          ipOwner: '',
+          ugcLicenseGranted: false,
+          limitIndirectDamages: true,
+          shippingDelayDisclaimer: false,
+          customDisclaimer: 'El acceso, descarga o entrega del producto digital puede depender de plataformas, correo transaccional, credenciales o disponibilidad técnica razonable.',
+          maySuspendAccounts: true,
+          terminationGrounds: 'Podemos restringir acceso o descargas por fraude, chargebacks, abuso, redistribución no autorizada o incumplimiento de estos términos.',
+          changeNotification: 'service',
+          disputesForum: 'Tribunales competentes de la Ciudad Autónoma de Buenos Aires',
+          adrMethod: 'none'
+        }
+      }
+    },
+    {
+      value: 'marketplace_with_accounts',
+      label: 'Marketplace o plataforma con cuentas',
+      description: 'Escenario para plataforma con cuentas, contenido de usuarios, moderación y facultades fuertes de suspensión.',
+      summary: [
+        'Asume cuentas obligatorias y contenido generado por usuarios.',
+        'Activa licencia sobre UGC y restricciones de uso más amplias.',
+        'Útil para directorios, comunidades o plataformas multiusuario.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar', 'global']
+        },
+        terms: {
+          offeringType: 'services',
+          hasAccounts: true,
+          requiresRegistration: true,
+          allowsUserContent: true,
+          pricesIncludeTaxes: false,
+          currency: 'USD',
+          paymentProvider: 'Stripe',
+          refundsOffered: true,
+          refundWindow: '14 días',
+          refundConditions: 'Los reembolsos, si aplican, dependen del servicio efectivamente prestado, del momento del reclamo y de las reglas comerciales o regulatorias aplicables.',
+          returnShippingResponsibility: 'merchant',
+          warrantyOffered: false,
+          warrantyDetails: '',
+          prohibitedActivities: [
+            'No usar el sitio para actividades ilegales.',
+            'No interferir con la seguridad, estabilidad o funcionamiento técnico del sitio.',
+            'No copiar, revender o explotar el contenido o productos fuera de lo permitido.',
+            'No enviar spam, contenido abusivo o información falsa.'
+          ],
+          ipOwner: '',
+          ugcLicenseGranted: true,
+          limitIndirectDamages: true,
+          shippingDelayDisclaimer: false,
+          customDisclaimer: 'La plataforma puede moderar, desindexar, limitar o remover contenido o cuentas cuando exista abuso, conflicto legal, riesgo operativo o incumplimiento de reglas internas.',
+          maySuspendAccounts: true,
+          terminationGrounds: 'Podemos suspender o terminar cuentas, publicaciones, accesos o transacciones por fraude, abuso, infracción de derechos, incumplimiento o riesgos legales, operativos o de seguridad.',
+          changeNotification: 'both',
+          disputesForum: 'Tribunales competentes de la Ciudad Autónoma de Buenos Aires',
+          adrMethod: 'mediation'
+        }
+      }
+    },
+    {
+      value: 'professional_services',
+      label: 'Servicios profesionales',
+      description: 'Base para consultoría, implementación, diseño, desarrollo o servicios prestados por proyecto o por encargo.',
+      summary: [
+        'Asume servicios más que venta de productos.',
+        'Reduce foco logístico y refuerza límites de alcance y ejecución.',
+        'Sirve para consultores, agencias y servicios a medida.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar', 'global']
+        },
+        terms: {
+          offeringType: 'services',
+          hasAccounts: false,
+          requiresRegistration: false,
+          allowsUserContent: false,
+          pricesIncludeTaxes: false,
+          currency: 'USD',
+          paymentProvider: 'Transferencia bancaria u otro medio acordado',
+          refundsOffered: true,
+          refundWindow: 'Caso por caso',
+          refundConditions: 'Los reembolsos o ajustes, si existieran, dependen del estado del servicio, entregables comprometidos, gastos ya incurridos y normas obligatorias aplicables.',
+          returnShippingResponsibility: 'merchant',
+          warrantyOffered: false,
+          warrantyDetails: '',
+          prohibitedActivities: [
+            'No usar el sitio para actividades ilegales.',
+            'No enviar spam, contenido abusivo o información falsa.'
+          ],
+          ipOwner: '',
+          ugcLicenseGranted: false,
+          limitIndirectDamages: true,
+          shippingDelayDisclaimer: false,
+          customDisclaimer: 'Los tiempos, entregables y alcances específicos pueden depender de propuestas, cronogramas, materiales provistos por el cliente o acuerdos complementarios.',
+          maySuspendAccounts: true,
+          terminationGrounds: 'Podemos suspender o terminar el servicio por falta de colaboración, incumplimiento, fraude, riesgo legal, operativo o de cobro, o imposibilidad razonable de ejecución.',
+          changeNotification: 'email',
+          disputesForum: 'Tribunales competentes de la Ciudad Autónoma de Buenos Aires',
+          adrMethod: 'mediation'
+        }
+      }
+    }
+  ],
   dpa: [
     {
       value: 'saas_b2b_eu',
