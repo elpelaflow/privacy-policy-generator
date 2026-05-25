@@ -1293,6 +1293,72 @@ const DOCUMENT_PRESETS = {
           securityControls: 'Aplicamos minimización, controles de acceso, logging razonable y medidas de seguridad sobre prompts, outputs y señales asociadas a la experiencia de IA.'
         }
       }
+    },
+    {
+      value: 'moderation_and_safety',
+      label: 'Moderación y seguridad',
+      description: 'IA usada para clasificación, moderación, fraude o seguridad, con revisión humana y canal de apelación cuando el caso lo requiere.',
+      summary: [
+        'Asume sistemas de clasificación o moderación con foco en seguridad.',
+        'Activa revisión humana y canal de apelación por decisiones relevantes.',
+        'Útil para abuso, fraude, moderación de contenido o riesgo operativo.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        ai: {
+          systemsUsed: ['classification_or_moderation'],
+          useCases: ['moderation_or_safety', 'internal_operations'],
+          userFacingAi: false,
+          generatedContentLabeling: false,
+          trainingDataUse: 'evaluation_only',
+          dataSources: ['customer_inputs', 'service_logs', 'feedback_signals'],
+          personalDataInTraining: false,
+          modelImprovementUses: ['quality_evaluation', 'safety_testing', 'abuse_monitoring'],
+          optOutAvailable: false,
+          optOutMethod: '',
+          retentionPeriod: 'Los registros vinculados a moderación, fraude o seguridad se conservan sólo por el tiempo razonablemente necesario para investigación, soporte, seguridad y mejora controlada del servicio.',
+          thirdPartyProviders: ['third_party_model_api', 'cloud_infrastructure', 'monitoring_or_safety_tooling'],
+          automatedDecisionMaking: true,
+          humanReviewAvailable: true,
+          appealChannel: 'Email de soporte, privacidad o seguridad para solicitar revisión humana cuando una decisión automatizada afecte de forma relevante al usuario.',
+          sensitiveDataRestrictions: 'Los flujos de moderación o seguridad deben minimizar datos sensibles y aplicar controles reforzados cuando el contexto requiera revisar contenido potencialmente sensible.',
+          securityControls: 'Aplicamos minimización, controles de acceso, registros operativos y medidas razonables de seguridad sobre señales, eventos y resultados vinculados a moderación o seguridad.'
+        }
+      }
+    },
+    {
+      value: 'marketing_content_generation',
+      label: 'Generación de contenido marketing',
+      description: 'IA usada para redactar campañas, copies, emails o contenido promocional, con proveedores externos y mejora acotada del producto.',
+      summary: [
+        'Asume generación de contenido con proveedores de modelos externos.',
+        'Activa etiquetado y evaluación de calidad del output.',
+        'Útil para campañas, emails, copies, captions o material promocional.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        ai: {
+          systemsUsed: ['content_generation'],
+          useCases: ['drafting_or_generation'],
+          userFacingAi: true,
+          generatedContentLabeling: true,
+          trainingDataUse: 'service_improvement',
+          dataSources: ['customer_inputs', 'feedback_signals'],
+          personalDataInTraining: false,
+          modelImprovementUses: ['quality_evaluation', 'product_analytics'],
+          optOutAvailable: true,
+          optOutMethod: 'Configuración de cuenta, soporte o canal contractual para limitar determinados usos de evaluación o mejora del contenido generado.',
+          retentionPeriod: 'Prompts, briefs y outputs vinculados a generación de contenido se conservan sólo por el tiempo razonablemente necesario para soporte, calidad, troubleshooting y mejora acotada del servicio.',
+          thirdPartyProviders: ['third_party_model_api', 'cloud_infrastructure'],
+          automatedDecisionMaking: false,
+          humanReviewAvailable: true,
+          appealChannel: '',
+          sensitiveDataRestrictions: 'Se desaconseja cargar datos sensibles, secretos comerciales o información personal innecesaria en prompts o assets destinados a generación de contenido.',
+          securityControls: 'Aplicamos minimización, controles de acceso y medidas razonables de seguridad sobre prompts, outputs, briefs y señales vinculadas a la generación de contenido.'
+        }
+      }
     }
   ]
 };

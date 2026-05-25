@@ -42,7 +42,7 @@ What the static app can do today:
 - preview HTML, Markdown, or text output
 - download `html`, `md`, `txt`, and input `json`
 - import previously generated JSON to continue editing without starting from zero
-- apply document-specific presets for `privacy`, `terms`, `cookies`, `refund`, `eula`, `security`, `deletion`, `dpa`, and `ai`
+- apply document-specific presets for `privacy`, `terms`, `cookies`, `refund`, `eula`, `security`, `deletion`, `dpa`, and `ai`, including moderation/safety and marketing-content AI flows
 - authenticate with GitHub through a Cloudflare Worker backend
 - list repositories from the authenticated user
 - detect whether a repo has `Pages activo` or `Pages accesible`
