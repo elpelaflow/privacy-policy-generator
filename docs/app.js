@@ -525,6 +525,112 @@ const DOCUMENT_PRESETS = {
       }
     }
   ],
+  cookies: [
+    {
+      value: 'informational_site_analytics',
+      label: 'Sitio informativo con analítica',
+      description: 'Base liviana para sitio institucional, landing o proyecto informativo con cookies necesarias y de analítica.',
+      summary: [
+        'Asume cookies necesarias y de analítica.',
+        'Usa banner o centro de preferencias como base de consentimiento.',
+        'Marca terceros de analítica e infraestructura mínimos.'
+      ],
+      patch: {
+        business: { type: 'blog' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar', 'global']
+        },
+        cookies: {
+          categories: ['necessary', 'analytics'],
+          thirdParties: ['analytics', 'cloud'],
+          consentMode: 'banner',
+          managementUrl: '',
+          browserControls: 'El usuario puede bloquear o eliminar cookies desde la configuración del navegador y revisar sus preferencias cuando el banner o el centro de preferencias esté disponible.',
+          retentionPolicy: 'Algunas cookies son de sesión y otras pueden persistir por más tiempo según la finalidad, la configuración técnica y las políticas del proveedor correspondiente.'
+        }
+      }
+    },
+    {
+      value: 'ecommerce_remarketing',
+      label: 'E-commerce con remarketing',
+      description: 'Escenario para tienda online con analítica, marketing y plataformas publicitarias o de remarketing.',
+      summary: [
+        'Asume cookies necesarias, de preferencias, analítica y publicidad.',
+        'Marca proveedores publicitarios, analítica, email y cloud.',
+        'Útil para comercio con campañas, atribución y remarketing.'
+      ],
+      patch: {
+        business: { type: 'ecommerce', country: 'Argentina' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar']
+        },
+        cookies: {
+          categories: ['necessary', 'preferences', 'analytics', 'advertising'],
+          thirdParties: ['analytics', 'advertising', 'email', 'cloud'],
+          consentMode: 'banner',
+          managementUrl: '',
+          browserControls: 'El usuario puede gestionar preferencias desde el banner o centro de cookies y también bloquear o eliminar cookies desde la configuración del navegador.',
+          retentionPolicy: 'Las cookies publicitarias, de analítica y preferencias pueden persistir según la campaña, la finalidad técnica y la política del proveedor involucrado.'
+        }
+      }
+    },
+    {
+      value: 'saas_product_support',
+      label: 'SaaS con producto y soporte',
+      description: 'Base para app web o SaaS con cookies necesarias, preferencias y analítica, pero sin foco fuerte en publicidad.',
+      summary: [
+        'Asume cookies funcionales del producto, preferencias y analítica.',
+        'Reduce foco publicitario frente a un e-commerce o medio con ads.',
+        'Sirve para apps, dashboards, paneles y productos con soporte.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar', 'global']
+        },
+        cookies: {
+          categories: ['necessary', 'preferences', 'analytics'],
+          thirdParties: ['analytics', 'cloud'],
+          consentMode: 'banner',
+          managementUrl: '',
+          browserControls: 'El usuario puede gestionar o deshabilitar cookies desde el banner o centro de preferencias y desde la configuración del navegador o dispositivo.',
+          retentionPolicy: 'Las cookies necesarias y de preferencias pueden persistir por períodos razonables según autenticación, seguridad, configuración del usuario y operación del servicio.'
+        }
+      }
+    },
+    {
+      value: 'blog_social_embeds',
+      label: 'Medio / blog con embeds sociales',
+      description: 'Escenario para contenido con analítica, embeds o widgets sociales y terceros relacionados con distribución o interacción social.',
+      summary: [
+        'Asume cookies necesarias, analítica y de terceros sociales.',
+        'Marca integraciones sociales, infraestructura y medición.',
+        'Útil para blogs, medios o sitios con videos, posts embebidos o widgets.'
+      ],
+      patch: {
+        business: { type: 'blog' },
+        settings: { language: 'es' },
+        operations: {
+          primaryJurisdiction: 'ar',
+          sellRegions: ['ar', 'global']
+        },
+        cookies: {
+          categories: ['necessary', 'analytics'],
+          thirdParties: ['analytics', 'social', 'cloud'],
+          consentMode: 'banner',
+          managementUrl: '',
+          browserControls: 'El usuario puede gestionar preferencias desde el banner o centro de cookies y también bloquear o eliminar cookies desde la configuración del navegador.',
+          retentionPolicy: 'Las cookies y tecnologías relacionadas con embeds, analítica o integraciones sociales pueden persistir según la finalidad y la política del proveedor correspondiente.'
+        }
+      }
+    }
+  ],
   dpa: [
     {
       value: 'saas_b2b_eu',
