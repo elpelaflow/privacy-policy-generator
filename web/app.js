@@ -1978,7 +1978,7 @@ function renderPresetPanel() {
   const presets = DOCUMENT_PRESETS[appState.documentType] || [];
   if (presets.length === 0) {
     presetPanelEl.className = 'preset-panel is-empty';
-    presetPanelEl.innerHTML = '<p class="muted-copy">Este documento todavía no tiene presets específicos. Acá conviene completar el formulario manualmente o usar el recomendador de jurisdicción si aplica.</p>';
+    presetPanelEl.innerHTML = '<p class="muted-copy">Este documento todavía no tiene presets específicos. Acá conviene completar el formulario manualmente y revisar los campos sensibles del documento antes de generar o publicar.</p>';
     return;
   }
 
