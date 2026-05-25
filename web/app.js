@@ -948,6 +948,158 @@ const DOCUMENT_PRESETS = {
       }
     }
   ],
+  deletion: [
+    {
+      value: 'meta_connected_app',
+      label: 'App conectada con Meta',
+      description: 'Base para apps o integraciones conectadas con Meta/Facebook, con doble canal y nota clara sobre revocación de permisos.',
+      summary: [
+        'Asume conexión con Meta/Facebook y revocación de permisos.',
+        'Pide email, identificador y recurso vinculado cuando corresponde.',
+        'Útil para apps con login, páginas, cuentas publicitarias o integraciones Meta.'
+      ],
+      patch: {
+        business: { type: 'mobile' },
+        settings: { language: 'es' },
+        deletion: {
+          requestChannel: 'both',
+          requestEmail: '',
+          requestUrl: '',
+          identityRequirements: [
+            'Email de la cuenta o del usuario solicitante',
+            'Nombre del perfil o identificador de usuario',
+            'ID de cuenta publicitaria o recurso vinculado',
+            'Breve descripción del pedido de eliminación'
+          ],
+          deletionScope: [
+            'Datos de perfil o cuenta asociados al usuario',
+            'Tokens o credenciales de acceso almacenadas por la aplicación',
+            'Registros operativos vinculados al uso de la aplicación',
+            'Configuraciones o preferencias guardadas'
+          ],
+          retentionExceptions: [
+            'Registros necesarios para cumplir obligaciones legales o regulatorias',
+            'Registros mínimos para seguridad, prevención de fraude o auditoría'
+          ],
+          responseTime: '10 días hábiles',
+          completionTime: '30 días',
+          hasMetaConnection: true,
+          metaDisconnectInstructions: 'El usuario puede revocar permisos desde Meta/Facebook y además solicitar la eliminación por email o por la página de solicitud de borrado.'
+        }
+      }
+    },
+    {
+      value: 'saas_user_accounts',
+      label: 'SaaS con cuentas',
+      description: 'Escenario para app web o SaaS con perfiles, preferencias, logs y tiempos razonables de respuesta y cierre.',
+      summary: [
+        'Asume cuentas de usuario y datos de perfil, configuración y logs.',
+        'Usa verificación por email o identificador de cuenta.',
+        'Sirve para paneles, productos SaaS y apps con login propio.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        deletion: {
+          requestChannel: 'both',
+          requestEmail: '',
+          requestUrl: '',
+          identityRequirements: [
+            'Email de la cuenta o del usuario solicitante',
+            'Nombre del perfil o identificador de usuario',
+            'Breve descripción del pedido de eliminación'
+          ],
+          deletionScope: [
+            'Datos de perfil o cuenta asociados al usuario',
+            'Registros operativos vinculados al uso de la aplicación',
+            'Configuraciones o preferencias guardadas'
+          ],
+          retentionExceptions: [
+            'Registros necesarios para cumplir obligaciones legales o regulatorias',
+            'Registros mínimos para seguridad, prevención de fraude o auditoría',
+            'Información necesaria para resolver disputas o hacer cumplir acuerdos'
+          ],
+          responseTime: '10 días hábiles',
+          completionTime: '30 días',
+          hasMetaConnection: false,
+          metaDisconnectInstructions: ''
+        }
+      }
+    },
+    {
+      value: 'ecommerce_customer_account',
+      label: 'E-commerce con cuenta de cliente',
+      description: 'Base para comercio electrónico con perfiles de cliente, pedidos y excepciones de retención por consumo, impuestos y disputas.',
+      summary: [
+        'Asume datos de cuenta y cierta retención legal/comercial.',
+        'Refuerza excepciones por obligaciones fiscales, fraude y disputas.',
+        'Útil para tiendas con cuenta de cliente y pedidos asociados.'
+      ],
+      patch: {
+        business: { type: 'ecommerce', country: 'Argentina' },
+        settings: { language: 'es' },
+        deletion: {
+          requestChannel: 'both',
+          requestEmail: '',
+          requestUrl: '',
+          identityRequirements: [
+            'Email de la cuenta o del usuario solicitante',
+            'Nombre del perfil o identificador de usuario',
+            'Breve descripción del pedido de eliminación'
+          ],
+          deletionScope: [
+            'Datos de perfil o cuenta asociados al usuario',
+            'Configuraciones o preferencias guardadas',
+            'Registros operativos vinculados al uso de la aplicación'
+          ],
+          retentionExceptions: [
+            'Registros necesarios para cumplir obligaciones legales o regulatorias',
+            'Registros mínimos para seguridad, prevención de fraude o auditoría',
+            'Información necesaria para resolver disputas o hacer cumplir acuerdos'
+          ],
+          responseTime: '10 días hábiles',
+          completionTime: '30 días',
+          hasMetaConnection: false,
+          metaDisconnectInstructions: ''
+        }
+      }
+    },
+    {
+      value: 'lightweight_deletion_flow',
+      label: 'Producto con baja sensibilidad',
+      description: 'Escenario simple para productos o servicios con pocos datos, canal directo y alcance de borrado más acotado.',
+      summary: [
+        'Asume flujo liviano con pocas categorías de datos.',
+        'Mantiene verificación y respuesta razonables sin complejidad extra.',
+        'Útil para micrositios, apps pequeñas o herramientas con perfil de riesgo bajo.'
+      ],
+      patch: {
+        business: { type: 'blog' },
+        settings: { language: 'es' },
+        deletion: {
+          requestChannel: 'email',
+          requestEmail: '',
+          requestUrl: '',
+          identityRequirements: [
+            'Email de la cuenta o del usuario solicitante',
+            'Breve descripción del pedido de eliminación'
+          ],
+          deletionScope: [
+            'Datos de perfil o cuenta asociados al usuario',
+            'Configuraciones o preferencias guardadas'
+          ],
+          retentionExceptions: [
+            'Registros necesarios para cumplir obligaciones legales o regulatorias',
+            'Registros mínimos para seguridad, prevención de fraude o auditoría'
+          ],
+          responseTime: '10 días hábiles',
+          completionTime: '30 días',
+          hasMetaConnection: false,
+          metaDisconnectInstructions: ''
+        }
+      }
+    }
+  ],
   dpa: [
     {
       value: 'saas_b2b_eu',
