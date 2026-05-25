@@ -9,20 +9,20 @@ Generate legal documents for apps, SaaS, ecommerce, and websites from a CLI or a
 
 Use the [public web app](https://elpelaflow.github.io/privacy-policy-generator/) if you want to try it immediately without forking or deploying anything.
 
-## At a Glance
+## Overview
 
-- generate privacy, terms, cookies, refund, security, EULA, DPA, AI, and deletion documents
-- use the public browser app or run the CLI locally
-- apply document-specific presets for common scenarios
-- export `html`, `md`, `txt`, `docx`, and input `json`
-- publish documents into your own GitHub Pages repo under safe `legal/...` paths
+- `⚖️` generate privacy, terms, cookies, refund, security, EULA, DPA, AI, and deletion documents
+- `🌐` use the public browser app or run the CLI locally
+- `🧩` apply document-specific presets for common scenarios
+- `📦` export `html`, `md`, `txt`, `docx`, and input `json`
+- `🚀` publish documents into your own GitHub Pages repo under safe `legal/...` paths
 
 ## Who This Is For
 
-- SaaS and app operators who need public legal pages quickly
-- ecommerce or content-site owners who want editable legal docs
-- developers who want a local CLI plus a browser workflow
-- teams that want to keep legal-document inputs versionable as JSON
+- `🏢` SaaS and app operators who need public legal pages quickly
+- `🛍️` ecommerce or content-site owners who want editable legal docs
+- `🧑‍💻` developers who want a local CLI plus a browser workflow
+- `🗂️` teams that want to keep legal-document inputs versionable as JSON
 
 ## Scope
 
@@ -53,7 +53,7 @@ This repo now supports two delivery modes:
 
 ## Choose Your Workflow
 
-### 1. Public Web App
+### 1. 🌐 Public Web App
 
 Use the hosted browser app to:
 
@@ -63,7 +63,7 @@ Use the hosted browser app to:
 - download the result
 - optionally publish it into your own GitHub Pages repo
 
-### 2. Local CLI
+### 2. 🧑‍💻 Local CLI
 
 Use the CLI if you want:
 
@@ -72,7 +72,7 @@ Use the CLI if you want:
 - scripting or repeatable workflows
 - publishing into hosting you already control
 
-### 3. Your Own Hosted Copy
+### 3. 🏗️ Your Own Hosted Copy
 
 Fork the repo and deploy your own static app + Worker backend if you want:
 
@@ -81,7 +81,7 @@ Fork the repo and deploy your own static app + Worker backend if you want:
 - your own backend
 - full control of the public instance
 
-## Static Web App
+## 🌐 Static Web App
 
 The repo now includes a browser-based static app under `web/` and a GitHub Pages-ready build output under `docs/`.
 
@@ -108,7 +108,7 @@ What it does not do yet:
 - auto-enable GitHub Pages on repos where Pages is not configured
 - publish arbitrary custom document roots outside the current guided flow
 
-## Structured Data Note
+## 🧠 Structured Data Note
 
 Generated legal-document HTML can include embedded `JSON-LD` metadata using Schema.org types such as `WebPage` and `Organization`.
 
@@ -119,7 +119,7 @@ Important clarification:
 - it does **not** guarantee special Google rich results or official legal recognition by itself
 - treat it as a structured-data enhancement, not as a compliance or SEO magic switch
 
-## Accessibility Note
+## ♿ Accessibility Note
 
 Generated HTML documents now use a more accessible baseline structure across all supported document types, including:
 
@@ -135,7 +135,7 @@ Important clarification:
 - it improves the generated documents for screen readers and semantic parsing
 - legal or contractual accessibility obligations may still require independent auditing in your specific jurisdiction or product context
 
-## GitHub Publish v1
+## 🚀 GitHub Publish v1
 
 The repo includes a Cloudflare Worker backend under:
 
@@ -199,7 +199,7 @@ docs/
 
 That folder is ready to be served by GitHub Pages.
 
-## GitHub Pages Publish Flow
+## 📄 GitHub Pages Publish Flow
 
 Once the static app and backend are configured, the browser flow is:
 
