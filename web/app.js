@@ -631,6 +631,173 @@ const DOCUMENT_PRESETS = {
       }
     }
   ],
+  eula: [
+    {
+      value: 'consumer_mobile_app',
+      label: 'App móvil de consumo',
+      description: 'Base para app móvil orientada a usuarios finales, con licencia por cuenta, updates, componentes de terceros y restricciones estándar.',
+      summary: [
+        'Asume app móvil con licencia no transferible por cuenta.',
+        'Mantiene restricciones de ingeniería inversa, modificación y redistribución.',
+        'Útil para apps móviles de consumo con soporte comercial o del plan activo.'
+      ],
+      patch: {
+        business: { type: 'mobile' },
+        settings: { language: 'es' },
+        eula: {
+          softwareType: 'mobile_app',
+          licenseGrant: 'Se concede una licencia limitada, revocable, no exclusiva y no transferible para instalar y usar la app en dispositivos compatibles conforme a este acuerdo y al plan, tienda o suscripción aplicable.',
+          licenseScope: 'per_account',
+          allowsCommercialUse: false,
+          transferable: false,
+          installationLimit: 'Una cuenta activa y los dispositivos personales razonablemente asociados al usuario, sujeto a las reglas técnicas o comerciales aplicables.',
+          reverseEngineeringRestricted: true,
+          modificationRestricted: true,
+          redistributionRestricted: true,
+          updatesProvided: true,
+          supportLevel: 'commercial_support',
+          thirdPartyComponents: true,
+          openSourceNotice: 'La app puede incluir SDKs, librerías o componentes de terceros y open source sujetos a sus propias licencias, avisos y condiciones aplicables.',
+          warrantyDisclaimer: 'Salvo garantía comercial expresa, la app se entrega "tal cual" y según disponibilidad, en la máxima medida permitida por la ley aplicable.',
+          liabilityLimit: 'En la máxima medida permitida por la ley, no respondemos por daños indirectos, pérdida de datos, lucro cesante o interrupciones derivadas del uso de la app, salvo dolo o prohibición legal aplicable.',
+          terminationTriggers: 'La licencia puede terminarse por incumplimiento material, uso no autorizado, manipulación indebida, infracción de restricciones técnicas o legales, o falta de pago cuando corresponda.',
+          governingLaw: 'Según la jurisdicción indicada por el licenciante o por los términos comerciales principales asociados a la app.'
+        }
+      }
+    },
+    {
+      value: 'saas_end_user',
+      label: 'SaaS con cliente final',
+      description: 'Escenario para software o app web con acceso por cuenta, uso comercial autorizado y soporte sujeto a plan o contrato.',
+      summary: [
+        'Asume licencia vinculada a cuenta o suscripción.',
+        'Permite uso comercial bajo plan aplicable.',
+        'Sirve para SaaS, dashboards o productos online con soporte comercial.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        eula: {
+          softwareType: 'web_app',
+          licenseGrant: 'Se concede una licencia limitada, revocable, no exclusiva y no transferible para acceder y usar el software conforme a este acuerdo, al plan contratado y a la documentación aplicable.',
+          licenseScope: 'per_account',
+          allowsCommercialUse: true,
+          transferable: false,
+          installationLimit: 'Una cuenta activa, un entorno autorizado o la cantidad de usuarios o seats contratados según el plan aplicable.',
+          reverseEngineeringRestricted: true,
+          modificationRestricted: true,
+          redistributionRestricted: true,
+          updatesProvided: true,
+          supportLevel: 'commercial_support',
+          thirdPartyComponents: true,
+          openSourceNotice: 'El servicio puede apoyarse en componentes de terceros u open source sujetos a sus propias licencias, avisos y condiciones.',
+          warrantyDisclaimer: 'Salvo garantía comercial expresa, el software se entrega "tal cual" y según disponibilidad, con los límites permitidos por la ley aplicable y el contrato principal.',
+          liabilityLimit: 'En la máxima medida permitida por la ley, no respondemos por daños indirectos, pérdida de datos, lucro cesante o interrupciones derivadas del uso del software, salvo dolo o prohibición legal aplicable.',
+          terminationTriggers: 'La licencia puede revocarse o suspenderse por incumplimiento material, impago, uso abusivo, acceso no autorizado o riesgos operativos, legales o de seguridad.',
+          governingLaw: 'Según la jurisdicción indicada por el licenciante o por los términos comerciales principales del servicio.'
+        }
+      }
+    },
+    {
+      value: 'sdk_api_developers',
+      label: 'SDK / API para developers',
+      description: 'Base para librerías, SDKs, tooling o APIs con restricciones de redistribución, uso técnico y dependencia de documentación y licencias externas.',
+      summary: [
+        'Asume uso técnico por developers o equipos integradores.',
+        'Refuerza restricciones de redistribución y modificación.',
+        'Útil para SDKs, APIs, librerías o herramientas para terceros.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        eula: {
+          softwareType: 'sdk_api',
+          licenseGrant: 'Se concede una licencia limitada, revocable, no exclusiva y no transferible para usar el SDK, API o tooling conforme a la documentación, límites técnicos y plan o contrato aplicable.',
+          licenseScope: 'commercial_b2b',
+          allowsCommercialUse: true,
+          transferable: false,
+          installationLimit: 'Uso por las cuentas, proyectos, entornos o límites técnicos expresamente autorizados por el plan o contrato aplicable.',
+          reverseEngineeringRestricted: true,
+          modificationRestricted: true,
+          redistributionRestricted: true,
+          updatesProvided: true,
+          supportLevel: 'contract_defined',
+          thirdPartyComponents: true,
+          openSourceNotice: 'El SDK o tooling puede incorporar componentes de terceros u open source sujetos a licencias y avisos separados que siguen vigentes para esos componentes.',
+          warrantyDisclaimer: 'Salvo garantía comercial expresa, el SDK, API o tooling se entrega "tal cual" y según disponibilidad, con los límites permitidos por la ley y el contrato aplicable.',
+          liabilityLimit: 'En la máxima medida permitida por la ley, no respondemos por daños indirectos, fallas de integración, pérdida de datos, lucro cesante o interrupciones derivadas del uso del SDK, API o tooling, salvo dolo o prohibición legal aplicable.',
+          terminationTriggers: 'La licencia puede terminarse por incumplimiento material, abuso técnico, violación de límites de uso, redistribución no autorizada, impago o riesgo legal o de seguridad.',
+          governingLaw: 'Según la jurisdicción indicada por el licenciante, la documentación contractual o el acuerdo comercial principal.'
+        }
+      }
+    },
+    {
+      value: 'plugin_or_extension',
+      label: 'Plugin o extensión',
+      description: 'Escenario para extensiones, add-ons o módulos que complementan otra plataforma y dependen de compatibilidad, updates y restricciones de reempaquetado.',
+      summary: [
+        'Asume plugin o extensión ligada a otra plataforma.',
+        'Refuerza compatibilidad, updates y redistribución restringida.',
+        'Sirve para add-ons, extensiones, módulos y complementos.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        eula: {
+          softwareType: 'plugin_extension',
+          licenseGrant: 'Se concede una licencia limitada, revocable, no exclusiva y no transferible para instalar y usar el plugin o extensión únicamente junto con las plataformas compatibles y dentro del alcance autorizado.',
+          licenseScope: 'per_account',
+          allowsCommercialUse: true,
+          transferable: false,
+          installationLimit: 'Una cuenta, instalación o cantidad de sitios, workspaces o entornos compatibles según el plan o licencia aplicable.',
+          reverseEngineeringRestricted: true,
+          modificationRestricted: true,
+          redistributionRestricted: true,
+          updatesProvided: true,
+          supportLevel: 'best_effort',
+          thirdPartyComponents: true,
+          openSourceNotice: 'El plugin o extensión puede depender de componentes de terceros, SDKs o módulos open source sujetos a licencias y avisos separados.',
+          warrantyDisclaimer: 'Salvo garantía comercial expresa, el plugin o extensión se entrega "tal cual" y según disponibilidad, sin promesa absoluta de compatibilidad continua con toda plataforma o versión externa.',
+          liabilityLimit: 'En la máxima medida permitida por la ley, no respondemos por daños indirectos, incompatibilidades, pérdida de datos o interrupciones derivadas del uso del plugin o extensión, salvo dolo o prohibición legal aplicable.',
+          terminationTriggers: 'La licencia puede terminarse por incumplimiento material, redistribución no autorizada, manipulación indebida, uso abusivo o incompatibilidades contractuales o técnicas graves.',
+          governingLaw: 'Según la jurisdicción indicada por el licenciante o por el acuerdo principal aplicable al plugin o extensión.'
+        }
+      }
+    },
+    {
+      value: 'internal_desktop_software',
+      label: 'Software desktop interno',
+      description: 'Base para software de escritorio o local con instalación acotada, uso interno y soporte best effort o definido por contrato.',
+      summary: [
+        'Asume instalación local o desktop dentro de una organización.',
+        'Limita la licencia a dispositivo, usuario o entorno autorizado.',
+        'Útil para herramientas internas, software on-prem o workstation.'
+      ],
+      patch: {
+        business: { type: 'saas' },
+        settings: { language: 'es' },
+        eula: {
+          softwareType: 'desktop',
+          licenseGrant: 'Se concede una licencia limitada, revocable, no exclusiva y no transferible para instalar y usar el software en equipos o entornos autorizados conforme a este acuerdo y al contrato aplicable.',
+          licenseScope: 'single_device',
+          allowsCommercialUse: true,
+          transferable: false,
+          installationLimit: 'Los dispositivos, usuarios o estaciones de trabajo expresamente autorizados por el licenciante o por el contrato principal aplicable.',
+          reverseEngineeringRestricted: true,
+          modificationRestricted: true,
+          redistributionRestricted: true,
+          updatesProvided: false,
+          supportLevel: 'best_effort',
+          thirdPartyComponents: true,
+          openSourceNotice: 'El software puede incluir componentes de terceros u open source sujetos a sus propias licencias y avisos aplicables.',
+          warrantyDisclaimer: 'Salvo garantía comercial expresa, el software se entrega "tal cual" y según disponibilidad, en la máxima medida permitida por la ley aplicable.',
+          liabilityLimit: 'En la máxima medida permitida por la ley, no respondemos por daños indirectos, pérdida de datos, lucro cesante o interrupciones derivadas del uso del software, salvo dolo o prohibición legal aplicable.',
+          terminationTriggers: 'La licencia puede terminarse por incumplimiento material, copia o instalación no autorizada, uso fuera del alcance contratado, manipulación indebida o falta de pago cuando corresponda.',
+          governingLaw: 'Según la jurisdicción indicada por el licenciante o el contrato principal aplicable al software.'
+        }
+      }
+    }
+  ],
   dpa: [
     {
       value: 'saas_b2b_eu',
