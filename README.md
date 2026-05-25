@@ -1,5 +1,10 @@
 # Privacy Policy Generator
 
+[![Public App](https://img.shields.io/badge/Public%20App-GitHub%20Pages-24292f?logo=github)](https://elpelaflow.github.io/privacy-policy-generator/)
+![Documents](https://img.shields.io/badge/Documents-9-blue)
+![Downloads](https://img.shields.io/badge/Downloads-HTML%20%7C%20DOCX%20%7C%20MD%20%7C%20TXT%20%7C%20JSON-6f42c1)
+![Tests](https://img.shields.io/badge/Tests-50%20passing-2ea44f)
+
 Generate legal documents for apps, SaaS, ecommerce, and websites from a CLI or a browser app, then download them or publish them to GitHub Pages.
 
 Use the [public web app](https://elpelaflow.github.io/privacy-policy-generator/) if you want to try it immediately without forking or deploying anything.
