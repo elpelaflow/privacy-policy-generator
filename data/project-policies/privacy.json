@@ -1,0 +1,31 @@
+{
+  "documentType": "privacy",
+  "business": {
+    "name": "Policy Generator Hub",
+    "type": "saas",
+    "websiteUrl": "https://elpelaflow.github.io/privacy-policy-generator/",
+    "country": "Argentina",
+    "address": ""
+  },
+  "contact": {
+    "email": "elpelaflow@users.noreply.github.com",
+    "phone": "",
+    "pageUrl": "https://github.com/elpelaflow/privacy-policy-generator/issues"
+  },
+  "operations": {
+    "primaryJurisdiction": "ar",
+    "sellRegions": ["ar", "global"],
+    "childrenAudience": false
+  },
+  "dataPractices": {
+    "collectedData": ["usage", "cookies"],
+    "thirdParties": ["cloud"],
+    "legalBases": ["legitimate_interest"]
+  },
+  "compliance": {
+    "requestedFrameworks": []
+  },
+  "settings": {
+    "language": "es"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "documentType": "terms",
+  "business": {
+    "name": "Policy Generator Hub",
+    "type": "saas",
+    "websiteUrl": "https://elpelaflow.github.io/privacy-policy-generator/",
+    "country": "Argentina",
+    "address": ""
+  },
+  "contact": {
+    "email": "elpelaflow@users.noreply.github.com",
+    "phone": "",
+    "pageUrl": "https://github.com/elpelaflow/privacy-policy-generator/issues"
+  },
+  "operations": {
+    "primaryJurisdiction": "ar",
+    "sellRegions": ["ar", "global"]
+  },
+  "terms": {
+    "offeringType": "services",
+    "hasAccounts": false,
+    "requiresRegistration": false,
+    "allowsUserContent": false,
+    "pricesIncludeTaxes": false,
+    "currency": "ARS",
+    "paymentProvider": "",
+    "refundsOffered": false,
+    "refundWindow": "",
+    "refundConditions": "",
+    "returnShippingResponsibility": "case_by_case",
+    "warrantyOffered": false,
+    "warrantyDetails": "",
+    "prohibitedActivities": [
+      "No usar la web para actividades ilegales.",
+      "No interferir con la seguridad, estabilidad o funcionamiento técnico del sitio.",
+      "No copiar, revender o presentar el contenido generado como asesoramiento legal profesional sin revisión propia."
+    ],
+    "ipOwner": "Policy Generator Hub",
+    "ugcLicenseGranted": false,
+    "limitIndirectDamages": true,
+    "shippingDelayDisclaimer": false,
+    "customDisclaimer": "Los documentos generados son borradores informativos y deben ser revisados por profesionales o responsables legales antes de publicarse en un proyecto real.",
+    "maySuspendAccounts": true,
+    "terminationGrounds": "Podemos restringir acceso o uso ante abuso, automatización maliciosa, intentos de afectar el servicio o incumplimientos razonables de estos términos.",
+    "changeNotification": "site_notice",
+    "disputesForum": "tribunales competentes de la Ciudad Autónoma de Buenos Aires, Argentina",
+    "adrMethod": "none"
+  },
+  "settings": {
+    "language": "es"
+  }
+}

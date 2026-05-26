@@ -1,0 +1,41 @@
+{
+  "documentType": "security",
+  "business": {
+    "name": "Policy Generator Hub",
+    "type": "saas",
+    "websiteUrl": "https://elpelaflow.github.io/privacy-policy-generator/",
+    "country": "Argentina",
+    "address": ""
+  },
+  "contact": {
+    "email": "elpelaflow@users.noreply.github.com",
+    "phone": "",
+    "pageUrl": "https://github.com/elpelaflow/privacy-policy-generator/issues"
+  },
+  "security": {
+    "reportChannel": "both",
+    "reportEmail": "elpelaflow@users.noreply.github.com",
+    "reportUrl": "https://github.com/elpelaflow/privacy-policy-generator/security/advisories",
+    "scope": ["web_application", "content", "infrastructure", "integrations"],
+    "safeHarborOffered": true,
+    "automatedTestingAllowed": false,
+    "denialOfServiceTestingAllowed": false,
+    "socialEngineeringAllowed": false,
+    "acknowledgementTime": "5 días hábiles",
+    "statusUpdateTime": "15 días hábiles",
+    "disclosurePreference": "coordinated",
+    "bugBountyOffered": false,
+    "bugBountyNotes": "",
+    "reportRequirements": [
+      "Descripción clara del hallazgo y del impacto esperado",
+      "Pasos de reproducción o prueba de concepto razonable",
+      "URLs, endpoints, archivos o commits involucrados",
+      "Información de contacto para seguimiento"
+    ],
+    "remediationGuidance": "Priorizamos los reportes según severidad, riesgo para usuarios, exposición de datos y complejidad técnica. Pedimos evitar divulgación pública hasta contar con una oportunidad razonable para investigar y mitigar.",
+    "securityPracticesSummary": "El proyecto se distribuye principalmente como app estática y CLI. Aplicamos revisión de dependencias, control de cambios por Git, separación de configuración local sensible y rutas de publicación acotadas."
+  },
+  "settings": {
+    "language": "es"
+  }
+}

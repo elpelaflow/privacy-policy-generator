@@ -3,6 +3,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const esbuild = require('esbuild');
+const { buildProjectPolicies } = require('./build-project-policies');
 
 const ROOT = path.resolve(__dirname, '..');
 const WEB_DIR = path.join(ROOT, 'web');
@@ -72,6 +73,7 @@ async function main() {
 
   await copyDirFlat(path.join(ROOT, 'data'), DOCS_DATA_DIR);
   await buildBundle();
+  await buildProjectPolicies();
   await writeNoJekyll();
 }
 

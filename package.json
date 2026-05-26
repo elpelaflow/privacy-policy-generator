@@ -11,6 +11,7 @@
     "test": "node --test",
     "build": "npm run build:web",
     "build:web": "node ./scripts/build-web.js",
+    "build:project-policies": "node ./scripts/build-project-policies.js",
     "validate:example": "node ./cli.js validate --input ./examples/saas-eu.json",
     "generate:example": "node ./cli.js generate --input ./examples/saas-eu.json --format markdown",
     "validate:terms": "node ./cli.js validate --document terms --input ./examples/terms-ar-ecommerce.json",

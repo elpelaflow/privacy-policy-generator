@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Términos y Condiciones - Policy Generator Hub</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","name":"Términos y Condiciones - Policy Generator Hub","url":"https://elpelaflow.github.io/privacy-policy-generator/","inLanguage":"es","dateModified":"2026-05-26","lastReviewed":"2026-05-26","about":{"@type":"Thing","name":"Términos y Condiciones"},"publisher":{"@type":"Organization","name":"Policy Generator Hub","url":"https://elpelaflow.github.io/privacy-policy-generator/","email":"elpelaflow@users.noreply.github.com"},"accountablePerson":{"@type":"Organization","name":"Policy Generator Hub","url":"https://elpelaflow.github.io/privacy-policy-generator/","email":"elpelaflow@users.noreply.github.com"}},{"@type":"Organization","name":"Policy Generator Hub","url":"https://elpelaflow.github.io/privacy-policy-generator/","email":"elpelaflow@users.noreply.github.com"}]}</script>
+  <style>
+:root {
+  --bg: #0e1226;
+  --panel: rgba(15, 20, 46, 0.82);
+  --panel-strong: rgba(10, 14, 32, 0.94);
+  --text: #f5f7ff;
+  --muted: #b7bfdc;
+  --line: rgba(255, 255, 255, 0.12);
+  --primary: #ff7a18;
+  --secondary: #00c2ff;
+  --tertiary: #9cff57;
+  --shadow: 0 22px 80px rgba(0, 0, 0, 0.38);
+  --radius: 24px;
+  --mono: "IBM Plex Mono", "Fira Code", monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(255, 122, 24, 0.22), transparent 28%),
+    radial-gradient(circle at top right, rgba(0, 194, 255, 0.18), transparent 32%),
+    radial-gradient(circle at bottom left, rgba(156, 255, 87, 0.12), transparent 24%),
+    linear-gradient(180deg, #0d1020 0%, #121833 45%, #0b0f1f 100%);
+}
+a { color: inherit; text-decoration: none; }
+.policy-page-shell {
+  width: min(1040px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 52px;
+}
+.back-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 16px;
+  margin-bottom: 24px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  color: #0b1020;
+  background: linear-gradient(135deg, var(--secondary), #8cf9ff);
+  font-weight: 800;
+}
+.policies-hero,
+.policy-document {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+.policies-hero {
+  padding: clamp(28px, 5vw, 52px);
+  margin-bottom: 18px;
+}
+.policy-pill {
+  display: inline-flex;
+  padding: 8px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.08);
+  color: var(--tertiary);
+  font-family: var(--mono);
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+.policies-hero h1,
+.policy-document h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  line-height: .95;
+  letter-spacing: -.04em;
+}
+.policies-hero p {
+  max-width: 64ch;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+.policy-index-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.policy-index-card {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.035));
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+.policy-index-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 194, 255, 0.42);
+  background: linear-gradient(160deg, rgba(0,194,255,0.14), rgba(255,255,255,0.04));
+}
+.policy-index-card span {
+  color: var(--tertiary);
+  font-family: var(--mono);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+.policy-index-card strong {
+  display: block;
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+.policy-index-card small {
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: .95rem;
+}
+.policy-document {
+  padding: clamp(24px, 5vw, 54px);
+}
+.policy-document main {
+  display: block;
+}
+.policy-document header {
+  margin-bottom: 34px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+.policy-document header p {
+  color: var(--muted);
+  margin: 18px 0 0;
+}
+.policy-document section {
+  padding: 24px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.policy-document section:first-of-type {
+  border-top: 0;
+}
+.policy-document h2,
+.policy-document h3 {
+  color: #ffffff;
+  line-height: 1.2;
+}
+.policy-document h2 {
+  margin: 0 0 14px;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+.policy-document h3 {
+  margin: 20px 0 10px;
+}
+.policy-document p,
+.policy-document li {
+  color: var(--muted);
+  line-height: 1.75;
+  font-size: 1rem;
+}
+.policy-document p {
+  margin: 0 0 14px;
+}
+.policy-document ul {
+  padding-left: 22px;
+}
+.policy-document code {
+  font-family: var(--mono);
+  color: #ffffff;
+}
+.policy-document a:focus-visible,
+.policy-index-card:focus-visible,
+.back-home:focus-visible {
+  outline: 3px solid var(--secondary);
+  outline-offset: 3px;
+}
+@media (max-width: 900px) {
+  .policy-index-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .policy-page-shell { width: min(100% - 24px, 1040px); padding-top: 18px; }
+  .back-home { width: 100%; }
+  .policy-index-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+  <div class="policy-page-shell">
+    <a class="back-home" href="../../">Volver al inicio</a>
+    <article class="policy-document">
+      <main id="main-content" aria-labelledby="document-title">
+    <header>
+      <h1 id="document-title">Términos y Condiciones - Policy Generator Hub</h1>
+      <p><strong>Fecha de vigencia:</strong> <time datetime="2026-05-26">2026-05-26</time></p>
+    </header>
+<section>
+<h2>Aceptación de los Términos</h2>
+<p>Estos Términos y Condiciones regulan el acceso y uso de https://elpelaflow.github.io/privacy-policy-generator/, operado por Policy Generator Hub. Al acceder, navegar o comprar a través del servicio, los usuarios aceptan quedar vinculados por estos términos.</p>
+
+</section>
+<section>
+<h2>Información del Negocio</h2>
+<p>Policy Generator Hub opera desde Argentina. Los datos de contacto para asuntos legales o contractuales se indican en la sección de contacto más abajo.</p>
+<p>Sitio web o aplicación principal: https://elpelaflow.github.io/privacy-policy-generator/.</p>
+
+</section>
+<section>
+<h2>Descripción del Servicio</h2>
+<p>El servicio ofrece principalmente servicios.</p>
+<p>Los usuarios pueden acceder y utilizar el servicio sin mantener una cuenta persistente, salvo que una función específica o un flujo de soporte requieran identificación.</p>
+
+</section>
+<section>
+<h2>Compras, Precios y Pagos</h2>
+<p>Los precios exhibidos pueden no incluir impuestos, tasas u otros cargos salvo indicación expresa en contrario. Los precios se muestran principalmente en ARS.</p>
+<p>Los detalles del procesamiento de pagos deben completarse antes de publicar para que los usuarios sepan qué proveedor interviene en el checkout.</p>
+
+</section>
+<section>
+<h2>Conductas Prohibidas</h2>
+<p>Los usuarios no pueden utilizar el servicio para actividades ilícitas, fraudulentas, abusivas o técnicamente dañinas, incluyendo intentos de interferir con la operación, usar indebidamente el contenido o violar la ley aplicable.</p>
+<ul><li>No usar la web para actividades ilegales.</li><li>No interferir con la seguridad, estabilidad o funcionamiento técnico del sitio.</li><li>No copiar, revender o presentar el contenido generado como asesoramiento legal profesional sin revisión propia.</li></ul>
+
+</section>
+<section>
+<h2>Propiedad Intelectual</h2>
+<p>Todo el contenido del sitio, la marca, los recursos visuales, los textos y materiales relacionados pertenecen a Policy Generator Hub o se utilizan con autorización, y no pueden copiarse, redistribuirse ni explotarse sin autorización salvo en los casos permitidos por la ley.</p>
+
+</section>
+<section>
+<h2>Descargos y Limitación de Responsabilidad</h2>
+<p>En la máxima medida permitida por la ley, el servicio se ofrece según disponibilidad y el negocio excluye responsabilidad por daños indirectos, incidentales, especiales o consecuenciales derivados del uso del servicio, salvo cuando la exclusión no esté legalmente permitida.</p>
+<p>Los documentos generados son borradores informativos y deben ser revisados por profesionales o responsables legales antes de publicarse en un proyecto real.</p>
+
+</section>
+<section>
+<h2>Suspensión, Terminación y Cambios</h2>
+<p>El negocio podrá suspender o terminar el acceso, las cuentas o los pedidos cuando los usuarios incumplan estos términos, hagan un uso indebido del servicio, generen riesgos operativos o legales, o cuando la continuidad del servicio no sea razonablemente posible. Podemos restringir acceso o uso ante abuso, automatización maliciosa, intentos de afectar el servicio o incumplimientos razonables de estos términos.</p>
+<p>El negocio podrá actualizar estos términos periódicamente y, en general, comunicará los cambios relevantes mediante un aviso visible en el sitio.</p>
+
+</section>
+<section>
+<h2>Ley Aplicable y Disputas</h2>
+<p>Estos términos se rigen e interpretan en relación con las leyes y tribunales de tribunales competentes de la Ciudad Autónoma de Buenos Aires, Argentina.</p>
+
+</section>
+<section>
+<h2>Información de Contacto</h2>
+<ul><li>Email: elpelaflow@users.noreply.github.com</li><li>Página de contacto: https://github.com/elpelaflow/privacy-policy-generator/issues</li></ul>
+
+</section>
+  </main>
+    </article>
+  </div>
+</body>
+</html>

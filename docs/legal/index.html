@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nuestras políticas - Policy Generator Hub</title>
+  <meta name="description" content="Políticas propias de Policy Generator Hub generadas con la misma herramienta.">
+  <style>
+:root {
+  --bg: #0e1226;
+  --panel: rgba(15, 20, 46, 0.82);
+  --panel-strong: rgba(10, 14, 32, 0.94);
+  --text: #f5f7ff;
+  --muted: #b7bfdc;
+  --line: rgba(255, 255, 255, 0.12);
+  --primary: #ff7a18;
+  --secondary: #00c2ff;
+  --tertiary: #9cff57;
+  --shadow: 0 22px 80px rgba(0, 0, 0, 0.38);
+  --radius: 24px;
+  --mono: "IBM Plex Mono", "Fira Code", monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(255, 122, 24, 0.22), transparent 28%),
+    radial-gradient(circle at top right, rgba(0, 194, 255, 0.18), transparent 32%),
+    radial-gradient(circle at bottom left, rgba(156, 255, 87, 0.12), transparent 24%),
+    linear-gradient(180deg, #0d1020 0%, #121833 45%, #0b0f1f 100%);
+}
+a { color: inherit; text-decoration: none; }
+.policy-page-shell {
+  width: min(1040px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 52px;
+}
+.back-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 16px;
+  margin-bottom: 24px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  color: #0b1020;
+  background: linear-gradient(135deg, var(--secondary), #8cf9ff);
+  font-weight: 800;
+}
+.policies-hero,
+.policy-document {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+.policies-hero {
+  padding: clamp(28px, 5vw, 52px);
+  margin-bottom: 18px;
+}
+.policy-pill {
+  display: inline-flex;
+  padding: 8px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.08);
+  color: var(--tertiary);
+  font-family: var(--mono);
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+.policies-hero h1,
+.policy-document h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  line-height: .95;
+  letter-spacing: -.04em;
+}
+.policies-hero p {
+  max-width: 64ch;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+.policy-index-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.policy-index-card {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.035));
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+.policy-index-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 194, 255, 0.42);
+  background: linear-gradient(160deg, rgba(0,194,255,0.14), rgba(255,255,255,0.04));
+}
+.policy-index-card span {
+  color: var(--tertiary);
+  font-family: var(--mono);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+.policy-index-card strong {
+  display: block;
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+.policy-index-card small {
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: .95rem;
+}
+.policy-document {
+  padding: clamp(24px, 5vw, 54px);
+}
+.policy-document main {
+  display: block;
+}
+.policy-document header {
+  margin-bottom: 34px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+.policy-document header p {
+  color: var(--muted);
+  margin: 18px 0 0;
+}
+.policy-document section {
+  padding: 24px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.policy-document section:first-of-type {
+  border-top: 0;
+}
+.policy-document h2,
+.policy-document h3 {
+  color: #ffffff;
+  line-height: 1.2;
+}
+.policy-document h2 {
+  margin: 0 0 14px;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+.policy-document h3 {
+  margin: 20px 0 10px;
+}
+.policy-document p,
+.policy-document li {
+  color: var(--muted);
+  line-height: 1.75;
+  font-size: 1rem;
+}
+.policy-document p {
+  margin: 0 0 14px;
+}
+.policy-document ul {
+  padding-left: 22px;
+}
+.policy-document code {
+  font-family: var(--mono);
+  color: #ffffff;
+}
+.policy-document a:focus-visible,
+.policy-index-card:focus-visible,
+.back-home:focus-visible {
+  outline: 3px solid var(--secondary);
+  outline-offset: 3px;
+}
+@media (max-width: 900px) {
+  .policy-index-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .policy-page-shell { width: min(100% - 24px, 1040px); padding-top: 18px; }
+  .back-home { width: 100%; }
+  .policy-index-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+  <div class="policy-page-shell">
+    <a class="back-home" href="../">Volver al inicio</a>
+    <header class="policies-hero">
+      <span class="policy-pill">Policy Generator Hub</span>
+      <h1>Nuestras políticas</h1>
+      <p>Estas políticas corresponden al proyecto Policy Generator Hub y fueron generadas con esta misma herramienta.</p>
+    </header>
+    <main class="policy-index-grid" aria-label="Políticas del proyecto">
+      
+      <a class="policy-index-card" href="./privacy/">
+        <span>privacy</span>
+        <strong>Política de privacidad</strong>
+        <small>Cómo este proyecto trata datos técnicos, contacto y uso de la web.</small>
+      </a>
+      <a class="policy-index-card" href="./terms/">
+        <span>terms</span>
+        <strong>Términos de uso</strong>
+        <small>Reglas de uso del generador, límites del borrador legal y responsabilidades.</small>
+      </a>
+      <a class="policy-index-card" href="./security/">
+        <span>security</span>
+        <strong>Política de seguridad</strong>
+        <small>Canales y reglas para reportar vulnerabilidades de forma responsable.</small>
+      </a>
+      <a class="policy-index-card" href="./disclaimer/">
+        <span>disclaimer</span>
+        <strong>Disclaimer</strong>
+        <small>Alcance informativo de la herramienta y límites de responsabilidad.</small>
+      </a>
+    </main>
+  </div>
+</body>
+</html>

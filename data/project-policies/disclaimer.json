@@ -1,0 +1,26 @@
+{
+  "documentType": "disclaimer",
+  "business": {
+    "name": "Policy Generator Hub",
+    "type": "saas",
+    "websiteUrl": "https://elpelaflow.github.io/privacy-policy-generator/",
+    "country": "Argentina",
+    "address": ""
+  },
+  "contact": {
+    "email": "elpelaflow@users.noreply.github.com",
+    "phone": "",
+    "pageUrl": "https://github.com/elpelaflow/privacy-policy-generator/issues"
+  },
+  "disclaimer": {
+    "categories": ["errors_omissions", "external_links", "own_risk"],
+    "professionalAdviceChannel": "Los documentos generados por la herramienta no reemplazan asesoramiento legal profesional ni una revisión específica del caso de uso real.",
+    "externalLinksPolicy": "La web puede enlazar documentación, repositorios, servicios o recursos de terceros. No controlamos ni garantizamos el contenido, disponibilidad o políticas de esos sitios externos.",
+    "affiliateDisclosure": "",
+    "reviewMethodology": "",
+    "customRiskStatement": "El uso de la herramienta, sus plantillas, presets, validaciones y documentos generados se realiza bajo responsabilidad del usuario. Cada documento debe revisarse antes de publicarse o utilizarse en producción."
+  },
+  "settings": {
+    "language": "es"
+  }
+}

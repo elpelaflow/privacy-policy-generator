@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Política de Privacidad - Policy Generator Hub</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","name":"Política de Privacidad - Policy Generator Hub","url":"https://elpelaflow.github.io/privacy-policy-generator/","inLanguage":"es","dateModified":"2026-05-26","lastReviewed":"2026-05-26","about":{"@type":"Thing","name":"Política de Privacidad"},"publisher":{"@type":"Organization","name":"Policy Generator Hub","url":"https://elpelaflow.github.io/privacy-policy-generator/","email":"elpelaflow@users.noreply.github.com"},"accountablePerson":{"@type":"Organization","name":"Policy Generator Hub","url":"https://elpelaflow.github.io/privacy-policy-generator/","email":"elpelaflow@users.noreply.github.com"}},{"@type":"Organization","name":"Policy Generator Hub","url":"https://elpelaflow.github.io/privacy-policy-generator/","email":"elpelaflow@users.noreply.github.com"}]}</script>
+  <style>
+:root {
+  --bg: #0e1226;
+  --panel: rgba(15, 20, 46, 0.82);
+  --panel-strong: rgba(10, 14, 32, 0.94);
+  --text: #f5f7ff;
+  --muted: #b7bfdc;
+  --line: rgba(255, 255, 255, 0.12);
+  --primary: #ff7a18;
+  --secondary: #00c2ff;
+  --tertiary: #9cff57;
+  --shadow: 0 22px 80px rgba(0, 0, 0, 0.38);
+  --radius: 24px;
+  --mono: "IBM Plex Mono", "Fira Code", monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(255, 122, 24, 0.22), transparent 28%),
+    radial-gradient(circle at top right, rgba(0, 194, 255, 0.18), transparent 32%),
+    radial-gradient(circle at bottom left, rgba(156, 255, 87, 0.12), transparent 24%),
+    linear-gradient(180deg, #0d1020 0%, #121833 45%, #0b0f1f 100%);
+}
+a { color: inherit; text-decoration: none; }
+.policy-page-shell {
+  width: min(1040px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 52px;
+}
+.back-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 16px;
+  margin-bottom: 24px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  color: #0b1020;
+  background: linear-gradient(135deg, var(--secondary), #8cf9ff);
+  font-weight: 800;
+}
+.policies-hero,
+.policy-document {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+.policies-hero {
+  padding: clamp(28px, 5vw, 52px);
+  margin-bottom: 18px;
+}
+.policy-pill {
+  display: inline-flex;
+  padding: 8px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.08);
+  color: var(--tertiary);
+  font-family: var(--mono);
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+.policies-hero h1,
+.policy-document h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  line-height: .95;
+  letter-spacing: -.04em;
+}
+.policies-hero p {
+  max-width: 64ch;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+.policy-index-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.policy-index-card {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.035));
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+.policy-index-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 194, 255, 0.42);
+  background: linear-gradient(160deg, rgba(0,194,255,0.14), rgba(255,255,255,0.04));
+}
+.policy-index-card span {
+  color: var(--tertiary);
+  font-family: var(--mono);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+.policy-index-card strong {
+  display: block;
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+.policy-index-card small {
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: .95rem;
+}
+.policy-document {
+  padding: clamp(24px, 5vw, 54px);
+}
+.policy-document main {
+  display: block;
+}
+.policy-document header {
+  margin-bottom: 34px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+.policy-document header p {
+  color: var(--muted);
+  margin: 18px 0 0;
+}
+.policy-document section {
+  padding: 24px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.policy-document section:first-of-type {
+  border-top: 0;
+}
+.policy-document h2,
+.policy-document h3 {
+  color: #ffffff;
+  line-height: 1.2;
+}
+.policy-document h2 {
+  margin: 0 0 14px;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+.policy-document h3 {
+  margin: 20px 0 10px;
+}
+.policy-document p,
+.policy-document li {
+  color: var(--muted);
+  line-height: 1.75;
+  font-size: 1rem;
+}
+.policy-document p {
+  margin: 0 0 14px;
+}
+.policy-document ul {
+  padding-left: 22px;
+}
+.policy-document code {
+  font-family: var(--mono);
+  color: #ffffff;
+}
+.policy-document a:focus-visible,
+.policy-index-card:focus-visible,
+.back-home:focus-visible {
+  outline: 3px solid var(--secondary);
+  outline-offset: 3px;
+}
+@media (max-width: 900px) {
+  .policy-index-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .policy-page-shell { width: min(100% - 24px, 1040px); padding-top: 18px; }
+  .back-home { width: 100%; }
+  .policy-index-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+  <div class="policy-page-shell">
+    <a class="back-home" href="../../">Volver al inicio</a>
+    <article class="policy-document">
+      <main id="main-content" aria-labelledby="document-title">
+    <header>
+      <h1 id="document-title">Política de Privacidad - Policy Generator Hub</h1>
+      <p><em>Fecha de vigencia: <time datetime="2026-05-26">2026-05-26</time></em></p>
+    </header>
+    <section aria-labelledby="section-1"><h2 id="section-1">1. Resumen de la Política</h2><p>Policy Generator Hub presta servicio de software y funciones relacionadas de cuenta. Esta Política de Privacidad explica qué información personal recopilamos, cómo la usamos, cuándo la compartimos y qué derechos pueden corresponder a los usuarios.</p><p>Este documento se genera a partir de un cuestionario estructurado. Debe revisarse y completarse con asesoramiento legal específico antes de publicarse.</p></section><section aria-labelledby="section-2"><h2 id="section-2">2. Definiciones</h2><ul><li><strong>Compañía</strong> significa Policy Generator Hub.</li></ul><ul><li><strong>Servicio</strong> significa el servicio de software y funciones relacionadas de cuenta operado por Policy Generator Hub.</li></ul><ul><li><strong>Sitio web</strong> significa https://elpelaflow.github.io/privacy-policy-generator/.</li></ul><ul><li><strong>Datos personales</strong> significa información que identifica o puede identificar razonablemente a una persona.</li></ul><ul><li><strong>País</strong> significa Argentina.</li></ul></section><section aria-labelledby="section-3"><h2 id="section-3">3. Tratamiento Específico del Negocio</h2><h3 id="section-3-1">3.1 Servicios SaaS y de Cuenta</h3><p>Procesamos información de cuentas, autenticación, uso del servicio y soporte para prestar servicios de software alojado, asegurar cuentas, resolver incidentes y administrar suscripciones.</p></section><section aria-labelledby="section-4"><h2 id="section-4">4. Información que Recopilamos</h2><h3 id="section-4-1">4.1 Datos de Uso y Diagnóstico</h3><p>Recopilamos información técnica y de comportamiento como dirección IP, tipo de navegador, páginas visitadas, horarios de sesión, páginas de referencia y diagnósticos del dispositivo.</p><h3 id="section-4-2">4.2 Cookies y Tecnologías Similares</h3><p>Utilizamos cookies y tecnologías similares para recordar preferencias, comprender patrones de uso, mantener sesiones y soportar funciones de seguridad o analítica.</p></section><section aria-labelledby="section-5"><h2 id="section-5">5. Cómo Usamos la Información</h2><p>Usamos información personal para prestar y mantener el servicio, autenticar usuarios, procesar transacciones, responder solicitudes de soporte, comunicar actualizaciones, monitorear desempeño, proteger el servicio y cumplir obligaciones legales.</p><h3 id="section-5-1">5.1 Interés Legítimo</h3><p>Podemos tratar cierta información sobre la base de intereses legítimos tales como seguridad del servicio, prevención de fraude, mejora del producto, analítica operativa limitada o continuidad del negocio, siempre que esos intereses no prevalezcan sobre los derechos aplicables de privacidad.</p></section><section aria-labelledby="section-6"><h2 id="section-6">6. Bases Legales Regionales y Derechos de Privacidad</h2><h3 id="section-6-1">6.1 Derechos de Privacidad en Argentina</h3><p>Cuando resulta aplicable la normativa argentina, las personas pueden ejercer derechos de acceso, rectificación, actualización y supresión conforme a la Ley 25.326. El consentimiento puede retirarse cuando el tratamiento se base en dicho consentimiento, sujeto a límites legales y a obligaciones legítimas de conservación.</p><p>Las solicitudes vinculadas con derechos de acceso, rectificación, actualización o supresión pueden presentarse por los medios de contacto indicados en esta política. Cuando corresponda, podremos solicitar información razonable para verificar identidad y proteger datos de terceros.</p><p>Cuando el tratamiento involucre relaciones de consumo, cuentas, facturación o historial operativo, podremos conservar ciertos registros mínimos por el plazo necesario para cumplir obligaciones legales, contractuales, fiscales, contables, de seguridad o prevención de fraude.</p><p>Los titulares de datos también pueden presentar reclamos ante la Agencia de Acceso a la Información Pública (AAIP) si consideran que sus derechos no fueron debidamente atendidos.</p><h3 id="section-6-2">6.2 Revisión para Jurisdicción Global o Personalizada</h3><p>Esta política fue generada para un negocio que opera bajo un perfil global o de jurisdicción personalizada. Se incluyó lenguaje genérico de derechos de privacidad, pero los requisitos legales locales deben revisarse manualmente para cada país o región donde se ofrezca el servicio.</p><p>Dependiendo de la ley aplicable, las personas pueden tener derechos de acceso, rectificación, supresión, restricción u oposición respecto del tratamiento de sus datos personales.</p></section><section aria-labelledby="section-7"><h2 id="section-7">7. Compartición y Proveedores de Servicio</h2><p>Compartimos información personal únicamente cuando es necesario para operar el servicio, cumplir transacciones, soportar operaciones del negocio, cumplir la ley, proteger derechos o seguir instrucciones o consentimiento del usuario.</p><h3 id="section-7-1">7.1 Hosting e Infraestructura Cloud</h3><p>Utilizamos proveedores de infraestructura cloud para alojar aplicaciones, bases de datos, almacenamiento de archivos, backups y servicios relacionados de seguridad u operación.</p></section><section aria-labelledby="section-8"><h2 id="section-8">8. Conservación y Seguridad</h2><p>Conservamos la información personal durante el tiempo razonablemente necesario para prestar el servicio, cumplir las finalidades descriptas en esta política, resolver disputas, hacer cumplir acuerdos y atender obligaciones legales, fiscales, contables o regulatorias.</p><p>Aplicamos medidas administrativas, técnicas y organizativas orientadas a proteger la información personal frente a acceso no autorizado, pérdida, uso indebido, alteración o divulgación.</p><h3 id="section-8-1">8.1 Seguridad, Conservación y Datos Sensibles en Argentina</h3><p>Cuando aplica la normativa argentina, procuramos limitar el acceso interno a los datos personales, documentar medidas de seguridad razonables y conservar la información sólo durante el tiempo necesario para las finalidades informadas o exigidas por la normativa aplicable.</p><p>Si llegáramos a tratar datos sensibles, procuraremos hacerlo con una base legal reforzada, bajo medidas de resguardo proporcionales y con un uso restringido a la finalidad específica correspondiente.</p></section><section aria-labelledby="section-9"><h2 id="section-9">9. Privacidad Infantil</h2><h3 id="section-9-1">9.1 Servicios para Audiencia General</h3><p>El servicio está dirigido a una audiencia general y no está diseñado para recopilar deliberadamente información personal directamente de niños sin base legal apropiada o autorización parental cuando sea exigida.</p></section><section aria-labelledby="section-10"><h2 id="section-10">10. Transferencias Internacionales</h2><p>Dado que el servicio puede apoyarse en proveedores globales o infraestructura remota, la información personal puede procesarse en países distintos de la jurisdicción del usuario. Cuando corresponda, utilizamos salvaguardas contractuales, organizativas o técnicas apropiadas para transferencias transfronterizas.</p><h3 id="section-10-1">10.1 Transferencias desde Argentina</h3><p>Si los datos personales se transfieren desde Argentina hacia proveedores, infraestructura o terceros ubicados en otros países, procuraremos que esas transferencias se apoyen en bases legales y salvaguardas razonables según la naturaleza del servicio, el proveedor involucrado y la normativa aplicable.</p></section><section aria-labelledby="section-11"><h2 id="section-11">11. Ejercicio de Derechos de Privacidad</h2><p>Los usuarios pueden presentar solicitudes de privacidad o de derechos sobre datos personales a través de los medios de contacto indicados abajo. Podemos verificar la identidad antes de atender pedidos de acceso, rectificación, supresión, portabilidad u oposición cuando la ley lo requiera.</p><h3 id="section-11-1">11.1 Solicitudes bajo Ley 25.326</h3><p>Cuando aplica la normativa argentina, recomendamos que las solicitudes identifiquen al titular, la relación con el servicio y el derecho que desea ejercer. El negocio procurará responder en plazos razonables y, cuando corresponda, conforme a los tiempos previstos por la normativa aplicable.</p></section><section aria-labelledby="section-12"><h2 id="section-12">12. Cambios en esta Política</h2><p>Podemos actualizar esta Política de Privacidad ocasionalmente para reflejar cambios legales, operativos o del producto. La versión más reciente debe publicarse con una fecha de vigencia actualizada.</p></section><section aria-labelledby="section-13"><h2 id="section-13">13. Información de Contacto</h2><ul><li>Por email: elpelaflow@users.noreply.github.com</li><li>A través de esta página: https://github.com/elpelaflow/privacy-policy-generator/issues</li></ul></section>
+  </main>
+    </article>
+  </div>
+</body>
+</html>

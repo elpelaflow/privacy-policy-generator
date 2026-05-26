@@ -44,6 +44,7 @@ This repo now supports two delivery modes:
 - optional hashed public URL generation for HTML published through hosting you already have
 - GitHub OAuth publish flow for user-owned GitHub Pages repos
 - safe publish paths under `legal/<document-type>/...` to avoid touching a user's site root
+- project-owned policies are generated into `docs/legal/` from JSON sources in `data/project-policies/`
 - generated legal-document HTML can embed internal `JSON-LD` metadata to describe the page and responsible organization
 - generated legal-document HTML now follows a stronger semantic structure with landmarks and machine-readable dates
 - validation errors and draft warnings
