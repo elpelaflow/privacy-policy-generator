@@ -350,6 +350,69 @@ button, input, select, textarea { font: inherit; }
   border-color: rgba(0, 194, 255, 0.62) !important;
   box-shadow: 0 0 0 3px rgba(0,194,255,0.16), 0 20px 50px rgba(0,0,0,0.24) !important;
 }
+.diagnostic-panel {
+  display: none;
+  margin-bottom: 20px;
+}
+.diagnostic-panel.is-visible {
+  display: block;
+}
+.diagnostic-card {
+  padding: 20px 22px;
+  border: 1px solid rgba(156,255,87,0.18);
+  border-radius: 22px;
+  background: rgba(9, 14, 28, 0.72);
+  box-shadow: var(--shadow);
+}
+.diagnostic-card-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.diagnostic-card h3 {
+  margin: 0 0 8px;
+}
+.diagnostic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px;
+}
+.diagnostic-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+}
+.diagnostic-result {
+  display: none;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+}
+.diagnostic-result.is-visible {
+  display: block;
+}
+.diagnostic-suggestions {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.diagnostic-suggestion {
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.035);
+}
+.diagnostic-suggestion p,
+.diagnostic-suggestion small {
+  display: block;
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
 
 .generator-layout {
   display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; align-items: start;
@@ -604,6 +667,48 @@ button, input, select, textarea { font: inherit; }
 }
 .field textarea { min-height: 120px; resize: vertical; }
 .field-hint { color: var(--muted); font-size: .88rem; }
+.info-popover {
+  position: relative;
+  display: inline-flex;
+  margin-left: 6px;
+  vertical-align: middle;
+  z-index: 3;
+}
+.info-popover-button {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(0,194,255,0.34);
+  border-radius: 999px;
+  background: rgba(0,194,255,0.12);
+  color: #dff8ff;
+  font-size: .72rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.info-popover-content {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  display: none;
+  width: min(280px, 70vw);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,194,255,0.28);
+  background: #111831;
+  color: #edf5ff;
+  font-size: .82rem;
+  font-weight: 400;
+  line-height: 1.45;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.34);
+  z-index: 20;
+}
+.info-popover:hover .info-popover-content,
+.info-popover:focus-within .info-popover-content,
+.info-popover.is-open .info-popover-content {
+  display: block;
+}
 .checkbox-group {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;
 }
@@ -744,6 +849,56 @@ button, input, select, textarea { font: inherit; }
 }
 .summary-box h4 {
   margin: 0 0 12px;
+}
+.final-checklist {
+  display: none;
+  margin-bottom: 16px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+}
+.final-checklist.is-visible {
+  display: block;
+}
+.final-checklist h4 {
+  margin: 0 0 12px;
+}
+.checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+.checklist-item {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.035);
+}
+.checklist-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: #ffd166;
+  box-shadow: 0 0 0 4px rgba(255,209,102,0.12);
+}
+.checklist-item.is-done .checklist-dot {
+  background: var(--tertiary);
+  box-shadow: 0 0 0 4px rgba(156,255,87,0.12);
+}
+.checklist-item strong,
+.checklist-item small {
+  display: block;
+}
+.checklist-item small {
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.4;
 }
 .summary-copy {
   margin: 16px 0 12px;
@@ -896,7 +1051,7 @@ button, input, select, textarea { font: inherit; }
 
 @media (max-width: 720px) {
   .site-shell { padding: 16px; }
-  .first-run-bar, .tour-card-top, .guided-head { grid-template-columns: 1fr; display: grid; }
+  .first-run-bar, .tour-card-top, .guided-head, .diagnostic-card-head { grid-template-columns: 1fr; display: grid; }
   .topbar { border-radius: 24px; align-items: flex-start; }
   .field-grid { grid-template-columns: 1fr; }
   .hero-copy h1 { max-width: none; }

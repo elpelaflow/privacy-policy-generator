@@ -1839,8 +1839,11 @@ function buildDocuments() {
   };
 }
 
+const HELP_STORAGE_KEY = 'legal_hub_help_state_v2';
+const storedHelpState = readStoredHelpState();
+
 const appState = {
-  documentType: 'privacy',
+  documentType: storedHelpState.lastDocumentType || 'privacy',
   previewFormat: 'html',
   lastGenerated: null,
   lastInput: null,
@@ -1850,9 +1853,13 @@ const appState = {
   publishedSnippets: null,
   suiteItems: [],
   suitePublishedUrls: [],
-  guidedMode: false,
+  lastValidation: null,
+  guidedMode: storedHelpState.guidedModeEnabled,
+  diagnosticOpen: false,
+  diagnosticRecommendation: null,
   tourOpen: false,
-  tourStep: 0
+  tourStep: storedHelpState.lastTourStep || 0,
+  tourCompleted: storedHelpState.tourCompleted
 };
 
 const formEl = document.getElementById('generator-form');
@@ -1861,13 +1868,16 @@ const previewCodeEl = document.getElementById('preview-code');
 const validationEl = document.getElementById('validation-box');
 const statusEl = document.getElementById('document-status');
 const summaryEl = document.getElementById('summary-box');
+const finalChecklistEl = document.getElementById('final-checklist');
 const documentSelectEl = document.getElementById('document-type');
 const documentDescriptionEl = document.getElementById('document-description');
 const firstRunBarEl = document.getElementById('first-run-bar');
 const guidedModeToggleEl = document.getElementById('guided-mode-toggle');
 const tourLaunchEl = document.getElementById('tour-launch');
+const diagnosticToggleEl = document.getElementById('diagnostic-toggle');
 const guidedPanelEl = document.getElementById('guided-panel');
 const tourOverlayEl = document.getElementById('tour-overlay');
+const diagnosticPanelEl = document.getElementById('diagnostic-panel');
 const loadConfigButtonEl = document.getElementById('load-config-button');
 const loadConfigInputEl = document.getElementById('load-config-input');
 const presetPanelEl = document.getElementById('preset-panel');
@@ -1923,6 +1933,8 @@ loadConfigButtonEl.addEventListener('click', () => loadConfigInputEl.click());
 loadConfigInputEl.addEventListener('change', loadExistingConfig);
 guidedModeToggleEl.addEventListener('click', toggleGuidedMode);
 tourLaunchEl.addEventListener('click', toggleTour);
+diagnosticToggleEl.addEventListener('click', toggleDiagnosticPanel);
+document.addEventListener('click', handleInfoPopoverClick);
 
 for (const button of document.querySelectorAll('.format-button')) {
   button.addEventListener('click', () => {
@@ -1935,11 +1947,15 @@ for (const button of document.querySelectorAll('.format-button')) {
 
 function init() {
   bootstrapOAuthSessionFromUrl();
+  if (!DOCUMENTS[appState.documentType]) {
+    appState.documentType = 'privacy';
+  }
   renderDocumentCards();
   renderDocumentSelect();
   renderPresetPanel();
   renderJurisdictionAdvisor();
   renderFirstRunState();
+  renderDiagnosticPanel();
   renderForm();
   setPreviewPlaceholder('Generá un documento para ver la salida acá.');
   setExportState(false);
@@ -1965,6 +1981,7 @@ function renderDocumentCards() {
     button.addEventListener('click', () => {
       appState.documentType = button.dataset.openDoc;
       appState.formSeed = null;
+      writeStoredHelpState({ lastDocumentType: appState.documentType });
       documentSelectEl.value = appState.documentType;
       renderPresetPanel();
       renderForm();
@@ -1981,6 +1998,7 @@ function renderDocumentSelect() {
   documentSelectEl.addEventListener('change', () => {
     appState.documentType = documentSelectEl.value;
     appState.formSeed = null;
+    writeStoredHelpState({ lastDocumentType: appState.documentType });
     renderPresetPanel();
     renderForm();
   });
@@ -2048,6 +2066,7 @@ function renderFirstRunState() {
 
 function toggleGuidedMode() {
   appState.guidedMode = !appState.guidedMode;
+  writeStoredHelpState({ guidedModeEnabled: appState.guidedMode });
   renderFirstRunState();
   renderGuidedPanel();
 }
@@ -2055,6 +2074,7 @@ function toggleGuidedMode() {
 function toggleTour() {
   appState.tourOpen = !appState.tourOpen;
   appState.tourStep = 0;
+  writeStoredHelpState({ lastTourStep: 0, tourCompleted: appState.tourOpen ? appState.tourCompleted : true });
   renderFirstRunState();
   renderTour();
 }
@@ -2062,6 +2082,8 @@ function toggleTour() {
 function closeTour() {
   appState.tourOpen = false;
   appState.tourStep = 0;
+  appState.tourCompleted = true;
+  writeStoredHelpState({ tourCompleted: true, lastTourStep: 0 });
   renderFirstRunState();
   renderTour();
 }
@@ -2074,6 +2096,7 @@ function changeTourStep(direction) {
     return;
   }
   appState.tourStep = nextStep;
+  writeStoredHelpState({ lastTourStep: appState.tourStep });
   renderTour();
 }
 
@@ -2126,7 +2149,7 @@ function renderGuidedPanel() {
   }
 
   const values = gatherFormValues();
-  const flow = buildGuidedFlow(appState.documentType, values);
+  const flow = withValidationStep(buildGuidedFlow(appState.documentType, values));
   if (!flow) {
     guidedPanelEl.className = 'rail-card guided-panel';
     guidedPanelEl.innerHTML = `
@@ -2309,7 +2332,84 @@ function buildGuidedFlow(documentType, values) {
     };
   }
 
-  return null;
+  return buildGenericGuidedFlow(documentType, values);
+}
+
+function buildGenericGuidedFlow(documentType, values) {
+  const guide = GUIDED_DOCUMENT_REQUIREMENTS[documentType];
+  if (!guide) return null;
+
+  const basics = guide.basics.map((item) => guidedPathItem(item.label, item.path, values, item.kind));
+  const sensitive = guide.sensitive.map((item) => guidedPathItem(item.label, item.path, values, item.kind));
+  return {
+    title: guide.title,
+    intro: guide.intro,
+    steps: [
+      {
+        title: 'Confirmá el documento',
+        description: guide.when,
+        focus: guide.focus,
+        done: true,
+        items: [guidedItem(`Documento actual: ${DOCUMENTS[documentType].label}`, true)]
+      },
+      {
+        title: 'Completá la base mínima',
+        description: 'Estos datos hacen que el borrador sea usable y no quede demasiado genérico.',
+        focus: guide.baseFocus,
+        done: basics.every((item) => item.done),
+        items: basics
+      },
+      {
+        title: 'Revisá campos sensibles',
+        description: 'Estos puntos cambian el alcance operativo o legal del documento.',
+        focus: guide.sensitiveFocus,
+        done: sensitive.every((item) => item.done),
+        items: sensitive
+      },
+      {
+        title: 'Generá y exportá',
+        description: 'Cuando el borrador está actualizado, podés descargarlo, sumarlo a suite o publicarlo.',
+        focus: appState.lastGenerated && !appState.isDirtySinceGenerate ? 'La versión actual ya está lista para descargar o publicar.' : 'Usá Generar documento cuando termines los puntos mínimos.',
+        done: Boolean(appState.lastGenerated && !appState.isDirtySinceGenerate),
+        items: [
+          guidedItem('Documento generado y actualizado', Boolean(appState.lastGenerated && !appState.isDirtySinceGenerate)),
+          guidedItem('Descargar archivos, sumar a suite o conectar GitHub', Boolean(appState.lastGenerated))
+        ]
+      }
+    ]
+  };
+}
+
+function withValidationStep(flow) {
+  if (!flow) return null;
+  const errors = appState.lastValidation?.errors || [];
+  const warnings = appState.lastValidation?.warnings || [];
+  if (errors.length === 0 && warnings.length === 0) return flow;
+
+  const validationItems = [
+    ...errors.slice(0, 3).map((item) => guidedItem(`Obligatorio: ${item}`, false)),
+    ...warnings.slice(0, 3).map((item) => guidedItem(`Revisar: ${item}`, true))
+  ];
+
+  return {
+    ...flow,
+    steps: [
+      ...flow.steps.slice(0, -1),
+      {
+        title: errors.length ? 'Resolvé validaciones obligatorias' : 'Revisá advertencias contextuales',
+        description: errors.length ? 'Estos puntos bloquean una generación confiable.' : 'No bloquean la generación, pero pueden cambiar el alcance del documento.',
+        focus: errors.length ? 'Corregí los errores marcados antes de generar.' : 'Leé las advertencias principales antes de publicar.',
+        done: errors.length === 0,
+        items: validationItems
+      },
+      flow.steps[flow.steps.length - 1]
+    ]
+  };
+}
+
+function guidedPathItem(label, path, values, kind = 'filled') {
+  const value = getByPath(values, path);
+  return guidedItem(label, kind === 'items' ? hasItems(value) : isFilled(value));
 }
 
 function guidedItem(label, done) {
@@ -2323,6 +2423,146 @@ function isFilled(value) {
 function hasItems(value) {
   return Array.isArray(value) ? value.length > 0 : isFilled(value);
 }
+
+const GUIDED_DOCUMENT_REQUIREMENTS = {
+  refund: {
+    title: 'Devoluciones para venta o suscripción',
+    intro: 'Te ayuda a dejar claros plazos, condiciones, canal de solicitud y excepciones antes de publicar una política comercial.',
+    when: 'Usalo si vendés productos, servicios, reservas, productos digitales o suscripciones.',
+    focus: 'Este documento ordena qué se puede devolver, cuándo y por qué canal.',
+    baseFocus: 'Definí tipo de oferta, plazo, canal y método de reembolso.',
+    sensitiveFocus: 'Revisá condiciones, no retornables y proceso por fallas o daños.',
+    basics: [
+      { label: 'URL del sitio o app', path: 'business.websiteUrl' },
+      { label: 'Tipo de oferta', path: 'refund.offeringType' },
+      { label: 'Plazo de reembolso', path: 'refund.refundWindow' },
+      { label: 'Canal para pedir devolución', path: 'refund.returnRequestChannel' }
+    ],
+    sensitive: [
+      { label: 'Condiciones de devolución', path: 'refund.returnConditions' },
+      { label: 'Productos no retornables', path: 'refund.nonReturnableItems' },
+      { label: 'Proceso por daño, falla o error', path: 'refund.damagedItemsProcess' }
+    ]
+  },
+  disclaimer: {
+    title: 'Disclaimer contextual',
+    intro: 'Este documento es más editorial: elegí los riesgos reales del contenido y ajustá el tono antes de publicarlo.',
+    when: 'Usalo para contenido informativo, reviews, salud, fitness, enlaces externos o material educativo.',
+    focus: 'Marcá sólo los módulos que realmente aplican a tu contenido.',
+    baseFocus: 'Definí sitio, contacto y tipos de disclaimer.',
+    sensitiveFocus: 'Revisá asesoramiento profesional, afiliados o metodología si aplican.',
+    basics: [
+      { label: 'URL del sitio o app', path: 'business.websiteUrl' },
+      { label: 'Contacto', path: 'contact.email' },
+      { label: 'Tipos de disclaimer', path: 'disclaimer.categories', kind: 'items' }
+    ],
+    sensitive: [
+      { label: 'Nota de asesoramiento profesional', path: 'disclaimer.professionalAdviceChannel' },
+      { label: 'Divulgación de afiliados', path: 'disclaimer.affiliateDisclosure' },
+      { label: 'Metodología de reseñas', path: 'disclaimer.reviewMethodology' }
+    ]
+  },
+  security: {
+    title: 'Security disclosure',
+    intro: 'Te guía para publicar un canal claro de reporte, alcance, safe harbor y reglas de testing.',
+    when: 'Usalo si querés recibir reportes de vulnerabilidades o publicar una política tipo SECURITY.md.',
+    focus: 'Definí cómo reportar y qué pruebas están permitidas.',
+    baseFocus: 'Completá canal real de reporte, email o URL y alcance técnico.',
+    sensitiveFocus: 'Revisá safe harbor, DoS, ingeniería social, tiempos y bounty.',
+    basics: [
+      { label: 'Canal de reporte', path: 'security.reportChannel' },
+      { label: 'Email de seguridad', path: 'security.reportEmail' },
+      { label: 'URL de reporte o formulario', path: 'security.reportUrl' },
+      { label: 'Alcance técnico', path: 'security.scope', kind: 'items' }
+    ],
+    sensitive: [
+      { label: 'Safe harbor o buena fe', path: 'security.safeHarborOffered' },
+      { label: 'Tiempo para acusar recibo', path: 'security.acknowledgementTime' },
+      { label: 'Preferencia de disclosure', path: 'security.disclosurePreference' },
+      { label: 'Guía de remediación', path: 'security.remediationGuidance' }
+    ]
+  },
+  eula: {
+    title: 'EULA para software',
+    intro: 'Te lleva por producto, grant de licencia, restricciones, soporte, terceros y responsabilidad.',
+    when: 'Usalo para apps, SDKs, software desktop, plugins o herramientas licenciadas.',
+    focus: 'Asegurate de identificar el producto y el alcance de licencia.',
+    baseFocus: 'Completá nombre del software, tipo, licencia y límite de uso.',
+    sensitiveFocus: 'Revisá restricciones, soporte, terceros, garantías y terminación.',
+    basics: [
+      { label: 'Nombre del software o app', path: 'eula.productName' },
+      { label: 'Tipo de software', path: 'eula.softwareType' },
+      { label: 'Alcance de licencia', path: 'eula.licenseScope' },
+      { label: 'Límite de instalación o asientos', path: 'eula.installationLimit' }
+    ],
+    sensitive: [
+      { label: 'Restricción de ingeniería inversa', path: 'eula.reverseEngineeringRestricted' },
+      { label: 'Nivel de soporte', path: 'eula.supportLevel' },
+      { label: 'Componentes de terceros', path: 'eula.openSourceNotice' },
+      { label: 'Ley aplicable', path: 'eula.governingLaw' }
+    ]
+  },
+  dpa: {
+    title: 'DPA SaaS B2B',
+    intro: 'Te ayuda a no olvidar partes, scope regulatorio, finalidad, datos, subprocessors, transferencias y auditoría.',
+    when: 'Usalo cuando tratás datos personales por cuenta de clientes o empresas.',
+    focus: 'Un DPA necesita partes identificadas y un alcance de tratamiento claro.',
+    baseFocus: 'Completá contraparte, rol, servicio, finalidad y duración.',
+    sensitiveFocus: 'Revisá subprocessors, transferencias, SCC, auditoría y backups.',
+    basics: [
+      { label: 'Nombre de la contraparte', path: 'dpa.counterpartyName' },
+      { label: 'Rol de la contraparte', path: 'dpa.counterpartyRole' },
+      { label: 'Descripción del servicio', path: 'dpa.servicesDescription' },
+      { label: 'Finalidad del tratamiento', path: 'dpa.processingPurpose' }
+    ],
+    sensitive: [
+      { label: 'Alcance regulatorio', path: 'dpa.regulatoryScope', kind: 'items' },
+      { label: 'Subprocessors', path: 'dpa.subprocessorMethodology' },
+      { label: 'Transferencias internacionales', path: 'dpa.transferMechanism' },
+      { label: 'Mecanismo de auditoría', path: 'dpa.auditMechanism' }
+    ]
+  },
+  ai: {
+    title: 'Política de IA y datos',
+    intro: 'Te guía por sistemas de IA, visibilidad, entrenamiento, proveedores, opt-out, decisiones automatizadas y revisión humana.',
+    when: 'Usalo si el servicio usa IA generativa, asistentes, clasificación, moderación, recomendaciones o model providers.',
+    focus: 'La decisión más sensible es si usás datos para training, fine-tuning, evaluación o mejora.',
+    baseFocus: 'Definí sistemas, casos de uso, visibilidad y uso de datos.',
+    sensitiveFocus: 'Revisá proveedores, datos personales, opt-out y decisiones automatizadas.',
+    basics: [
+      { label: 'Sistemas o funciones de IA', path: 'ai.systemsUsed', kind: 'items' },
+      { label: 'Casos de uso', path: 'ai.useCases', kind: 'items' },
+      { label: 'Uso de datos para entrenamiento o mejora', path: 'ai.trainingDataUse' },
+      { label: 'Fuentes de datos', path: 'ai.dataSources', kind: 'items' }
+    ],
+    sensitive: [
+      { label: 'Actividades sobre datos de IA', path: 'ai.modelImprovementUses', kind: 'items' },
+      { label: 'Proveedores externos', path: 'ai.thirdPartyProviders', kind: 'items' },
+      { label: 'Canal de revisión o soporte', path: 'ai.appealChannel' },
+      { label: 'Controles de seguridad', path: 'ai.securityControls' }
+    ]
+  },
+  deletion: {
+    title: 'Eliminación de datos',
+    intro: 'Te ayuda a publicar instrucciones concretas para pedir borrado, verificar identidad, explicar alcance y excepciones.',
+    when: 'Usalo para apps con cuentas, integraciones Meta, SaaS o cualquier producto que necesite un flujo de eliminación.',
+    focus: 'El usuario necesita un canal real y saber qué se borra o retiene.',
+    baseFocus: 'Completá canal, email o URL, requisitos de identidad y alcance.',
+    sensitiveFocus: 'Revisá excepciones, tiempos y conexión Meta si aplica.',
+    basics: [
+      { label: 'Canal de solicitud', path: 'deletion.requestChannel' },
+      { label: 'Email de eliminación', path: 'deletion.requestEmail' },
+      { label: 'URL de eliminación', path: 'deletion.requestUrl' },
+      { label: 'Alcance de eliminación', path: 'deletion.deletionScope', kind: 'items' }
+    ],
+    sensitive: [
+      { label: 'Requisitos de identidad', path: 'deletion.identityRequirements', kind: 'items' },
+      { label: 'Excepciones de retención', path: 'deletion.retentionExceptions', kind: 'items' },
+      { label: 'Tiempo de respuesta', path: 'deletion.responseTime' },
+      { label: 'Instrucciones Meta', path: 'deletion.metaDisconnectInstructions' }
+    ]
+  }
+};
 
 const TOUR_STEPS = [
   {
@@ -2398,6 +2638,151 @@ function renderJurisdictionAdvisor() {
   advisorPanelEl.querySelector('#advisor-apply').addEventListener('click', applyJurisdictionRecommendation);
 }
 
+function toggleDiagnosticPanel() {
+  appState.diagnosticOpen = !appState.diagnosticOpen;
+  renderDiagnosticPanel();
+}
+
+function renderDiagnosticPanel() {
+  diagnosticToggleEl.textContent = appState.diagnosticOpen ? 'Cerrar diagnóstico' : 'No sé qué necesito';
+  if (!appState.diagnosticOpen) {
+    diagnosticPanelEl.className = 'diagnostic-panel';
+    diagnosticPanelEl.innerHTML = '';
+    return;
+  }
+
+  const recommendation = appState.diagnosticRecommendation;
+  diagnosticPanelEl.className = 'diagnostic-panel is-visible';
+  diagnosticPanelEl.innerHTML = `
+    <div class="diagnostic-card">
+      <div class="diagnostic-card-head">
+        <div>
+          <p class="eyebrow">Diagnóstico inicial</p>
+          <h3>Marcá lo que aplica a tu producto</h3>
+          <p class="muted-copy">Esto sólo sugiere documentos y presets. No guarda respuestas ni reemplaza revisar el formulario.</p>
+        </div>
+        <button type="button" class="button button-secondary" id="diagnostic-close">Cerrar</button>
+      </div>
+      <div class="diagnostic-grid">
+        ${DIAGNOSTIC_QUESTIONS.map((item) => `
+          <label class="checkbox-item">
+            <input type="checkbox" name="diagnostic.${item.value}" value="${item.value}">
+            <span><strong>${item.label}</strong><small>${item.description}</small></span>
+          </label>
+        `).join('')}
+      </div>
+      <div class="diagnostic-actions">
+        <button type="button" class="button button-secondary" id="diagnostic-run">Sugerir documentos</button>
+        <button type="button" class="button button-primary ${recommendation ? '' : 'button-disabled'}" id="diagnostic-apply" ${recommendation ? '' : 'disabled'}>Usar primera sugerencia</button>
+      </div>
+      <div class="diagnostic-result ${recommendation ? 'is-visible' : ''}" id="diagnostic-result">
+        ${recommendation ? renderDiagnosticRecommendation(recommendation) : '<p class="muted-copy">Respondé el mini-test para ver sugerencias.</p>'}
+      </div>
+    </div>
+  `;
+
+  diagnosticPanelEl.querySelector('#diagnostic-close')?.addEventListener('click', toggleDiagnosticPanel);
+  diagnosticPanelEl.querySelector('#diagnostic-run')?.addEventListener('click', () => {
+    appState.diagnosticRecommendation = computeDiagnosticRecommendation(gatherDiagnosticAnswers());
+    renderDiagnosticPanel();
+  });
+  diagnosticPanelEl.querySelector('#diagnostic-apply')?.addEventListener('click', applyDiagnosticRecommendation);
+}
+
+function gatherDiagnosticAnswers() {
+  return new Set(Array.from(diagnosticPanelEl.querySelectorAll('input[name^="diagnostic."]:checked')).map((input) => input.value));
+}
+
+function computeDiagnosticRecommendation(answers) {
+  const suggestions = [];
+  const add = (documentType, reason, presetValue = '') => {
+    if (!DOCUMENTS[documentType] || suggestions.some((item) => item.documentType === documentType)) return;
+    const preset = presetValue ? (DOCUMENT_PRESETS[documentType] || []).find((item) => item.value === presetValue) : null;
+    suggestions.push({
+      documentType,
+      label: DOCUMENTS[documentType].label,
+      reason,
+      presetValue: preset?.value || '',
+      presetLabel: preset?.label || ''
+    });
+  };
+
+  if (answers.has('collects_data')) add('privacy', 'Recolectás datos personales o de uso.', answers.has('ecommerce') ? 'ecommerce_argentina' : 'saas_b2b_argentina');
+  if (answers.has('sells')) add('terms', 'Vendés, prestás servicios o necesitás reglas de uso.', answers.has('subscription') ? 'subscription_saas' : answers.has('digital_product') ? 'digital_downloads' : 'ecommerce_argentina');
+  if (answers.has('cookies')) add('cookies', 'Usás cookies, analytics, publicidad o embeds.', answers.has('ecommerce') ? 'ecommerce_remarketing' : 'informational_site_analytics');
+  if (answers.has('refunds')) add('refund', 'Necesitás explicar devoluciones, cambios o cancelaciones.', answers.has('subscription') ? 'saas_subscriptions' : answers.has('digital_product') ? 'digital_products' : 'physical_ecommerce');
+  if (answers.has('ai')) add('ai', 'Usás IA, asistentes, generación o clasificación.', answers.has('moderation') ? 'moderation_and_safety' : 'external_ai_saas');
+  if (answers.has('b2b_data')) add('dpa', 'Tratás datos por cuenta de clientes B2B.', 'saas_b2b_eu');
+  if (answers.has('software')) add('eula', 'Distribuís o licenciás software, app, SDK o plugin.', answers.has('developer_tool') ? 'sdk_api_developers' : 'consumer_mobile_app');
+  if (answers.has('security')) add('security', 'Querés recibir reportes de vulnerabilidades.', answers.has('developer_tool') ? 'open_source_maintainer' : 'startup_light_program');
+  if (answers.has('deletion')) add('deletion', 'Necesitás una página o flujo de eliminación de datos.', answers.has('meta') ? 'meta_connected_app' : 'saas_user_accounts');
+  if (answers.has('content_risk')) add('disclaimer', 'Publicás contenido, reviews o material informativo con riesgos contextuales.');
+
+  if (suggestions.length === 0) {
+    add('privacy', 'Como punto de partida general, privacidad suele ser el primer documento para sitios o apps.');
+  }
+
+  return { suggestions };
+}
+
+function renderDiagnosticRecommendation(recommendation) {
+  return `
+    <strong>Documentos sugeridos</strong>
+    <div class="diagnostic-suggestions">
+      ${recommendation.suggestions.map((item) => `
+        <article class="diagnostic-suggestion">
+          <strong>${escapeHtml(item.label)}</strong>
+          <p>${escapeHtml(item.reason)}</p>
+          ${item.presetLabel ? `<small>Preset sugerido: ${escapeHtml(item.presetLabel)}</small>` : '<small>Sin preset automático para este caso.</small>'}
+        </article>
+      `).join('')}
+    </div>
+  `;
+}
+
+function applyDiagnosticRecommendation() {
+  const first = appState.diagnosticRecommendation?.suggestions?.[0];
+  if (!first) return;
+
+  appState.documentType = first.documentType;
+  appState.formSeed = null;
+  documentSelectEl.value = appState.documentType;
+  writeStoredHelpState({ lastDocumentType: appState.documentType, guidedModeEnabled: true });
+  appState.guidedMode = true;
+  renderPresetPanel();
+
+  if (first.presetValue) {
+    const preset = (DOCUMENT_PRESETS[first.documentType] || []).find((item) => item.value === first.presetValue);
+    if (preset) {
+      appState.formSeed = deepMerge(createDefaults(first.documentType), preset.patch);
+    }
+  }
+
+  renderFirstRunState();
+  renderForm();
+  scheduleLiveValidation();
+  setStatus(`Diagnóstico aplicado: ${first.label}${first.presetLabel ? ` con preset ${first.presetLabel}` : ''}. Revisá y ajustá el formulario antes de generar.`, 'success');
+}
+
+const DIAGNOSTIC_QUESTIONS = [
+  { value: 'collects_data', label: 'Recolecto datos de usuarios', description: 'Emails, cuentas, analytics, formularios, logs o datos de uso.' },
+  { value: 'sells', label: 'Vendo o presto servicios', description: 'Productos, servicios, suscripciones, reservas o acceso pago.' },
+  { value: 'ecommerce', label: 'Es e-commerce', description: 'Tienda, checkout, pagos, envíos o facturación.' },
+  { value: 'subscription', label: 'Hay suscripción SaaS', description: 'Planes, cuentas, acceso recurrente o billing periódico.' },
+  { value: 'digital_product', label: 'Producto digital', description: 'Descargas, licencias, cursos, templates o activos digitales.' },
+  { value: 'cookies', label: 'Uso cookies o analytics', description: 'Analytics, ads, embeds sociales, remarketing o preferencias.' },
+  { value: 'refunds', label: 'Necesito reglas de devolución', description: 'Reembolsos, cambios, cancelaciones o productos no retornables.' },
+  { value: 'ai', label: 'Uso inteligencia artificial', description: 'Asistentes, generación, clasificación, moderación o model providers.' },
+  { value: 'moderation', label: 'Uso IA para moderación o seguridad', description: 'Abuso, fraude, clasificación, scoring o revisión de contenido.' },
+  { value: 'b2b_data', label: 'Soy SaaS B2B y proceso datos de clientes', description: 'Actuás como processor/subprocessor o necesitás un DPA.' },
+  { value: 'software', label: 'Distribuyo software o app', description: 'App móvil, desktop, SDK, API, plugin o extensión licenciada.' },
+  { value: 'developer_tool', label: 'Es herramienta para developers', description: 'SDK, API, open source, plugin o integración técnica.' },
+  { value: 'security', label: 'Quiero recibir reportes de seguridad', description: 'Disclosure responsable, safe harbor, scope o SECURITY.md.' },
+  { value: 'deletion', label: 'Necesito flujo de eliminación', description: 'Página de borrado de datos, cuentas conectadas o requisito de plataforma.' },
+  { value: 'meta', label: 'Tiene conexión con Meta/Facebook', description: 'Login, permisos, SDK o app conectada con Meta.' },
+  { value: 'content_risk', label: 'Publico contenido, reviews o consejos', description: 'Contenido informativo, afiliados, salud, fitness o enlaces externos.' }
+];
+
 function renderForm() {
   const config = DOCUMENTS[appState.documentType];
   documentDescriptionEl.textContent = config.description;
@@ -2406,6 +2791,7 @@ function renderForm() {
   appState.lastInput = null;
   appState.isDirtySinceGenerate = false;
   appState.publishedSnippets = null;
+  appState.lastValidation = null;
   validationRequestId += 1;
   clearTimeout(validationTimer);
 
@@ -2431,6 +2817,7 @@ function renderForm() {
   validationEl.className = 'validation-box';
   validationEl.innerHTML = '';
   renderSummary();
+  renderFinalChecklist();
   setPreviewPlaceholder('Generá un documento para ver la salida acá.');
   setExportState(false);
   setStatus('');
@@ -2466,7 +2853,7 @@ function renderField(field, defaults) {
     return `<div class="field full"><label>${renderFieldLabel(field)}</label><div class="checkbox-group">${field.options.map((option, index) => `
       <label class="checkbox-item">
         <input type="checkbox" name="${field.name}" value="${option.value}" ${selected.includes(option.value) ? 'checked' : ''}>
-        <span><strong>${option.label}</strong><small>${option.description}</small></span>
+        <span><strong>${option.label}${renderInfoButton(`${field.name}:${option.value}`)}</strong><small>${option.description}</small></span>
       </label>
     `).join('')}</div>${hint(field)}</div>`;
   }
@@ -2484,7 +2871,24 @@ function hint(field) {
 }
 
 function renderFieldLabel(field) {
-  return `${field.label}${field.required ? '<span class="required-mark">*</span>' : ''}`;
+  return `${field.label}${field.required ? '<span class="required-mark">*</span>' : ''}${renderInfoButton(field.name)}`;
+}
+
+function renderInfoButton(key) {
+  const text = INFO_POPOVERS[key];
+  if (!text) return '';
+  return `<span class="info-popover"><button type="button" class="info-popover-button" data-info-key="${escapeHtml(key)}" aria-label="Más información">i</button><span class="info-popover-content">${escapeHtml(text)}</span></span>`;
+}
+
+function handleInfoPopoverClick(event) {
+  const button = event.target.closest('[data-info-key]');
+  document.querySelectorAll('.info-popover.is-open').forEach((popover) => {
+    if (!button || !popover.contains(button)) popover.classList.remove('is-open');
+  });
+  if (!button) return;
+  event.preventDefault();
+  event.stopPropagation();
+  button.closest('.info-popover')?.classList.toggle('is-open');
 }
 
 function createDefaults(type, seed = null) {
@@ -2640,6 +3044,7 @@ async function loadExistingConfig(event) {
 
     appState.documentType = documentType;
     appState.formSeed = normalizeLoadedSeed(documentType, parsed);
+    writeStoredHelpState({ lastDocumentType: appState.documentType });
     documentSelectEl.value = documentType;
     renderPresetPanel();
     renderForm();
@@ -2851,9 +3256,12 @@ async function generateDocument() {
 function renderValidation(validation) {
   const errors = validation.errors || [];
   const warnings = validation.warnings || [];
+  appState.lastValidation = { errors, warnings, ok: Boolean(validation.ok) };
   if (errors.length === 0 && warnings.length === 0) {
     validationEl.className = 'validation-box';
     validationEl.innerHTML = '';
+    renderFinalChecklist();
+    renderGuidedPanel();
     return;
   }
 
@@ -2887,6 +3295,8 @@ function renderValidation(validation) {
   if (errors.length === 0 && warnings.length === 0 && !appState.isDirtySinceGenerate) {
     setStatus('');
   }
+  renderFinalChecklist();
+  renderGuidedPanel();
 }
 
 function refreshPreview() {
@@ -3209,6 +3619,41 @@ function renderSummary() {
   `;
 }
 
+function renderFinalChecklist() {
+  const validation = appState.lastValidation;
+  const errors = validation?.errors || [];
+  const warnings = validation?.warnings || [];
+  const readyToGenerate = errors.length === 0;
+  const generated = Boolean(appState.lastGenerated && !appState.isDirtySinceGenerate);
+  const canPublish = githubState.backendEnabled
+    && Boolean(githubState.session)
+    && Boolean(githubRepoSelectEl.value)
+    && generated;
+
+  finalChecklistEl.className = 'final-checklist is-visible';
+  finalChecklistEl.innerHTML = `
+    <h4>Checklist final</h4>
+    <div class="checklist-grid">
+      ${renderChecklistItem('Campos obligatorios', readyToGenerate, errors.length ? `${errors.length} pendiente(s)` : 'Sin bloqueos')}
+      ${renderChecklistItem('Advertencias', warnings.length === 0, warnings.length ? `${warnings.length} para revisar` : 'Sin advertencias')}
+      ${renderChecklistItem('Versión generada', generated, generated ? 'Actualizada' : 'Todavía no generada')}
+      ${renderChecklistItem('Publicación GitHub', canPublish, canPublish ? 'Lista para publicar' : 'Opcional: conectá GitHub y elegí repo')}
+    </div>
+  `;
+}
+
+function renderChecklistItem(label, done, detail) {
+  return `
+    <div class="checklist-item ${done ? 'is-done' : 'needs-review'}">
+      <span class="checklist-dot" aria-hidden="true"></span>
+      <div>
+        <strong>${escapeHtml(label)}</strong>
+        <small>${escapeHtml(detail)}</small>
+      </div>
+    </div>
+  `;
+}
+
 function isHighPriorityWarning(message) {
   const text = String(message || '').toLowerCase();
   return [
@@ -3423,6 +3868,39 @@ function repoLabel(repo) {
   return '';
 }
 
+function readStoredHelpState() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(HELP_STORAGE_KEY) || '{}');
+    return {
+      guidedModeEnabled: Boolean(parsed.guidedModeEnabled),
+      tourCompleted: Boolean(parsed.tourCompleted),
+      lastDocumentType: typeof parsed.lastDocumentType === 'string' ? parsed.lastDocumentType : '',
+      lastTourStep: Number.isInteger(parsed.lastTourStep) ? parsed.lastTourStep : 0,
+      helpDismissed: Boolean(parsed.helpDismissed)
+    };
+  } catch {
+    return {
+      guidedModeEnabled: false,
+      tourCompleted: false,
+      lastDocumentType: '',
+      lastTourStep: 0,
+      helpDismissed: false
+    };
+  }
+}
+
+function writeStoredHelpState(patch = {}) {
+  try {
+    const current = readStoredHelpState();
+    localStorage.setItem(HELP_STORAGE_KEY, JSON.stringify({
+      ...current,
+      ...patch
+    }));
+  } catch {
+    // Ignore storage errors in private or restricted browser modes.
+  }
+}
+
 function updatePublishControls() {
   const canPublish = githubState.backendEnabled
     && Boolean(githubState.session)
@@ -3434,6 +3912,7 @@ function updatePublishControls() {
   publishGitHubPagesEl.classList.toggle('button-disabled', !canPublish);
   publishGitHubPagesEl.classList.toggle('button-primary', canPublish);
   setSuiteButtons(appState.suiteItems.length > 0, githubState.backendEnabled && Boolean(githubState.session) && Boolean(githubRepoSelectEl.value));
+  renderFinalChecklist();
 }
 
 function connectGitHub() {
@@ -3611,8 +4090,11 @@ function scheduleLiveValidation() {
       renderValidation(validation);
     } catch {
       if (currentRequestId !== validationRequestId) return;
+      appState.lastValidation = { ok: false, errors: ['No se pudo validar el formulario en tiempo real.'], warnings: [] };
       validationEl.className = 'validation-box is-visible';
       validationEl.innerHTML = '<div class="errors"><strong>Error de validación</strong><ul><li>No se pudo validar el formulario en tiempo real.</li></ul></div>';
+      renderFinalChecklist();
+      renderGuidedPanel();
     }
   }, 250);
 }
@@ -3635,6 +4117,7 @@ function markDirtySinceGenerate() {
   setExportState(false);
   setPreviewPlaceholder('El formulario cambió desde la última generación. Volvé a generar el documento para actualizar la vista previa y las descargas.');
   renderSnippetState();
+  renderFinalChecklist();
   setStatus('La versión generada quedó desactualizada. Volvé a generar el documento para que la vista previa y las descargas reflejen los cambios.', 'warning');
 }
 
@@ -3968,6 +4451,35 @@ const AI_THIRD_PARTY_PROVIDERS = [
   { value: 'annotation_or_review_vendor', label: 'Vendor de anotación o revisión', description: 'Etiquetado, QA, revisión humana o proveedores de evaluación.' },
   { value: 'monitoring_or_safety_tooling', label: 'Monitoreo o safety tooling', description: 'Observabilidad, filtros, seguridad o herramientas de control.' }
 ];
+const INFO_POPOVERS = {
+  'compliance.requestedFrameworks:ccpa': 'Derechos de privacidad de California. Suele importar si tenés usuarios o clientes residentes en California.',
+  'compliance.requestedFrameworks:coppa': 'Marco estadounidense para privacidad infantil. Revisalo si tu servicio apunta a menores o recopila datos de chicos.',
+  'compliance.requestedFrameworks:caloppa': 'Baseline de transparencia online de California. Puede aplicar a sitios o apps accesibles para residentes de California.',
+  'compliance.requestedFrameworks:pipeda': 'Marco canadiense de privacidad. Útil si operás o apuntás a usuarios en Canadá.',
+  'dpa.counterpartyRole': 'Define si tu cliente actúa como controller, processor o joint controller. Cambia el tipo de obligaciones del DPA.',
+  'dpa.regulatoryScope:eu': 'Activalo si hay clientes, usuarios o tratamiento con foco GDPR/EEE.',
+  'dpa.regulatoryScope:uk': 'Activalo si hay clientes o tratamiento con foco UK GDPR.',
+  'dpa.subprocessorAuthorization': 'Define si podés usar subencargados con autorización general, aprobación específica o reglas del contrato principal.',
+  'dpa.euSccRequired': 'Las SCC suelen aparecer en transferencias internacionales de datos personales desde UE/UK hacia terceros países.',
+  'dpa.auditMechanism': 'Aclara cómo el cliente puede revisar controles: cuestionarios, evidencia remota, auditoría limitada o contrato principal.',
+  'ai.trainingDataUse': 'Esta es la decisión más sensible de IA: indica si los datos se usan para evaluación, mejora, fine-tuning o entrenamiento.',
+  'ai.modelImprovementUses:fine_tuning': 'Fine-tuning ajusta un modelo con datos o señales más específicas. Conviene declararlo de forma clara.',
+  'ai.modelImprovementUses:model_training': 'Entrenamiento amplio implica un uso más fuerte de datos para mejorar o entrenar modelos.',
+  'ai.automatedDecisionMaking': 'Activalo si la IA puede influir decisiones relevantes como acceso, moderación, fraude, scoring o priorización.',
+  'ai.humanReviewAvailable': 'Indica si una persona puede revisar o escalar decisiones asistidas por IA.',
+  'ai.thirdPartyProviders:third_party_model_api': 'Usalo si enviás prompts, outputs, embeddings o datos relacionados a APIs de modelos externas.',
+  'security.safeHarborOffered': 'Safe harbor comunica que reportes de buena fe y dentro del alcance serán tratados como autorizados.',
+  'security.denialOfServiceTestingAllowed': 'Las pruebas DoS o de carga pueden afectar disponibilidad. Conviene permitirlas sólo con coordinación explícita.',
+  'security.socialEngineeringAllowed': 'Ingeniería social incluye phishing u otros ataques humanos. Normalmente se excluye salvo programas formales.',
+  'eula.licenseScope': 'Define si la licencia es por cuenta, asiento, dispositivo, uso interno o uso comercial.',
+  'eula.reverseEngineeringRestricted': 'Restringe descompilar o intentar derivar código fuente, salvo límites obligatorios de la ley aplicable.',
+  'eula.thirdPartyComponents': 'Útil si tu app incluye librerías, SDKs o componentes open source con licencias separadas.',
+  'cookies.consentMode': 'Define cómo el sitio informa o recoge preferencias de cookies. Debe coincidir con la implementación real.',
+  'cookies.categories:advertising': 'Publicidad y remarketing suelen requerir mayor transparencia y controles de consentimiento más claros.',
+  'refund.digitalGoodsFinal': 'En productos digitales puede cambiar el tratamiento de devoluciones cuando el acceso o descarga ya comenzó.',
+  'deletion.hasMetaConnection': 'Meta suele exigir una URL o instrucciones claras para eliminación de datos conectados a su plataforma.',
+  'disclaimer.categories:medical': 'El contenido médico o de salud suele requerir lenguaje muy claro de no sustitución profesional.'
+};
 const DISCLAIMER_TYPES = [
   { value: 'medical', label: 'Medical information', description: 'Health or medical content.' },
   { value: 'fitness', label: 'Fitness information', description: 'Fitness, exercise, wellness.' },

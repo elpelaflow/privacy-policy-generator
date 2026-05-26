@@ -131,10 +131,12 @@
           <div class="first-run-actions">
             <button type="button" class="button button-secondary" id="guided-mode-toggle">Activar modo guiado</button>
             <button type="button" class="button button-secondary" id="tour-launch">Ver tour rápido</button>
+            <button type="button" class="button button-secondary" id="diagnostic-toggle">No sé qué necesito</button>
           </div>
         </div>
 
         <div id="tour-overlay" class="tour-overlay" aria-live="polite"></div>
+        <div id="diagnostic-panel" class="diagnostic-panel" aria-live="polite"></div>
 
         <div class="generator-layout">
           <aside class="control-rail">
@@ -203,6 +205,7 @@
               <div id="validation-box" class="validation-box"></div>
               <div id="document-status" class="status-banner"></div>
               <div id="summary-box" class="summary-box"></div>
+              <div id="final-checklist" class="final-checklist"></div>
 
               <div class="download-actions" id="download-actions">
                 <button type="button" id="generate-button" class="button button-primary">Generar documento</button>
