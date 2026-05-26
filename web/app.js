@@ -1849,7 +1849,10 @@ const appState = {
   advisorRecommendation: null,
   publishedSnippets: null,
   suiteItems: [],
-  suitePublishedUrls: []
+  suitePublishedUrls: [],
+  guidedMode: false,
+  tourOpen: false,
+  tourStep: 0
 };
 
 const formEl = document.getElementById('generator-form');
@@ -1860,6 +1863,11 @@ const statusEl = document.getElementById('document-status');
 const summaryEl = document.getElementById('summary-box');
 const documentSelectEl = document.getElementById('document-type');
 const documentDescriptionEl = document.getElementById('document-description');
+const firstRunBarEl = document.getElementById('first-run-bar');
+const guidedModeToggleEl = document.getElementById('guided-mode-toggle');
+const tourLaunchEl = document.getElementById('tour-launch');
+const guidedPanelEl = document.getElementById('guided-panel');
+const tourOverlayEl = document.getElementById('tour-overlay');
 const loadConfigButtonEl = document.getElementById('load-config-button');
 const loadConfigInputEl = document.getElementById('load-config-input');
 const presetPanelEl = document.getElementById('preset-panel');
@@ -1913,6 +1921,8 @@ clearSuiteEl.addEventListener('click', clearSuite);
 githubRepoSelectEl.addEventListener('change', updatePublishControls);
 loadConfigButtonEl.addEventListener('click', () => loadConfigInputEl.click());
 loadConfigInputEl.addEventListener('change', loadExistingConfig);
+guidedModeToggleEl.addEventListener('click', toggleGuidedMode);
+tourLaunchEl.addEventListener('click', toggleTour);
 
 for (const button of document.querySelectorAll('.format-button')) {
   button.addEventListener('click', () => {
@@ -1929,12 +1939,14 @@ function init() {
   renderDocumentSelect();
   renderPresetPanel();
   renderJurisdictionAdvisor();
+  renderFirstRunState();
   renderForm();
   setPreviewPlaceholder('Generá un documento para ver la salida acá.');
   setExportState(false);
   setStatus('');
   renderSnippetState();
   renderSuiteState();
+  renderTour();
   initGitHubPublish();
 }
 
@@ -2025,6 +2037,321 @@ function renderPresetPanel() {
   applyButtonEl.addEventListener('click', () => applyDocumentPreset(selectEl.value));
 }
 
+
+function renderFirstRunState() {
+  firstRunBarEl.classList.toggle('is-guided', appState.guidedMode);
+  guidedModeToggleEl.textContent = appState.guidedMode ? 'Ocultar modo guiado' : 'Activar modo guiado';
+  guidedModeToggleEl.classList.toggle('button-primary', appState.guidedMode);
+  guidedModeToggleEl.classList.toggle('button-secondary', !appState.guidedMode);
+  tourLaunchEl.textContent = appState.tourOpen ? 'Cerrar tour' : 'Ver tour rápido';
+}
+
+function toggleGuidedMode() {
+  appState.guidedMode = !appState.guidedMode;
+  renderFirstRunState();
+  renderGuidedPanel();
+}
+
+function toggleTour() {
+  appState.tourOpen = !appState.tourOpen;
+  appState.tourStep = 0;
+  renderFirstRunState();
+  renderTour();
+}
+
+function closeTour() {
+  appState.tourOpen = false;
+  appState.tourStep = 0;
+  renderFirstRunState();
+  renderTour();
+}
+
+function changeTourStep(direction) {
+  const nextStep = appState.tourStep + direction;
+  if (nextStep < 0) return;
+  if (nextStep >= TOUR_STEPS.length) {
+    closeTour();
+    return;
+  }
+  appState.tourStep = nextStep;
+  renderTour();
+}
+
+function renderTour() {
+  clearTourHighlights();
+  if (!appState.tourOpen) {
+    tourOverlayEl.className = 'tour-overlay';
+    tourOverlayEl.innerHTML = '';
+    return;
+  }
+
+  const step = TOUR_STEPS[appState.tourStep];
+  const target = step ? document.querySelector(step.selector) : null;
+  if (target) {
+    target.classList.add('tour-highlight');
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  tourOverlayEl.className = 'tour-overlay is-visible';
+  tourOverlayEl.innerHTML = `
+    <div class="tour-card">
+      <div class="tour-card-top">
+        <span class="panel-pill">Tour rápido</span>
+        <span class="tour-progress">Paso ${appState.tourStep + 1} de ${TOUR_STEPS.length}</span>
+      </div>
+      <h3>${step.title}</h3>
+      <p>${step.body}</p>
+      <div class="tour-actions">
+        <button type="button" class="button button-secondary ${appState.tourStep === 0 ? 'button-disabled' : ''}" id="tour-prev" ${appState.tourStep === 0 ? 'disabled' : ''}>Anterior</button>
+        <button type="button" class="button button-secondary" id="tour-close">Cerrar</button>
+        <button type="button" class="button button-primary" id="tour-next">${appState.tourStep === TOUR_STEPS.length - 1 ? 'Terminar' : 'Siguiente'}</button>
+      </div>
+    </div>
+  `;
+
+  tourOverlayEl.querySelector('#tour-prev')?.addEventListener('click', () => changeTourStep(-1));
+  tourOverlayEl.querySelector('#tour-next')?.addEventListener('click', () => changeTourStep(1));
+  tourOverlayEl.querySelector('#tour-close')?.addEventListener('click', closeTour);
+}
+
+function clearTourHighlights() {
+  document.querySelectorAll('.tour-highlight').forEach((element) => element.classList.remove('tour-highlight'));
+}
+
+function renderGuidedPanel() {
+  if (!appState.guidedMode) {
+    guidedPanelEl.className = 'rail-card guided-panel is-hidden';
+    guidedPanelEl.innerHTML = '';
+    return;
+  }
+
+  const values = gatherFormValues();
+  const flow = buildGuidedFlow(appState.documentType, values);
+  if (!flow) {
+    guidedPanelEl.className = 'rail-card guided-panel';
+    guidedPanelEl.innerHTML = `
+      <div class="guided-head">
+        <div>
+          <p class="eyebrow">Modo guiado</p>
+          <h3>${DOCUMENTS[appState.documentType].label}</h3>
+        </div>
+        <button type="button" class="button button-secondary" id="guided-dismiss">Ocultar</button>
+      </div>
+      <p class="muted-copy">Esta primera versión del modo guiado acompaña mejor a <strong>Privacidad</strong>, <strong>Términos</strong> y <strong>Cookies</strong>. En este documento conviene seguir el formulario normal y usar el tour rápido si querés ubicarte mejor.</p>
+    `;
+    guidedPanelEl.querySelector('#guided-dismiss')?.addEventListener('click', toggleGuidedMode);
+    return;
+  }
+
+  const completedSteps = flow.steps.filter((step) => step.done).length;
+  const currentStep = flow.steps.find((step) => !step.done) || flow.steps[flow.steps.length - 1];
+
+  guidedPanelEl.className = 'rail-card guided-panel';
+  guidedPanelEl.innerHTML = `
+    <div class="guided-head">
+      <div>
+        <p class="eyebrow">Modo guiado</p>
+        <h3>${flow.title}</h3>
+      </div>
+      <button type="button" class="button button-secondary" id="guided-dismiss">Ocultar</button>
+    </div>
+    <p class="muted-copy">${flow.intro}</p>
+    <div class="guided-progress">
+      <strong>${completedSteps}/${flow.steps.length}</strong>
+      <span>pasos ya encaminados</span>
+    </div>
+    <div class="guided-current-step">
+      <strong>Siguiente foco</strong>
+      <p>${currentStep.focus}</p>
+    </div>
+    <div class="guided-steps">
+      ${flow.steps.map((step, index) => `
+        <article class="guided-step ${step.done ? 'is-done' : step === currentStep ? 'is-current' : ''}">
+          <div class="guided-step-top">
+            <span class="guided-step-number">${index + 1}</span>
+            <div>
+              <strong>${step.title}</strong>
+              <p>${step.description}</p>
+            </div>
+          </div>
+          <ul>
+            ${step.items.map((item) => `<li class="${item.done ? 'is-done' : ''}">${item.done ? 'Listo:' : 'Falta:'} ${escapeHtml(item.label)}</li>`).join('')}
+          </ul>
+        </article>
+      `).join('')}
+    </div>
+  `;
+
+  guidedPanelEl.querySelector('#guided-dismiss')?.addEventListener('click', toggleGuidedMode);
+}
+
+function buildGuidedFlow(documentType, values) {
+  if (documentType === 'privacy') {
+    const basics = [
+      guidedItem('Nombre del proyecto o negocio', isFilled(values.business?.name)),
+      guidedItem('URL del sitio o app', isFilled(values.business?.websiteUrl)),
+      guidedItem('Email de contacto', isFilled(values.contact?.email)),
+      guidedItem('Jurisdicción principal', isFilled(values.operations?.primaryJurisdiction))
+    ];
+    const reviews = [
+      guidedItem('Regiones donde esperás usuarios o clientes', hasItems(values.operations?.sellRegions)),
+      guidedItem('Terceros o proveedores que tocan datos', hasItems(values.dataPractices?.thirdParties)),
+      guidedItem('Bases legales del tratamiento', hasItems(values.dataPractices?.legalBases))
+    ];
+    return {
+      title: 'Privacidad para primera generación',
+      intro: 'Si tu sitio o app recopila datos personales, esta guía te lleva al borrador mínimo sin perder de vista lo sensible antes de publicar.',
+      steps: [
+        {
+          title: 'Confirmá que este documento es el correcto',
+          description: 'Privacidad es el punto de partida normal si recolectás datos personales, de uso, cookies o contacto.',
+          focus: 'Quedate en Política de privacidad si tu producto reúne datos de usuarios o visitantes.',
+          done: appState.documentType === 'privacy',
+          items: [guidedItem('Documento actual: Política de privacidad', appState.documentType === 'privacy')]
+        },
+        {
+          title: 'Completá lo mínimo para el primer borrador',
+          description: 'Con estos cuatro datos ya podés generar una base útil y legible.',
+          focus: 'Terminá nombre, URL, contacto y jurisdicción para destrabar la generación.',
+          done: basics.every((item) => item.done),
+          items: basics
+        },
+        {
+          title: 'Revisá lo sensible antes de publicar',
+          description: 'Estos campos cambian bastante el alcance legal del texto.',
+          focus: 'Antes de publicar, verificá proveedores, regiones y bases legales reales.',
+          done: reviews.every((item) => item.done),
+          items: reviews
+        },
+        {
+          title: 'Generá y exportá',
+          description: 'Cuando el borrador ya está al día, podés descargarlo o publicarlo.',
+          focus: appState.lastGenerated && !appState.isDirtySinceGenerate ? 'La versión actual ya está lista para descargar o publicar.' : 'Usá Generar documento cuando termines los puntos mínimos.',
+          done: Boolean(appState.lastGenerated && !appState.isDirtySinceGenerate),
+          items: [
+            guidedItem('Documento generado y actualizado', Boolean(appState.lastGenerated && !appState.isDirtySinceGenerate)),
+            guidedItem('Descargar archivos o conectar GitHub para publicar', Boolean(appState.lastGenerated))
+          ]
+        }
+      ]
+    };
+  }
+
+  if (documentType === 'terms') {
+    const basics = [
+      guidedItem('Nombre del proyecto o negocio', isFilled(values.business?.name)),
+      guidedItem('URL del sitio o app', isFilled(values.business?.websiteUrl)),
+      guidedItem('Tipo de oferta o servicio', isFilled(values.terms?.offeringType)),
+      guidedItem('Foro o jurisdicción para disputas', isFilled(values.terms?.disputesForum))
+    ];
+    return {
+      title: 'Términos para empezar rápido',
+      intro: 'Esta guía corta te ayuda a sacar una base usable para cuentas, pagos, acceso y reglas del servicio.',
+      steps: [
+        {
+          title: 'Confirmá que necesitás términos',
+          description: 'Suelen aplicar si vendés, prestás un servicio o tenés cuentas y reglas de uso.',
+          focus: 'Usá Términos si querés ordenar relación comercial, cuentas, pagos o restricciones.',
+          done: appState.documentType === 'terms',
+          items: [guidedItem('Documento actual: Términos y condiciones', appState.documentType === 'terms')]
+        },
+        {
+          title: 'Completá la base contractual mínima',
+          description: 'Con estos datos ya se entiende qué ofrecés y bajo qué reglas principales.',
+          focus: 'Definí qué ofrecés, a qué URL aplica y dónde se resuelven disputas.',
+          done: basics.every((item) => item.done),
+          items: basics
+        },
+        {
+          title: 'Generá y revisá el borrador',
+          description: 'Después podés afinar reembolsos, garantías, suspensión y pagos.',
+          focus: appState.lastGenerated && !appState.isDirtySinceGenerate ? 'La versión actual ya está lista para revisar o exportar.' : 'Generá el documento cuando completes la base mínima.',
+          done: Boolean(appState.lastGenerated && !appState.isDirtySinceGenerate),
+          items: [guidedItem('Documento generado y actualizado', Boolean(appState.lastGenerated && !appState.isDirtySinceGenerate))]
+        }
+      ]
+    };
+  }
+
+  if (documentType === 'cookies') {
+    const basics = [
+      guidedItem('URL del sitio o app', isFilled(values.business?.websiteUrl)),
+      guidedItem('Categorías de cookies', hasItems(values.cookies?.categories)),
+      guidedItem('Terceros relacionados', hasItems(values.cookies?.thirdParties)),
+      guidedItem('Modo de consentimiento', isFilled(values.cookies?.consentMode))
+    ];
+    return {
+      title: 'Cookies sin perderte en detalles',
+      intro: 'Si usás analítica, embeds, ads o tecnologías similares, esta guía te deja una base clara para transparencia y control.',
+      steps: [
+        {
+          title: 'Confirmá que necesitás política de cookies',
+          description: 'Suele ser útil si tu sitio usa analítica, marketing, embeds o terceros que escriben cookies.',
+          focus: 'Usá Cookies si querés explicar categorías, terceros y consentimiento.',
+          done: appState.documentType === 'cookies',
+          items: [guidedItem('Documento actual: Política de cookies', appState.documentType === 'cookies')]
+        },
+        {
+          title: 'Definí el marco mínimo',
+          description: 'Estas cuatro decisiones ya ordenan la base del documento.',
+          focus: 'Marcá categorías, terceros y cómo manejás consentimiento o preferencias.',
+          done: basics.every((item) => item.done),
+          items: basics
+        },
+        {
+          title: 'Generá y ajustá',
+          description: 'Después podés refinar retención o URL de preferencias si aplica.',
+          focus: appState.lastGenerated && !appState.isDirtySinceGenerate ? 'La política actual ya está lista para descargar o publicar.' : 'Generá el documento cuando completes lo mínimo.',
+          done: Boolean(appState.lastGenerated && !appState.isDirtySinceGenerate),
+          items: [guidedItem('Documento generado y actualizado', Boolean(appState.lastGenerated && !appState.isDirtySinceGenerate))]
+        }
+      ]
+    };
+  }
+
+  return null;
+}
+
+function guidedItem(label, done) {
+  return { label, done };
+}
+
+function isFilled(value) {
+  return typeof value === 'string' ? value.trim().length > 0 : Boolean(value);
+}
+
+function hasItems(value) {
+  return Array.isArray(value) ? value.length > 0 : isFilled(value);
+}
+
+const TOUR_STEPS = [
+  {
+    selector: '#doc-selector-card',
+    title: 'Tipo de documento',
+    body: 'Acá elegís qué clase de documento querés generar. Si venís por primera vez, privacidad suele ser el punto de partida más común.'
+  },
+  {
+    selector: '#preset-card',
+    title: 'Presets por escenario',
+    body: 'Estos presets te dejan una base razonable según tu caso. No te bloquean nada: después podés editar todos los campos.'
+  },
+  {
+    selector: '#generator-form',
+    title: 'Formulario',
+    body: 'Acá completás datos del negocio, del servicio y del documento. El modo guiado te marca qué terminar primero.'
+  },
+  {
+    selector: '#download-actions',
+    title: 'Generar y descargar',
+    body: 'Primero generás el documento. Después podés descargarlo en varios formatos o sumarlo a una suite legal.'
+  },
+  {
+    selector: '#github-publish-card',
+    title: 'Publicar en GitHub Pages',
+    body: 'Si querés una URL pública, conectá GitHub, elegí un repo y publicá bajo rutas seguras como legal/... sin tocar tu home.'
+  }
+];
+
 function renderJurisdictionAdvisor() {
   advisorPanelEl.innerHTML = `
     <div class="advisor-grid">
@@ -2096,6 +2423,7 @@ function renderForm() {
   formEl.oninput = () => {
     preparedPathEl.textContent = buildPreparedPath();
     markDirtySinceGenerate();
+    renderGuidedPanel();
     scheduleLiveValidation();
   };
 
@@ -2109,6 +2437,8 @@ function renderForm() {
   renderAdvisorRecommendation();
   renderSnippetState();
   renderSuiteState();
+  renderGuidedPanel();
+  renderTour();
 }
 
 function applyDocumentPreset(presetValue) {
@@ -2504,6 +2834,7 @@ async function generateDocument() {
     appState.isDirtySinceGenerate = false;
     setExportState(true);
     setStatus('Documento generado correctamente. Si cambiás el formulario, vas a tener que regenerarlo para actualizar vista previa y descargas.', 'success');
+    renderGuidedPanel();
     updatePublishControls();
     refreshPreview();
   } catch (error) {
@@ -2512,6 +2843,7 @@ async function generateDocument() {
     setPreviewPlaceholder('La generación falló.');
     appState.lastGenerated = null;
     setExportState(false);
+    renderGuidedPanel();
     updatePublishControls();
   }
 }

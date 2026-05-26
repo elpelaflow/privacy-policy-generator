@@ -122,9 +122,24 @@
           <p>Elegí un documento, completá los campos, revisá advertencias y exportá los archivos finales.</p>
         </div>
 
+        <div class="first-run-bar" id="first-run-bar">
+          <div>
+            <p class="eyebrow">Primera vez</p>
+            <h3>Activá ayuda si querés una guía corta antes de generar.</h3>
+            <p class="muted-copy">El modo guiado te acompaña para completar lo mínimo. El tour rápido sólo te ubica en la interfaz.</p>
+          </div>
+          <div class="first-run-actions">
+            <button type="button" class="button button-secondary" id="guided-mode-toggle">Activar modo guiado</button>
+            <button type="button" class="button button-secondary" id="tour-launch">Ver tour rápido</button>
+          </div>
+        </div>
+
+        <div id="tour-overlay" class="tour-overlay" aria-live="polite"></div>
+
         <div class="generator-layout">
           <aside class="control-rail">
-            <div class="rail-card">
+            <div id="guided-panel" class="rail-card guided-panel is-hidden"></div>
+            <div class="rail-card" id="doc-selector-card">
               <h3>Tipo de documento</h3>
               <select id="document-type" aria-label="Tipo de documento"></select>
               <p id="document-description" class="muted-copy"></p>
@@ -134,7 +149,7 @@
                 <p class="muted-copy">Importá un JSON generado antes para seguir editándolo sin empezar de cero.</p>
               </div>
             </div>
-            <div class="rail-card">
+            <div class="rail-card" id="preset-card">
               <h3>Presets por escenario</h3>
               <p class="muted-copy">Aplicá una base razonable para el documento actual y después ajustá sólo lo que cambie en tu operación real.</p>
               <div id="preset-panel" class="preset-panel"></div>
@@ -153,7 +168,7 @@
                 <li>No modifica la home ni la navegación del sitio del usuario</li>
               </ul>
             </div>
-            <div class="rail-card future-publish">
+            <div class="rail-card future-publish" id="github-publish-card">
               <h3>Publicación en GitHub Pages</h3>
               <p id="github-publish-copy">Conectá GitHub para publicar el HTML generado dentro de un repo tuyo, bajo una ruta segura tipo <code>legal/...</code>, y obtener una URL pública.</p>
               <div class="publish-stack">
@@ -189,7 +204,7 @@
               <div id="document-status" class="status-banner"></div>
               <div id="summary-box" class="summary-box"></div>
 
-              <div class="download-actions">
+              <div class="download-actions" id="download-actions">
                 <button type="button" id="generate-button" class="button button-primary">Generar documento</button>
                 <button type="button" id="add-to-suite" class="button button-secondary button-disabled" disabled>Agregar a suite legal</button>
                 <button type="button" id="download-html" class="button button-secondary">Descargar HTML</button>

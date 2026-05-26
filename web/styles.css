@@ -282,6 +282,75 @@ button, input, select, textarea { font: inherit; }
   display: inline-flex; padding: 8px 10px; border-radius: 999px; background: rgba(255,255,255,0.08); color: var(--secondary); font-size: .8rem;
 }
 
+.first-run-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(0,194,255,0.08));
+  box-shadow: var(--shadow);
+}
+.first-run-bar h3 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+.first-run-bar.is-guided {
+  border-color: rgba(0, 194, 255, 0.34);
+  background: linear-gradient(135deg, rgba(0,194,255,0.14), rgba(255,255,255,0.05));
+}
+.first-run-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.tour-overlay {
+  display: none;
+  margin-bottom: 20px;
+}
+.tour-overlay.is-visible {
+  display: block;
+}
+.tour-card {
+  padding: 20px 22px;
+  border: 1px solid rgba(0,194,255,0.24);
+  border-radius: 22px;
+  background: rgba(9, 14, 28, 0.86);
+  box-shadow: var(--shadow);
+}
+.tour-card h3 {
+  margin: 0 0 10px;
+}
+.tour-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.tour-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.tour-progress {
+  color: var(--muted);
+  font-size: .88rem;
+}
+.tour-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+.tour-highlight {
+  border-color: rgba(0, 194, 255, 0.62) !important;
+  box-shadow: 0 0 0 3px rgba(0,194,255,0.16), 0 20px 50px rgba(0,0,0,0.24) !important;
+}
+
 .generator-layout {
   display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; align-items: start;
 }
@@ -313,6 +382,105 @@ button, input, select, textarea { font: inherit; }
 .advisor-panel {
   display: grid;
   gap: 12px;
+}
+.guided-panel.is-hidden {
+  display: none;
+}
+.guided-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.guided-head h3 {
+  margin: 0;
+}
+.guided-progress {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 14px 0;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+}
+.guided-progress strong {
+  color: #ffffff;
+  font-size: 1rem;
+}
+.guided-progress span {
+  color: var(--muted);
+}
+.guided-current-step {
+  margin-bottom: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,194,255,0.18);
+  background: rgba(0,194,255,0.08);
+}
+.guided-current-step strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #ffffff;
+}
+.guided-current-step p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.guided-steps {
+  display: grid;
+  gap: 12px;
+}
+.guided-step {
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.03);
+}
+.guided-step.is-current {
+  border-color: rgba(255, 122, 24, 0.36);
+  background: rgba(255,122,24,0.08);
+}
+.guided-step.is-done {
+  border-color: rgba(156,255,87,0.28);
+  background: rgba(156,255,87,0.08);
+}
+.guided-step-top {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+.guided-step-number {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  color: #ffffff;
+  font-weight: 700;
+}
+.guided-step strong {
+  display: block;
+  margin-bottom: 4px;
+}
+.guided-step p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.guided-step ul {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.guided-step li.is-done {
+  color: #dfffc8;
 }
 .preset-panel {
   display: grid;
@@ -728,6 +896,7 @@ button, input, select, textarea { font: inherit; }
 
 @media (max-width: 720px) {
   .site-shell { padding: 16px; }
+  .first-run-bar, .tour-card-top, .guided-head { grid-template-columns: 1fr; display: grid; }
   .topbar { border-radius: 24px; align-items: flex-start; }
   .field-grid { grid-template-columns: 1fr; }
   .hero-copy h1 { max-width: none; }
