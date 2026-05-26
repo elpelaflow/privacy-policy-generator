@@ -8,6 +8,7 @@
 ![Documents](https://img.shields.io/badge/Documents-9-blue)
 ![Downloads](https://img.shields.io/badge/Downloads-HTML%20%7C%20DOCX%20%7C%20MD%20%7C%20TXT%20%7C%20JSON-6f42c1)
 ![Tests](https://img.shields.io/badge/Tests-50%20passing-2ea44f)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-0070ba?logo=paypal)](https://www.paypal.com/donate?hosted_button_id=YA9R8YKCDMM84)
 
 Generate legal documents for apps, SaaS, ecommerce, and websites from a CLI or a browser app, then download them or publish them to GitHub Pages.
 
