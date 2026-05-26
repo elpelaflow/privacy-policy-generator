@@ -1,4 +1,4 @@
-# Privacy Policy Generator
+<h1 align="center">Privacy Policy Generator</h1>
 
 <p align="center">
   <img src="./web/assets/brand/readme-banner.svg" alt="Policy Generator Hub banner">
