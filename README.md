@@ -4,6 +4,10 @@
   <img src="./web/assets/brand/readme-banner.svg" alt="Policy Generator Hub banner">
 </p>
 
+<p align="center">
+  English | <a href="./README_es.md">Español</a>
+</p>
+
 [![Public App](https://img.shields.io/badge/Public%20App-GitHub%20Pages-24292f?logo=github)](https://elpelaflow.github.io/privacy-policy-generator/)
 ![Documents](https://img.shields.io/badge/Documents-9-blue)
 ![Downloads](https://img.shields.io/badge/Downloads-HTML%20%7C%20DOCX%20%7C%20MD%20%7C%20TXT%20%7C%20JSON-6f42c1)
