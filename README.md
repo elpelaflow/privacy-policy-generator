@@ -40,7 +40,7 @@ This repo now supports two delivery modes:
 - document-specific presets for privacy, terms, cookies, refund, EULA, security, deletion, DPA, and AI policy setup
 - `disclaimer` intentionally remains manual-first because its value is more editorial/contextual than structurally preset-driven
 - EULA generation for software/apps with license grant, restrictions, updates, support, and liability clauses
-- output language selection in Spanish or English
+- page language toggle and document output language selection in Spanish or English
 - optional hashed public URL generation for HTML published through hosting you already have
 - GitHub OAuth publish flow for user-owned GitHub Pages repos
 - safe publish paths under `legal/<document-type>/...` to avoid touching a user's site root
@@ -337,7 +337,7 @@ but not as a full GitHub publish app.
 - third-party categories: `analytics`, `advertising`, `payment`, `paypal_only`, `shipping`, `cloud`, `social`, `email`
 - legal bases: `contract`, `consent`, `legal_obligation`, `legitimate_interest`
 - compliance toggles: `ccpa`, `coppa`, `caloppa`, `pipeda`
-- output languages: `es`, `en`
+- page and output languages: `es`, `en`
 
 ## Existing Hosting Integration
 

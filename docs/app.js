@@ -1,5 +1,305 @@
 let DOCUMENTS;
 
+const SUPPORTED_LANGUAGES = [
+  { value: 'es', label: 'Español', shortLabel: 'ES' },
+  { value: 'en', label: 'English', shortLabel: 'EN' }
+];
+
+const UI_LANGUAGE_STORAGE_KEY = 'policy_generator_ui_language';
+let currentUiLanguage = readStoredUiLanguage();
+
+const UI_TEXT = {
+  es: {
+    'brand.subtitle': 'Documentos legales listos para estático',
+    'language.current': 'ES',
+    'language.aria': 'Cambiar idioma a inglés',
+    'topbar.openGenerator': 'Abrir generador',
+    'topbar.githubRepo': 'Repo en GitHub',
+    'hero.eyebrow': 'Listo para GitHub Pages',
+    'hero.title': 'Generá documentos legales en el navegador y exportalos como archivos listos para publicar.',
+    'hero.lead': 'Privacidad, términos, cookies, devoluciones, disclaimers, seguridad, EULA, DPA, políticas de IA e instrucciones de eliminación de datos en una sola app estática, con presets por escenario, exportación en varios formatos y publicación preparada para GitHub Pages.',
+    'hero.metricDocuments': 'documentos con presets',
+    'hero.metricFormats': 'formatos de descarga',
+    'hero.metricSuite': 'para publicar una suite legal',
+    'hero.start': 'Empezar a generar',
+    'hero.capabilities': 'Ver capacidades',
+    'hero.badgeClient': 'Generación client-side',
+    'hero.badgeDownloads': 'Descarga HTML / DOCX / Markdown / TXT / JSON',
+    'hero.badgeSuite': 'Suite legal y publicación en GitHub Pages',
+    'workflow.pill': 'Flujo rápido',
+    'workflow.title': 'Generá, publicá y enlazá en tres pasos',
+    'workflow.generateTitle': 'Generá',
+    'workflow.generateCopy': 'Elegí el documento, completá el formulario y revisá validaciones antes de exportar.',
+    'workflow.publishTitle': 'Publicá',
+    'workflow.publishCopy': 'Conectá GitHub y mandá uno o varios documentos a tu repo en un solo flujo.',
+    'workflow.linkTitle': 'Enlazá',
+    'workflow.linkCopy': 'Copiá la URL o el snippet listo para agregarlo al footer o a otra página de tu sitio.',
+    'outcome.pill': 'Resultado real',
+    'outcome.title': 'URLs públicas sin tocar la home del usuario',
+    'outcome.chipDocuments': 'Privacidad, términos, cookies, DPA, IA y más',
+    'outcome.chipPath': 'Publicación bajo <code>legal/...</code>',
+    'outcome.chipSnippets': 'Snippets listos para copiar',
+    'outcome.pathLabel': 'Ruta pública esperada',
+    'outcome.copy': 'La app trabaja sobre rutas separadas dentro de GitHub Pages, así que no sobrescribe <code>index.html</code>, no invade la navegación principal y deja cada documento listo para enlazar cuando vos quieras.',
+    'capabilities.eyebrow': 'Documentos',
+    'capabilities.title': 'Todo lo que esta web puede generar',
+    'generator.eyebrow': 'App estática',
+    'generator.title': 'Generador en navegador',
+    'generator.copy': 'Elegí un documento, completá los campos, revisá advertencias y exportá los archivos finales.',
+    'firstRun.eyebrow': 'Primera vez',
+    'firstRun.title': 'Activá ayuda si querés una guía corta antes de generar.',
+    'firstRun.copy': 'El modo guiado te acompaña para completar lo mínimo. El tour rápido sólo te ubica en la interfaz.',
+    'rail.documentTypeTitle': 'Tipo de documento',
+    'rail.importCopy': 'Importá un JSON generado antes para seguir editándolo sin empezar de cero.',
+    'rail.presetsTitle': 'Presets por escenario',
+    'rail.presetsCopy': 'Aplicá una base razonable para el documento actual y después ajustá sólo lo que cambie en tu operación real.',
+    'rail.advisorTitle': 'Recomendador de jurisdicción',
+    'rail.advisorCopy': 'Si no sabés qué marcos o defaults te convienen, respondé este mini-test y aplicá la sugerencia al documento actual.',
+    'rail.staticLimitsTitle': 'Límites del modo estático',
+    'rail.staticLimitBrowser': 'Genera documentos completos en el navegador',
+    'rail.staticLimitDownloads': 'Descarga archivos y JSON de entrada',
+    'rail.staticLimitGitHub': 'Publica en repositorios del usuario vía GitHub Pages',
+    'rail.staticLimitHome': 'No modifica la home ni la navegación del sitio del usuario',
+    'github.title': 'Publicación en GitHub Pages',
+    'github.copy': 'Conectá GitHub para publicar el HTML generado dentro de un repo tuyo, bajo una ruta segura tipo <code>legal/...</code>, y obtener una URL pública.',
+    'github.repoLabel': 'Repositorio destino',
+    'github.repoPlaceholder': 'Elegí un repositorio',
+    'results.eyebrow': 'Revisión',
+    'results.title': 'Salida generada',
+    'results.textFormat': 'Texto',
+    'publishPreview.title': 'Ruta preparada para GitHub Pages',
+    'snippets.title': 'Snippets para enlazar la política',
+    'snippets.copy': 'Después de publicar, vas a poder copiar un enlace HTML o Markdown listo para pegar en el footer o en otra página de tu sitio.',
+    'suite.title': 'Suite legal',
+    'suite.copy': 'Guardá varios documentos generados en esta sesión y publicalos juntos en un solo commit.',
+    'suite.empty': 'Todavía no agregaste documentos a la suite.',
+    guidedShow: 'Activar modo guiado',
+    guidedHide: 'Ocultar modo guiado',
+    tourShow: 'Ver tour rápido',
+    tourHide: 'Cerrar tour',
+    diagnosticShow: 'No sé qué necesito',
+    diagnosticHide: 'Cerrar diagnóstico',
+    loadConfig: 'Cargar configuración',
+    connectGitHub: 'Conectar GitHub',
+    disconnectGitHub: 'Desconectar',
+    publishGitHub: 'Publicar en mi GitHub Pages',
+    generateDocument: 'Generar documento',
+    addToSuite: 'Agregar a suite legal',
+    downloadHtml: 'Descargar HTML',
+    downloadDocx: 'Descargar DOCX',
+    downloadMarkdown: 'Descargar Markdown',
+    downloadText: 'Descargar TXT',
+    downloadJson: 'Descargar JSON',
+    copyHtml: 'Copiar HTML',
+    copyMarkdown: 'Copiar Markdown',
+    publishSuite: 'Publicar suite legal',
+    clearSuite: 'Vaciar suite',
+    outputSectionTitle: 'Salida',
+    outputSectionDescription: 'Idioma, exportación y preparación para GitHub Pages.',
+    outputLanguage: 'Idioma de salida',
+    documentButton: 'Usar este documento',
+    summaryTitle: 'Resumen actual',
+    summaryDocument: 'Documento',
+    summaryProject: 'Proyecto',
+    summaryType: 'Tipo',
+    summaryCountry: 'País',
+    summaryLanguage: 'Idioma',
+    summaryWebsite: 'Sitio',
+    summaryContact: 'Contacto',
+    undefinedValue: 'Sin definir',
+    noUrl: 'Sin URL',
+    noContact: 'Sin contacto',
+    previewPlaceholder: 'Generá un documento para ver la salida acá.',
+    githubBackendError: 'No se pudo conectar con el backend de GitHub.',
+    githubNotConnected: 'Todavía no conectaste una cuenta de GitHub.',
+    githubConnectedAs: 'Conectado como',
+    githubReposError: 'No se pudieron cargar repositorios',
+    githubBackendDisabled: 'Backend no configurado todavía. Definí __LEGAL_HUB_CONFIG__.backendBaseUrl para habilitar GitHub.'
+  },
+  en: {
+    'brand.subtitle': 'Static-ready legal documents',
+    'language.current': 'EN',
+    'language.aria': 'Switch language to Spanish',
+    'topbar.openGenerator': 'Open generator',
+    'topbar.githubRepo': 'GitHub repo',
+    'hero.eyebrow': 'Ready for GitHub Pages',
+    'hero.title': 'Generate legal documents in the browser and export publish-ready files.',
+    'hero.lead': 'Privacy, terms, cookies, refunds, disclaimers, security, EULA, DPA, AI policies, and data deletion instructions in one static app, with scenario presets, multiple export formats, and GitHub Pages publishing support.',
+    'hero.metricDocuments': 'documents with presets',
+    'hero.metricFormats': 'download formats',
+    'hero.metricSuite': 'to publish a legal suite',
+    'hero.start': 'Start generating',
+    'hero.capabilities': 'View capabilities',
+    'hero.badgeClient': 'Client-side generation',
+    'hero.badgeDownloads': 'HTML / DOCX / Markdown / TXT / JSON downloads',
+    'hero.badgeSuite': 'Legal suite and GitHub Pages publishing',
+    'workflow.pill': 'Quick workflow',
+    'workflow.title': 'Generate, publish, and link in three steps',
+    'workflow.generateTitle': 'Generate',
+    'workflow.generateCopy': 'Choose the document, complete the form, and review validations before exporting.',
+    'workflow.publishTitle': 'Publish',
+    'workflow.publishCopy': 'Connect GitHub and send one or more documents to your repo in one flow.',
+    'workflow.linkTitle': 'Link',
+    'workflow.linkCopy': 'Copy the URL or ready-made snippet for your footer or another page on your site.',
+    'outcome.pill': 'Real output',
+    'outcome.title': 'Public URLs without touching the user home page',
+    'outcome.chipDocuments': 'Privacy, terms, cookies, DPA, AI, and more',
+    'outcome.chipPath': 'Published under <code>legal/...</code>',
+    'outcome.chipSnippets': 'Copy-ready snippets',
+    'outcome.pathLabel': 'Expected public path',
+    'outcome.copy': 'The app works on separate GitHub Pages routes, so it does not overwrite <code>index.html</code>, does not invade the main navigation, and keeps every document ready to link when you need it.',
+    'capabilities.eyebrow': 'Documents',
+    'capabilities.title': 'Everything this web app can generate',
+    'generator.eyebrow': 'Static app',
+    'generator.title': 'Browser generator',
+    'generator.copy': 'Choose a document, complete the fields, review warnings, and export final files.',
+    'firstRun.eyebrow': 'First time',
+    'firstRun.title': 'Enable help if you want a short guide before generating.',
+    'firstRun.copy': 'Guided mode helps you complete the minimum. The quick tour only orients you in the interface.',
+    'rail.documentTypeTitle': 'Document type',
+    'rail.importCopy': 'Import a previously generated JSON to keep editing without starting from scratch.',
+    'rail.presetsTitle': 'Scenario presets',
+    'rail.presetsCopy': 'Apply a reasonable base for the current document, then adjust only what differs in your real operation.',
+    'rail.advisorTitle': 'Jurisdiction recommender',
+    'rail.advisorCopy': 'If you are unsure which frameworks or defaults apply, answer this mini-test and apply the suggestion to the current document.',
+    'rail.staticLimitsTitle': 'Static mode limits',
+    'rail.staticLimitBrowser': 'Generates complete documents in the browser',
+    'rail.staticLimitDownloads': 'Downloads files and input JSON',
+    'rail.staticLimitGitHub': 'Publishes to user repositories through GitHub Pages',
+    'rail.staticLimitHome': 'Does not modify the user home page or navigation',
+    'github.title': 'GitHub Pages publishing',
+    'github.copy': 'Connect GitHub to publish the generated HTML inside one of your repos, under a safe route like <code>legal/...</code>, and get a public URL.',
+    'github.repoLabel': 'Destination repository',
+    'github.repoPlaceholder': 'Choose a repository',
+    'results.eyebrow': 'Review',
+    'results.title': 'Generated output',
+    'results.textFormat': 'Text',
+    'publishPreview.title': 'Prepared GitHub Pages path',
+    'snippets.title': 'Snippets to link the policy',
+    'snippets.copy': 'After publishing, you can copy an HTML or Markdown link ready to paste into your footer or another page on your site.',
+    'suite.title': 'Legal suite',
+    'suite.copy': 'Save several documents generated in this session and publish them together in one commit.',
+    'suite.empty': 'You have not added documents to the suite yet.',
+    guidedShow: 'Enable guided mode',
+    guidedHide: 'Hide guided mode',
+    tourShow: 'View quick tour',
+    tourHide: 'Close tour',
+    diagnosticShow: 'I do not know what I need',
+    diagnosticHide: 'Close diagnostic',
+    loadConfig: 'Load configuration',
+    connectGitHub: 'Connect GitHub',
+    disconnectGitHub: 'Disconnect',
+    publishGitHub: 'Publish to my GitHub Pages',
+    generateDocument: 'Generate document',
+    addToSuite: 'Add to legal suite',
+    downloadHtml: 'Download HTML',
+    downloadDocx: 'Download DOCX',
+    downloadMarkdown: 'Download Markdown',
+    downloadText: 'Download TXT',
+    downloadJson: 'Download JSON',
+    copyHtml: 'Copy HTML',
+    copyMarkdown: 'Copy Markdown',
+    publishSuite: 'Publish legal suite',
+    clearSuite: 'Clear suite',
+    outputSectionTitle: 'Output',
+    outputSectionDescription: 'Language, export, and GitHub Pages preparation.',
+    outputLanguage: 'Output language',
+    documentButton: 'Use this document',
+    summaryTitle: 'Current summary',
+    summaryDocument: 'Document',
+    summaryProject: 'Project',
+    summaryType: 'Type',
+    summaryCountry: 'Country',
+    summaryLanguage: 'Language',
+    summaryWebsite: 'Website',
+    summaryContact: 'Contact',
+    undefinedValue: 'Undefined',
+    noUrl: 'No URL',
+    noContact: 'No contact',
+    previewPlaceholder: 'Generate a document to see the output here.',
+    githubBackendError: 'Could not connect to the GitHub backend.',
+    githubNotConnected: 'You have not connected a GitHub account yet.',
+    githubConnectedAs: 'Connected as',
+    githubReposError: 'Could not load repositories',
+    githubBackendDisabled: 'Backend not configured yet. Set __LEGAL_HUB_CONFIG__.backendBaseUrl to enable GitHub.'
+  }
+};
+
+const DOCUMENT_COPY = {
+  en: {
+    privacy: {
+      label: 'Privacy policy',
+      description: 'Privacy policy with regions, data categories, third parties, legal bases, and Argentina-first warnings.'
+    },
+    terms: {
+      label: 'Terms and conditions',
+      description: 'Service terms covering consumer use, e-commerce, accounts, payments, and disputes.'
+    },
+    cookies: {
+      label: 'Cookie policy',
+      description: 'Cookie categories, consent, third parties, browser controls, and privacy alignment.'
+    },
+    refund: {
+      label: 'Return and refund policy',
+      description: 'Return windows, refunds, exchanges, shipping, damaged items, and consumer expectations.'
+    },
+    disclaimer: {
+      label: 'Disclaimer',
+      description: 'Modular disclaimers for links, errors, health, fitness, risks, and reviews.'
+    },
+    security: {
+      label: 'Security policy',
+      description: 'Responsible disclosure, safe harbor, technical scope, response times, and minimum security practices.'
+    },
+    eula: {
+      label: 'EULA / End-user license',
+      description: 'End-user license for software, apps, SDKs, or extensions, with grant, restrictions, updates, support, and liability.'
+    },
+    dpa: {
+      label: 'DPA / Data processing agreement',
+      description: 'Controller-processor document for B2B SaaS with instructions, security, subprocessors, transfers, and service termination.'
+    },
+    ai: {
+      label: 'AI and training data policy',
+      description: 'Transparency on AI use, datasets, training, providers, retention, and human review.'
+    },
+    deletion: {
+      label: 'Data deletion instructions',
+      description: 'Deletion request channel, scope, retention exceptions, and guidance for Meta-connected accounts.'
+    }
+  }
+};
+
+function t(key) {
+  return UI_TEXT[currentUiLanguage]?.[key] || UI_TEXT.es[key] || key;
+}
+
+function readStoredUiLanguage() {
+  try {
+    const stored = localStorage.getItem(UI_LANGUAGE_STORAGE_KEY);
+    return SUPPORTED_LANGUAGES.some((item) => item.value === stored) ? stored : 'es';
+  } catch {
+    return 'es';
+  }
+}
+
+function languageLabel(value) {
+  return SUPPORTED_LANGUAGES.find((item) => item.value === value)?.label || value;
+}
+
+function localizeDocuments(documents) {
+  const copy = DOCUMENT_COPY[currentUiLanguage] || {};
+  for (const [type, localized] of Object.entries(copy)) {
+    if (!documents[type]) continue;
+    documents[type] = {
+      ...documents[type],
+      label: localized.label || documents[type].label,
+      description: localized.description || documents[type].description
+    };
+  }
+  return documents;
+}
+
 const DOCUMENT_PRESETS = {
   privacy: [
     {
@@ -1901,6 +2201,7 @@ const logoutGitHubEl = document.getElementById('logout-github');
 const publishGitHubPagesEl = document.getElementById('publish-github-pages');
 const githubRepoSelectEl = document.getElementById('github-repo-select');
 const githubSessionStatusEl = document.getElementById('github-session-status');
+const languageToggleEl = document.getElementById('language-toggle');
 
 let validationRequestId = 0;
 let validationTimer = null;
@@ -1935,6 +2236,7 @@ guidedModeToggleEl.addEventListener('click', toggleGuidedMode);
 tourLaunchEl.addEventListener('click', toggleTour);
 diagnosticToggleEl.addEventListener('click', toggleDiagnosticPanel);
 document.addEventListener('click', handleInfoPopoverClick);
+languageToggleEl?.addEventListener('click', toggleUiLanguage);
 
 for (const button of document.querySelectorAll('.format-button')) {
   button.addEventListener('click', () => {
@@ -1950,6 +2252,7 @@ function init() {
   if (!DOCUMENTS[appState.documentType]) {
     appState.documentType = 'privacy';
   }
+  applyUiLanguage();
   renderDocumentCards();
   renderDocumentSelect();
   renderPresetPanel();
@@ -1957,13 +2260,72 @@ function init() {
   renderFirstRunState();
   renderDiagnosticPanel();
   renderForm();
-  setPreviewPlaceholder('Generá un documento para ver la salida acá.');
+  setPreviewPlaceholder(t('previewPlaceholder'));
   setExportState(false);
   setStatus('');
   renderSnippetState();
   renderSuiteState();
   renderTour();
   initGitHubPublish();
+}
+
+function toggleUiLanguage() {
+  const currentIndex = SUPPORTED_LANGUAGES.findIndex((item) => item.value === currentUiLanguage);
+  const next = SUPPORTED_LANGUAGES[(currentIndex + 1) % SUPPORTED_LANGUAGES.length]?.value || 'es';
+  const currentValues = formEl?.innerHTML ? gatherFormValues() : null;
+  currentUiLanguage = next;
+  try {
+    localStorage.setItem(UI_LANGUAGE_STORAGE_KEY, currentUiLanguage);
+  } catch {}
+
+  DOCUMENTS = localizeDocuments(buildDocuments());
+  if (currentValues) appState.formSeed = currentValues;
+  applyUiLanguage();
+  renderDocumentCards();
+  renderDocumentSelect();
+  renderPresetPanel();
+  renderJurisdictionAdvisor();
+  renderFirstRunState();
+  renderDiagnosticPanel();
+  renderForm();
+}
+
+function applyUiLanguage() {
+  document.documentElement.lang = currentUiLanguage;
+  document.title = currentUiLanguage === 'en' ? 'Policy Generator Hub' : 'Policy Generator Hub';
+  document.querySelector('meta[name="description"]')?.setAttribute(
+    'content',
+    currentUiLanguage === 'en'
+      ? 'Static legal document generator with preview, export, and GitHub Pages publishing preparation.'
+      : 'Generador estático de documentos legales con vista previa, exportación y preparación para GitHub Pages.'
+  );
+  document.querySelectorAll('[data-i18n]').forEach((element) => {
+    element.textContent = t(element.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach((element) => {
+    element.innerHTML = t(element.dataset.i18nHtml);
+  });
+  languageToggleEl?.setAttribute('aria-label', t('language.aria'));
+  applyControlLanguage();
+}
+
+function applyControlLanguage() {
+  if (loadConfigButtonEl) loadConfigButtonEl.textContent = t('loadConfig');
+  if (connectGitHubEl) connectGitHubEl.querySelector('span:last-child').textContent = t('connectGitHub');
+  if (logoutGitHubEl) logoutGitHubEl.textContent = t('disconnectGitHub');
+  if (publishGitHubPagesEl) publishGitHubPagesEl.textContent = t('publishGitHub');
+  if (generateButtonEl) generateButtonEl.textContent = t('generateDocument');
+  if (addToSuiteEl) addToSuiteEl.textContent = t('addToSuite');
+  if (downloadHtmlEl) downloadHtmlEl.textContent = t('downloadHtml');
+  if (downloadDocxEl) downloadDocxEl.textContent = t('downloadDocx');
+  if (downloadMarkdownEl) downloadMarkdownEl.textContent = t('downloadMarkdown');
+  if (downloadTextEl) downloadTextEl.textContent = t('downloadText');
+  if (downloadJsonEl) downloadJsonEl.textContent = t('downloadJson');
+  if (copyHtmlSnippetEl) copyHtmlSnippetEl.textContent = t('copyHtml');
+  if (copyMarkdownSnippetEl) copyMarkdownSnippetEl.textContent = t('copyMarkdown');
+  if (publishSuiteEl) publishSuiteEl.textContent = t('publishSuite');
+  if (clearSuiteEl) clearSuiteEl.textContent = t('clearSuite');
+  if (githubSessionStatusEl && !githubState.backendEnabled) githubSessionStatusEl.textContent = t('githubBackendDisabled');
 }
 
 function renderDocumentCards() {
@@ -1973,7 +2335,7 @@ function renderDocumentCards() {
       <span class="doc-tag">${key}</span>
       <h3>${config.label}</h3>
       <p>${config.description}</p>
-      <button type="button" class="button button-secondary" data-open-doc="${key}">Usar este documento</button>
+      <button type="button" class="button button-secondary" data-open-doc="${key}">${t('documentButton')}</button>
     </article>
   `).join('');
 
@@ -2058,10 +2420,10 @@ function renderPresetPanel() {
 
 function renderFirstRunState() {
   firstRunBarEl.classList.toggle('is-guided', appState.guidedMode);
-  guidedModeToggleEl.textContent = appState.guidedMode ? 'Ocultar modo guiado' : 'Activar modo guiado';
+  guidedModeToggleEl.textContent = appState.guidedMode ? t('guidedHide') : t('guidedShow');
   guidedModeToggleEl.classList.toggle('button-primary', appState.guidedMode);
   guidedModeToggleEl.classList.toggle('button-secondary', !appState.guidedMode);
-  tourLaunchEl.textContent = appState.tourOpen ? 'Cerrar tour' : 'Ver tour rápido';
+  tourLaunchEl.textContent = appState.tourOpen ? t('tourHide') : t('tourShow');
 }
 
 function toggleGuidedMode() {
@@ -2644,7 +3006,7 @@ function toggleDiagnosticPanel() {
 }
 
 function renderDiagnosticPanel() {
-  diagnosticToggleEl.textContent = appState.diagnosticOpen ? 'Cerrar diagnóstico' : 'No sé qué necesito';
+  diagnosticToggleEl.textContent = appState.diagnosticOpen ? t('diagnosticHide') : t('diagnosticShow');
   if (!appState.diagnosticOpen) {
     diagnosticPanelEl.className = 'diagnostic-panel';
     diagnosticPanelEl.innerHTML = '';
@@ -2818,7 +3180,7 @@ function renderForm() {
   validationEl.innerHTML = '';
   renderSummary();
   renderFinalChecklist();
-  setPreviewPlaceholder('Generá un documento para ver la salida acá.');
+  setPreviewPlaceholder(t('previewPlaceholder'));
   setExportState(false);
   setStatus('');
   renderAdvisorRecommendation();
@@ -2905,7 +3267,7 @@ function createDefaults(type, seed = null) {
       phone: '',
       pageUrl: ''
     },
-    settings: { language: 'es' }
+    settings: { language: currentUiLanguage }
   };
 
   if (type === 'privacy') {
@@ -3433,7 +3795,7 @@ async function buildDocxBlob() {
   }
 
   const doc = new Document({
-    creator: 'Legal Generator Hub',
+    creator: 'Policy Generator Hub',
     title,
     description: title,
     sections: [
@@ -3582,13 +3944,13 @@ function setExportState(enabled) {
 function renderSummary() {
   const values = gatherFormValues();
   const items = [
-    ['Documento', DOCUMENTS[appState.documentType].label],
-    ['Proyecto', values.business?.name || 'Sin definir'],
-    ['Tipo', values.business?.type || 'Sin definir'],
-    ['País', values.business?.country || 'Sin definir'],
-    ['Idioma', values.settings?.language === 'en' ? 'English' : 'Español'],
-    ['Sitio', values.business?.websiteUrl || 'Sin URL'],
-    ['Contacto', values.contact?.email || values.contact?.pageUrl || 'Sin contacto']
+    [t('summaryDocument'), DOCUMENTS[appState.documentType].label],
+    [t('summaryProject'), values.business?.name || t('undefinedValue')],
+    [t('summaryType'), values.business?.type || t('undefinedValue')],
+    [t('summaryCountry'), values.business?.country || t('undefinedValue')],
+    [t('summaryLanguage'), languageLabel(values.settings?.language)],
+    [t('summaryWebsite'), values.business?.websiteUrl || t('noUrl')],
+    [t('summaryContact'), values.contact?.email || values.contact?.pageUrl || t('noContact')]
   ];
   const documentSpecificItems = buildDocumentSpecificSummary(appState.documentType, values);
 
@@ -3613,7 +3975,7 @@ function renderSummary() {
 
   summaryEl.className = 'summary-box is-visible';
   summaryEl.innerHTML = `
-    <h4>Resumen actual</h4>
+    <h4>${t('summaryTitle')}</h4>
     <div class="summary-grid">${valuesHtml}</div>
     ${documentSpecificHtml}
   `;
@@ -3727,7 +4089,7 @@ function buildDocumentSpecificSummary(documentType, values) {
 
 async function initGitHubPublish() {
   if (!githubState.backendEnabled) {
-    githubSessionStatusEl.textContent = 'Backend no configurado todavía. Definí __LEGAL_HUB_CONFIG__.backendBaseUrl para habilitar GitHub.';
+    githubSessionStatusEl.textContent = t('githubBackendDisabled');
     connectGitHubEl.disabled = true;
     logoutGitHubEl.disabled = true;
     githubRepoSelectEl.disabled = true;
@@ -3809,7 +4171,7 @@ async function refreshGitHubSession() {
   } catch {
     githubState.session = null;
     githubState.repos = [];
-    githubSessionStatusEl.textContent = 'No se pudo conectar con el backend de GitHub.';
+    githubSessionStatusEl.textContent = t('githubBackendError');
     renderRepoOptions();
   }
   updatePublishControls();
@@ -3818,11 +4180,11 @@ async function refreshGitHubSession() {
 function renderGitHubSession() {
   if (!githubState.backendEnabled) return;
   if (githubState.session) {
-    githubSessionStatusEl.textContent = `Conectado como ${githubState.session.login}.`;
+    githubSessionStatusEl.textContent = `${t('githubConnectedAs')} ${githubState.session.login}.`;
     connectGitHubEl.disabled = true;
     logoutGitHubEl.disabled = false;
   } else {
-    githubSessionStatusEl.textContent = 'Todavía no conectaste una cuenta de GitHub.';
+    githubSessionStatusEl.textContent = t('githubNotConnected');
     connectGitHubEl.disabled = false;
     logoutGitHubEl.disabled = true;
   }
@@ -3842,12 +4204,12 @@ async function loadGitHubRepos() {
     renderRepoOptions();
   } catch {
     githubState.repos = [];
-    githubRepoSelectEl.innerHTML = '<option value="">No se pudieron cargar repositorios</option>';
+    githubRepoSelectEl.innerHTML = `<option value="">${t('githubReposError')}</option>`;
   }
 }
 
 function renderRepoOptions() {
-  githubRepoSelectEl.innerHTML = '<option value="">Elegí un repositorio</option>';
+  githubRepoSelectEl.innerHTML = `<option value="">${t('github.repoPlaceholder')}</option>`;
   for (const repo of githubState.repos) {
     const option = document.createElement('option');
     option.value = repo.full_name;
@@ -4205,10 +4567,10 @@ function booleanField(name, label, description, value = false, required = false)
 
 function outputFields() {
   return {
-    title: 'Salida',
-    description: 'Idioma, exportación y preparación para GitHub Pages.',
+    title: t('outputSectionTitle'),
+    description: t('outputSectionDescription'),
     fields: [
-      selectField('settings.language', 'Idioma de salida', [{ value: 'es', label: 'Español' }, { value: 'en', label: 'English' }], 'es')
+      selectField('settings.language', t('outputLanguage'), SUPPORTED_LANGUAGES.map(({ value, label }) => ({ value, label })), currentUiLanguage)
     ]
   };
 }
@@ -4512,6 +4874,6 @@ const DELETION_RETENTION = [
   { value: 'Información necesaria para resolver disputas o hacer cumplir acuerdos', label: 'Disputes / contracts', description: 'Records needed for disputes or agreements.' }
 ];
 
-DOCUMENTS = buildDocuments();
+DOCUMENTS = localizeDocuments(buildDocuments());
 
 init();

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Legal Generator Hub</title>
+  <title>Policy Generator Hub</title>
   <meta name="description" content="Generador estático de documentos legales con vista previa, exportación y preparación para GitHub Pages.">
   <link rel="stylesheet" href="./styles.css">
 </head>
@@ -12,91 +12,94 @@
     <header class="hero">
       <nav class="topbar">
         <div class="brand">
-          <span class="brand-mark">LG</span>
+          <span class="brand-mark">PG</span>
           <span class="brand-copy">
-            <strong>Legal Generator Hub</strong>
-            <small>Documentos legales listos para estático</small>
+            <strong>Policy Generator Hub</strong>
+            <small data-i18n="brand.subtitle">Documentos legales listos para estático</small>
           </span>
         </div>
         <div class="topbar-actions">
-          <a href="#generator" class="ghost-link">Abrir generador</a>
-          <a href="https://github.com/elpelaflow/privacy-policy-generator" class="solid-link github-link-button"><span class="github-mark" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.67 0 8.2c0 3.63 2.29 6.7 5.47 7.79.4.08.55-.18.55-.39 0-.19-.01-.84-.01-1.52-2.01.38-2.53-.5-2.69-.96-.09-.24-.48-.97-.82-1.16-.28-.16-.68-.55-.01-.56.63-.01 1.08.59 1.23.84.72 1.26 1.87.9 2.33.69.07-.54.28-.9.5-1.11-1.78-.21-3.64-.92-3.64-4.08 0-.9.31-1.63.82-2.2-.08-.21-.36-1.05.08-2.18 0 0 .67-.22 2.2.84a7.38 7.38 0 0 1 4 0c1.53-1.06 2.2-.84 2.2-.84.44 1.13.16 1.97.08 2.18.51.57.82 1.29.82 2.2 0 3.17-1.87 3.87-3.65 4.08.29.26.54.75.54 1.52 0 1.1-.01 1.98-.01 2.25 0 .22.15.48.55.39A8.23 8.23 0 0 0 16 8.2C16 3.67 12.42 0 8 0Z"></path></svg></span><span>Repo en GitHub</span></a>
+          <button type="button" class="language-toggle" id="language-toggle" aria-label="Cambiar idioma">
+            <span data-i18n="language.current">ES</span>
+          </button>
+          <a href="#generator" class="ghost-link" data-i18n="topbar.openGenerator">Abrir generador</a>
+          <a href="https://github.com/elpelaflow/privacy-policy-generator" class="solid-link github-link-button"><span class="github-mark" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.67 0 8.2c0 3.63 2.29 6.7 5.47 7.79.4.08.55-.18.55-.39 0-.19-.01-.84-.01-1.52-2.01.38-2.53-.5-2.69-.96-.09-.24-.48-.97-.82-1.16-.28-.16-.68-.55-.01-.56.63-.01 1.08.59 1.23.84.72 1.26 1.87.9 2.33.69.07-.54.28-.9.5-1.11-1.78-.21-3.64-.92-3.64-4.08 0-.9.31-1.63.82-2.2-.08-.21-.36-1.05.08-2.18 0 0 .67-.22 2.2.84a7.38 7.38 0 0 1 4 0c1.53-1.06 2.2-.84 2.2-.84.44 1.13.16 1.97.08 2.18.51.57.82 1.29.82 2.2 0 3.17-1.87 3.87-3.65 4.08.29.26.54.75.54 1.52 0 1.1-.01 1.98-.01 2.25 0 .22.15.48.55.39A8.23 8.23 0 0 0 16 8.2C16 3.67 12.42 0 8 0Z"></path></svg></span><span data-i18n="topbar.githubRepo">Repo en GitHub</span></a>
         </div>
       </nav>
 
       <section class="hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">Listo para GitHub Pages</p>
-          <h1>Generá documentos legales en el navegador y exportalos como archivos listos para publicar.</h1>
-          <p class="lead">
+          <p class="eyebrow" data-i18n="hero.eyebrow">Listo para GitHub Pages</p>
+          <h1 data-i18n="hero.title">Generá documentos legales en el navegador y exportalos como archivos listos para publicar.</h1>
+          <p class="lead" data-i18n="hero.lead">
             Privacidad, términos, cookies, devoluciones, disclaimers, seguridad, EULA, DPA, políticas de IA e instrucciones de eliminación de datos
             en una sola app estática, con presets por escenario, exportación en varios formatos y publicación preparada para GitHub Pages.
           </p>
           <div class="hero-metrics">
             <div class="hero-metric">
               <strong>9</strong>
-              <span>documentos con presets</span>
+              <span data-i18n="hero.metricDocuments">documentos con presets</span>
             </div>
             <div class="hero-metric">
               <strong>5</strong>
-              <span>formatos de descarga</span>
+              <span data-i18n="hero.metricFormats">formatos de descarga</span>
             </div>
             <div class="hero-metric">
               <strong>1 commit</strong>
-              <span>para publicar una suite legal</span>
+              <span data-i18n="hero.metricSuite">para publicar una suite legal</span>
             </div>
           </div>
           <div class="hero-cta">
-            <a href="#generator" class="button button-primary">Empezar a generar</a>
-            <a href="#capabilities" class="button button-secondary">Ver capacidades</a>
+            <a href="#generator" class="button button-primary" data-i18n="hero.start">Empezar a generar</a>
+            <a href="#capabilities" class="button button-secondary" data-i18n="hero.capabilities">Ver capacidades</a>
           </div>
           <ul class="hero-badges">
-            <li>Generación client-side</li>
-            <li>Descarga HTML / DOCX / Markdown / TXT / JSON</li>
-            <li>Suite legal y publicación en GitHub Pages</li>
+            <li data-i18n="hero.badgeClient">Generación client-side</li>
+            <li data-i18n="hero.badgeDownloads">Descarga HTML / DOCX / Markdown / TXT / JSON</li>
+            <li data-i18n="hero.badgeSuite">Suite legal y publicación en GitHub Pages</li>
           </ul>
         </div>
         <div class="hero-panel">
           <div class="panel-card">
-            <span class="panel-pill">Flujo rápido</span>
-            <h2>Generá, publicá y enlazá en tres pasos</h2>
+            <span class="panel-pill" data-i18n="workflow.pill">Flujo rápido</span>
+            <h2 data-i18n="workflow.title">Generá, publicá y enlazá en tres pasos</h2>
             <div class="workflow-steps">
               <div class="workflow-step">
                 <span class="workflow-step-number">1</span>
                 <div>
-                  <strong>Generá</strong>
-                  <p>Elegí el documento, completá el formulario y revisá validaciones antes de exportar.</p>
+                  <strong data-i18n="workflow.generateTitle">Generá</strong>
+                  <p data-i18n="workflow.generateCopy">Elegí el documento, completá el formulario y revisá validaciones antes de exportar.</p>
                 </div>
               </div>
               <div class="workflow-step">
                 <span class="workflow-step-number">2</span>
                 <div>
-                  <strong>Publicá</strong>
-                  <p>Conectá GitHub y mandá uno o varios documentos a tu repo en un solo flujo.</p>
+                  <strong data-i18n="workflow.publishTitle">Publicá</strong>
+                  <p data-i18n="workflow.publishCopy">Conectá GitHub y mandá uno o varios documentos a tu repo en un solo flujo.</p>
                 </div>
               </div>
               <div class="workflow-step">
                 <span class="workflow-step-number">3</span>
                 <div>
-                  <strong>Enlazá</strong>
-                  <p>Copiá la URL o el snippet listo para agregarlo al footer o a otra página de tu sitio.</p>
+                  <strong data-i18n="workflow.linkTitle">Enlazá</strong>
+                  <p data-i18n="workflow.linkCopy">Copiá la URL o el snippet listo para agregarlo al footer o a otra página de tu sitio.</p>
                 </div>
               </div>
             </div>
           </div>
           <div class="panel-card accent">
-            <span class="panel-pill">Resultado real</span>
-            <h2>URLs públicas sin tocar la home del usuario</h2>
+            <span class="panel-pill" data-i18n="outcome.pill">Resultado real</span>
+            <h2 data-i18n="outcome.title">URLs públicas sin tocar la home del usuario</h2>
             <div class="outcome-chips">
-              <span>Privacidad, términos, cookies, DPA, IA y más</span>
-              <span>Publicación bajo <code>legal/...</code></span>
-              <span>Snippets listos para copiar</span>
+              <span data-i18n="outcome.chipDocuments">Privacidad, términos, cookies, DPA, IA y más</span>
+              <span data-i18n-html="outcome.chipPath">Publicación bajo <code>legal/...</code></span>
+              <span data-i18n="outcome.chipSnippets">Snippets listos para copiar</span>
             </div>
             <div class="publish-path-preview">
-              <span>Ruta pública esperada</span>
+              <span data-i18n="outcome.pathLabel">Ruta pública esperada</span>
               <code>usuario.github.io/repo/legal/privacy/mi-politica.html</code>
             </div>
-            <p>
+            <p data-i18n-html="outcome.copy">
               La app trabaja sobre rutas separadas dentro de GitHub Pages, así que no sobrescribe
               <code>index.html</code>, no invade la navegación principal y deja cada documento listo
               para enlazar cuando vos quieras.
@@ -109,24 +112,24 @@
     <main>
       <section id="capabilities" class="capabilities">
         <div class="section-heading">
-          <p class="eyebrow">Documentos</p>
-          <h2>Todo lo que esta web puede generar</h2>
+          <p class="eyebrow" data-i18n="capabilities.eyebrow">Documentos</p>
+          <h2 data-i18n="capabilities.title">Todo lo que esta web puede generar</h2>
         </div>
         <div class="cards-grid" id="document-cards"></div>
       </section>
 
       <section id="generator" class="generator-shell">
         <div class="section-heading">
-          <p class="eyebrow">App estática</p>
-          <h2>Generador en navegador</h2>
-          <p>Elegí un documento, completá los campos, revisá advertencias y exportá los archivos finales.</p>
+          <p class="eyebrow" data-i18n="generator.eyebrow">App estática</p>
+          <h2 data-i18n="generator.title">Generador en navegador</h2>
+          <p data-i18n="generator.copy">Elegí un documento, completá los campos, revisá advertencias y exportá los archivos finales.</p>
         </div>
 
         <div class="first-run-bar" id="first-run-bar">
           <div>
-            <p class="eyebrow">Primera vez</p>
-            <h3>Activá ayuda si querés una guía corta antes de generar.</h3>
-            <p class="muted-copy">El modo guiado te acompaña para completar lo mínimo. El tour rápido sólo te ubica en la interfaz.</p>
+            <p class="eyebrow" data-i18n="firstRun.eyebrow">Primera vez</p>
+            <h3 data-i18n="firstRun.title">Activá ayuda si querés una guía corta antes de generar.</h3>
+            <p class="muted-copy" data-i18n="firstRun.copy">El modo guiado te acompaña para completar lo mínimo. El tour rápido sólo te ubica en la interfaz.</p>
           </div>
           <div class="first-run-actions">
             <button type="button" class="button button-secondary" id="guided-mode-toggle">Activar modo guiado</button>
@@ -142,44 +145,44 @@
           <aside class="control-rail">
             <div id="guided-panel" class="rail-card guided-panel is-hidden"></div>
             <div class="rail-card" id="doc-selector-card">
-              <h3>Tipo de documento</h3>
+              <h3 data-i18n="rail.documentTypeTitle">Tipo de documento</h3>
               <select id="document-type" aria-label="Tipo de documento"></select>
               <p id="document-description" class="muted-copy"></p>
               <div class="import-config-block">
                 <button class="button button-secondary" type="button" id="load-config-button">Cargar configuración</button>
                 <input type="file" id="load-config-input" accept="application/json,.json" hidden>
-                <p class="muted-copy">Importá un JSON generado antes para seguir editándolo sin empezar de cero.</p>
+                <p class="muted-copy" data-i18n="rail.importCopy">Importá un JSON generado antes para seguir editándolo sin empezar de cero.</p>
               </div>
             </div>
             <div class="rail-card" id="preset-card">
-              <h3>Presets por escenario</h3>
-              <p class="muted-copy">Aplicá una base razonable para el documento actual y después ajustá sólo lo que cambie en tu operación real.</p>
+              <h3 data-i18n="rail.presetsTitle">Presets por escenario</h3>
+              <p class="muted-copy" data-i18n="rail.presetsCopy">Aplicá una base razonable para el documento actual y después ajustá sólo lo que cambie en tu operación real.</p>
               <div id="preset-panel" class="preset-panel"></div>
             </div>
             <div class="rail-card">
-              <h3>Recomendador de jurisdicción</h3>
-              <p class="muted-copy">Si no sabés qué marcos o defaults te convienen, respondé este mini-test y aplicá la sugerencia al documento actual.</p>
+              <h3 data-i18n="rail.advisorTitle">Recomendador de jurisdicción</h3>
+              <p class="muted-copy" data-i18n="rail.advisorCopy">Si no sabés qué marcos o defaults te convienen, respondé este mini-test y aplicá la sugerencia al documento actual.</p>
               <div id="advisor-panel" class="advisor-panel"></div>
             </div>
             <div class="rail-card">
-              <h3>Límites del modo estático</h3>
+              <h3 data-i18n="rail.staticLimitsTitle">Límites del modo estático</h3>
               <ul class="mini-list">
-                <li>Genera documentos completos en el navegador</li>
-                <li>Descarga archivos y JSON de entrada</li>
-                <li>Publica en repositorios del usuario vía GitHub Pages</li>
-                <li>No modifica la home ni la navegación del sitio del usuario</li>
+                <li data-i18n="rail.staticLimitBrowser">Genera documentos completos en el navegador</li>
+                <li data-i18n="rail.staticLimitDownloads">Descarga archivos y JSON de entrada</li>
+                <li data-i18n="rail.staticLimitGitHub">Publica en repositorios del usuario vía GitHub Pages</li>
+                <li data-i18n="rail.staticLimitHome">No modifica la home ni la navegación del sitio del usuario</li>
               </ul>
             </div>
             <div class="rail-card future-publish" id="github-publish-card">
-              <h3>Publicación en GitHub Pages</h3>
-              <p id="github-publish-copy">Conectá GitHub para publicar el HTML generado dentro de un repo tuyo, bajo una ruta segura tipo <code>legal/...</code>, y obtener una URL pública.</p>
+              <h3 data-i18n="github.title">Publicación en GitHub Pages</h3>
+              <p id="github-publish-copy" data-i18n-html="github.copy">Conectá GitHub para publicar el HTML generado dentro de un repo tuyo, bajo una ruta segura tipo <code>legal/...</code>, y obtener una URL pública.</p>
               <div class="publish-stack">
                 <button class="button button-secondary button-github" type="button" id="connect-github"><span class="github-mark" aria-hidden="true"><svg viewBox="0 0 16 16" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.67 0 8.2c0 3.63 2.29 6.7 5.47 7.79.4.08.55-.18.55-.39 0-.19-.01-.84-.01-1.52-2.01.38-2.53-.5-2.69-.96-.09-.24-.48-.97-.82-1.16-.28-.16-.68-.55-.01-.56.63-.01 1.08.59 1.23.84.72 1.26 1.87.9 2.33.69.07-.54.28-.9.5-1.11-1.78-.21-3.64-.92-3.64-4.08 0-.9.31-1.63.82-2.2-.08-.21-.36-1.05.08-2.18 0 0 .67-.22 2.2.84a7.38 7.38 0 0 1 4 0c1.53-1.06 2.2-.84 2.2-.84.44 1.13.16 1.97.08 2.18.51.57.82 1.29.82 2.2 0 3.17-1.87 3.87-3.65 4.08.29.26.54.75.54 1.52 0 1.1-.01 1.98-.01 2.25 0 .22.15.48.55.39A8.23 8.23 0 0 0 16 8.2C16 3.67 12.42 0 8 0Z"></path></svg></span><span>Conectar GitHub</span></button>
                 <button class="button button-secondary button-danger" type="button" id="logout-github">Desconectar</button>
                 <p id="github-session-status" class="muted-copy">Backend no configurado todavía.</p>
-                <label for="github-repo-select">Repositorio destino</label>
+                <label for="github-repo-select" data-i18n="github.repoLabel">Repositorio destino</label>
                 <select id="github-repo-select" disabled>
-                  <option value="">Elegí un repositorio</option>
+                  <option value="" data-i18n="github.repoPlaceholder">Elegí un repositorio</option>
                 </select>
                 <button class="button button-disabled" type="button" id="publish-github-pages" disabled>Publicar en mi GitHub Pages</button>
               </div>
@@ -192,13 +195,13 @@
             <div class="results-shell">
               <div class="results-top">
                 <div>
-                  <p class="eyebrow">Revisión</p>
-                  <h3>Salida generada</h3>
+                  <p class="eyebrow" data-i18n="results.eyebrow">Revisión</p>
+                  <h3 data-i18n="results.title">Salida generada</h3>
                 </div>
                 <div class="format-switch">
                   <button type="button" data-format="html" class="format-button is-active">HTML</button>
                   <button type="button" data-format="markdown" class="format-button">Markdown</button>
-                  <button type="button" data-format="text" class="format-button">Texto</button>
+                  <button type="button" data-format="text" class="format-button" data-i18n="results.textFormat">Texto</button>
                 </div>
               </div>
 
@@ -218,13 +221,13 @@
               </div>
 
               <div class="publish-preview">
-                <h4>Ruta preparada para GitHub Pages</h4>
+                <h4 data-i18n="publishPreview.title">Ruta preparada para GitHub Pages</h4>
                 <p id="prepared-path" class="prepared-path"></p>
               </div>
 
               <div id="publish-snippets" class="snippet-box">
-                <h4>Snippets para enlazar la política</h4>
-                <p class="muted-copy">Después de publicar, vas a poder copiar un enlace HTML o Markdown listo para pegar en el footer o en otra página de tu sitio.</p>
+                <h4 data-i18n="snippets.title">Snippets para enlazar la política</h4>
+                <p class="muted-copy" data-i18n="snippets.copy">Después de publicar, vas a poder copiar un enlace HTML o Markdown listo para pegar en el footer o en otra página de tu sitio.</p>
                 <div class="snippet-actions">
                   <button type="button" id="copy-html-snippet" class="button button-secondary button-disabled" disabled>Copiar HTML</button>
                   <button type="button" id="copy-markdown-snippet" class="button button-secondary button-disabled" disabled>Copiar Markdown</button>
@@ -233,14 +236,14 @@
               </div>
 
               <div id="suite-box" class="snippet-box">
-                <h4>Suite legal</h4>
-                <p class="muted-copy">Guardá varios documentos generados en esta sesión y publicalos juntos en un solo commit.</p>
+                <h4 data-i18n="suite.title">Suite legal</h4>
+                <p class="muted-copy" data-i18n="suite.copy">Guardá varios documentos generados en esta sesión y publicalos juntos en un solo commit.</p>
                 <div class="snippet-actions">
                   <button type="button" id="publish-suite" class="button button-secondary button-disabled" disabled>Publicar suite legal</button>
                   <button type="button" id="clear-suite" class="button button-secondary button-disabled" disabled>Vaciar suite</button>
                 </div>
                 <div id="suite-list" class="suite-list">
-                  <p class="muted-copy">Todavía no agregaste documentos a la suite.</p>
+                  <p class="muted-copy" data-i18n="suite.empty">Todavía no agregaste documentos a la suite.</p>
                 </div>
               </div>
 
