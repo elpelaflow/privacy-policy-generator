@@ -41,6 +41,20 @@ async function copyDirFlat(fromDir, toDir) {
   }
 }
 
+async function copyDirRecursive(fromDir, toDir) {
+  await fs.mkdir(toDir, { recursive: true });
+  const entries = await fs.readdir(fromDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const from = path.join(fromDir, entry.name);
+    const to = path.join(toDir, entry.name);
+    if (entry.isDirectory()) {
+      await copyDirRecursive(from, to);
+    } else if (entry.isFile()) {
+      await copyFile(from, to);
+    }
+  }
+}
+
 async function writeNoJekyll() {
   await fs.writeFile(path.join(DOCS_DIR, '.nojekyll'), '', 'utf8');
 }
@@ -72,6 +86,7 @@ async function main() {
   ]);
 
   await copyDirFlat(path.join(ROOT, 'data'), DOCS_DATA_DIR);
+  await copyDirRecursive(path.join(WEB_DIR, 'assets'), path.join(DOCS_DIR, 'assets'));
   await buildBundle();
   await buildProjectPolicies();
   await writeNoJekyll();
