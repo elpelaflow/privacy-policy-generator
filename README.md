@@ -18,6 +18,14 @@ Generate legal documents for apps, SaaS, ecommerce, and websites from a CLI or a
 
 Use the [public web app](https://elpelaflow.github.io/privacy-policy-generator/) if you want to try it immediately without forking or deploying anything.
 
+## Screenshots
+
+<p align="center">
+  <img src="./web/assets/screenshots/public-hero.png" alt="Policy Generator Hub landing page" width="32%">
+  <img src="./web/assets/screenshots/public-generator.png" alt="Browser legal document generator" width="32%">
+  <img src="./web/assets/screenshots/public-policies.png" alt="Project policies page" width="32%">
+</p>
+
 ## Overview
 
 - `⚖️` generate privacy, terms, cookies, refund, security, EULA, DPA, AI, and deletion documents
