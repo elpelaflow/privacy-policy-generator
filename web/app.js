@@ -2871,13 +2871,13 @@ function hint(field) {
 }
 
 function renderFieldLabel(field) {
-  return `${field.label}${field.required ? '<span class="required-mark">*</span>' : ''}${renderInfoButton(field.name)}`;
+  return `<span class="field-label-copy">${field.label}${field.required ? '<span class="required-mark">*</span>' : ''}</span>${renderInfoButton(field.name)}`;
 }
 
 function renderInfoButton(key) {
   const text = INFO_POPOVERS[key];
   if (!text) return '';
-  return `<span class="info-popover"><button type="button" class="info-popover-button" data-info-key="${escapeHtml(key)}" aria-label="Más información">i</button><span class="info-popover-content">${escapeHtml(text)}</span></span>`;
+  return `<span class="info-popover"><button type="button" class="info-popover-button" data-info-key="${escapeHtml(key)}" aria-label="Más información" title="Más información">i</button><span class="info-popover-content">${escapeHtml(text)}</span></span>`;
 }
 
 function handleInfoPopoverClick(event) {

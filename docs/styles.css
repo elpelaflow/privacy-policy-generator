@@ -661,6 +661,14 @@ button, input, select, textarea { font: inherit; }
 .field { display: grid; gap: 8px; }
 .field.full { grid-column: 1 / -1; }
 .field label { font-size: .94rem; color: #f3f6ff; }
+.field > label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.field-label-copy {
+  min-width: 0;
+}
 .field input, .field textarea {
   width: 100%; min-height: 48px; border-radius: 14px; border: 1px solid var(--line);
   background: rgba(255,255,255,0.04); color: var(--text); padding: 12px 14px;
@@ -669,8 +677,10 @@ button, input, select, textarea { font: inherit; }
 .field-hint { color: var(--muted); font-size: .88rem; }
 .info-popover {
   position: relative;
-  display: inline-flex;
-  margin-left: 6px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  margin-left: 4px;
   vertical-align: middle;
   z-index: 3;
 }
@@ -689,7 +699,7 @@ button, input, select, textarea { font: inherit; }
 }
 .info-popover-content {
   position: absolute;
-  left: 0;
+  right: 0;
   top: calc(100% + 8px);
   display: none;
   width: min(280px, 70vw);
@@ -704,10 +714,17 @@ button, input, select, textarea { font: inherit; }
   box-shadow: 0 18px 40px rgba(0,0,0,0.34);
   z-index: 20;
 }
-.info-popover:hover .info-popover-content,
-.info-popover:focus-within .info-popover-content,
 .info-popover.is-open .info-popover-content {
   display: block;
+}
+.checkbox-item strong .info-popover {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  margin-left: 0;
+}
+.checkbox-item strong .info-popover-content {
+  right: 0;
 }
 .checkbox-group {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;
