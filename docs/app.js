@@ -2853,7 +2853,7 @@ function renderField(field, defaults) {
     return `<div class="field full"><label>${renderFieldLabel(field)}</label><div class="checkbox-group">${field.options.map((option, index) => `
       <label class="checkbox-item">
         <input type="checkbox" name="${field.name}" value="${option.value}" ${selected.includes(option.value) ? 'checked' : ''}>
-        <span><strong>${option.label}${renderInfoButton(`${field.name}:${option.value}`)}</strong><small>${option.description}</small></span>
+        <span><strong>${option.label}</strong><small>${option.description}</small></span>
       </label>
     `).join('')}</div>${hint(field)}</div>`;
   }
