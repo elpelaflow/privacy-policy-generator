@@ -1,0 +1,9 @@
+name = "privacy-policy-generator-worker"
+main = "src/index.js"
+compatibility_date = "2026-05-23"
+
+[vars]
+PUBLIC_APP_URL = "https://elpelaflow.github.io/privacy-policy-generator"
+GITHUB_CLIENT_ID = "Ov23liPphEfQJtOfGfOg"
+COOKIE_NAME = "ppg_session"
+STATE_COOKIE_NAME = "ppg_state"
